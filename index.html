@@ -3751,7 +3751,7 @@ function normalizePayload(action, data) {
     case 'updaterecord':
       return cleanPayload({
         action: 'updaterecord',
-        recordId: data.recordId,
+        recordId: data.recordId || data.id || data.ID,
         employeeId: String(data.employeeId || ''),
         employeeName: String(data.employeeName || ''),
         team: String(data.team || ''),
