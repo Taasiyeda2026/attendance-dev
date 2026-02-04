@@ -8686,13 +8686,21 @@ async function updateAdminDashboard() {
   const filterEmploymentType = document.getElementById('filterEmploymentType')?.value || 'all';
   const filterTeam = document.getElementById('filterTeam')?.value || 'all';
   
-  // Get month/year from filters or use current - use same selector as instructor dashboard
+  // Get month/year from filters - managers/admin use dashboardMonth/Year, instructors use instructorMonth/Year
   const now = new Date();
-  const dashboardMonthEl = document.getElementById('instructorMonth');
-  const dashboardYearEl = document.getElementById('instructorYear');
+  const user = getCurrentUserData();
+  const isInstructor = user && user.role === 'instructor';
   
-  console.log('updateAdminDashboard - dashboardMonthEl value:', dashboardMonthEl?.value);
-  console.log('updateAdminDashboard - dashboardYearEl value:', dashboardYearEl?.value);
+  // Select the correct month/year elements based on role
+  const dashboardMonthEl = isInstructor 
+    ? document.getElementById('instructorMonth') 
+    : (document.getElementById('dashboardMonth') || document.getElementById('instructorMonth'));
+  const dashboardYearEl = isInstructor 
+    ? document.getElementById('instructorYear') 
+    : (document.getElementById('dashboardYear') || document.getElementById('instructorYear'));
+  
+  console.log('updateAdminDashboard - role:', user?.role, 'monthEl:', dashboardMonthEl?.id, 'value:', dashboardMonthEl?.value);
+  console.log('updateAdminDashboard - yearEl:', dashboardYearEl?.id, 'value:', dashboardYearEl?.value);
   
   const currentMonth = dashboardMonthEl ? parseInt(dashboardMonthEl.value) - 1 : now.getMonth();
   const currentYear = dashboardYearEl ? parseInt(dashboardYearEl.value) : now.getFullYear();
@@ -8904,10 +8912,16 @@ function toggleMobileAdminDetails(empId) {
     if (records.length === 0) {
       detailsDiv.innerHTML = '<p style="color: #64748b; text-align: center;">אין רשומות</p>';
     } else {
-      // Get current month/year from dashboard filters - use instructorMonth/Year
+      // Get current month/year from dashboard filters
       const now = new Date();
-      const dashboardMonth = document.getElementById('instructorMonth');
-      const dashboardYear = document.getElementById('instructorYear');
+      const user = getCurrentUserData();
+      const isInstructor = user && user.role === 'instructor';
+      const dashboardMonth = isInstructor 
+        ? document.getElementById('instructorMonth')
+        : (document.getElementById('dashboardMonth') || document.getElementById('instructorMonth'));
+      const dashboardYear = isInstructor
+        ? document.getElementById('instructorYear')
+        : (document.getElementById('dashboardYear') || document.getElementById('instructorYear'));
       const currentMonth = dashboardMonth ? parseInt(dashboardMonth.value) - 1 : now.getMonth();
       const currentYear = dashboardYear ? parseInt(dashboardYear.value) : now.getFullYear();
       
