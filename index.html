@@ -9348,7 +9348,7 @@ async function approveRecordFromAdmin(recordId) {
       employeeId: String(record.employeeId || record.empNum || ''),
       employeeName: String(record.employeeName || record.empName || ''),
       team: String(record.team || ''),
-      employmentType: String(record.employmentType || ''),
+      employmentType: normalizeEmploymentType(record, ''),
       attendanceDate: record.attendanceDate || record.date,
       startTime: record.startTime || record.start,
       endTime: record.endTime || record.end,
