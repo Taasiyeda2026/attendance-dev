@@ -3609,40 +3609,45 @@ function normalizeEmploymentType(source, defaultValue = '') {
 
   let extractedValue = '';
 
-  if (typeof source === 'object') {
-    if (source.Value || source.Label) {
-      extractedValue = source.Value || source.Label || '';
-    } else {
-      // Log specifically what we're checking
-      console.log('Checking EmploymentType field:', {
-        'employmentType': source.employmentType,
-        'EmploymentType': source.EmploymentType,
-        'field_OData_EmploymentType': source.field_OData_EmploymentType,
-        'OData__EmploymentType': source.OData__EmploymentType
-      });
-      
-      const possibleFields = [
-        source.employmentType,
-        source.EmploymentType,
-        source.EmployeeType,
-        source.employeeType,
-        source['Employment_x0020_Type'],
-        source.SogHaasaka,
-        source.field_OData_EmploymentType,
-        source.OData__EmploymentType,
-        source.OData__x0045_mploymentType,
-        source['OData__EmploymentType'],
-        source['field@odata.EmploymentType'],
-        source.Title_EmploymentType
-      ];
+  // Helper to extract value from SharePoint lookup/choice field objects
+  const extractFromFieldObject = (obj) => {
+    if (!obj) return '';
+    if (typeof obj === 'string') return obj;
+    if (typeof obj !== 'object') return '';
+    // Try all possible object formats from SharePoint lookup/choice fields
+    const val = obj.Value || obj.value || obj.Label || obj.label || 
+                obj.LookupValue || obj.lookupValue ||
+                obj.results?.[0] || obj.Results?.[0] || '';
+    if (typeof val === 'object') {
+      // Nested object - try again
+      return extractFromFieldObject(val);
+    }
+    return val ? String(val) : '';
+  };
 
-      for (const field of possibleFields) {
-        const value = extractLookupValue(field, '');
-        if (value) {
-          extractedValue = value;
-          console.log('Found employmentType value:', value);
-          break;
-        }
+  if (typeof source === 'object') {
+    // Check known employmentType fields only (don't extract from whole record)
+    const possibleFields = [
+      source.employmentType,
+      source.EmploymentType,
+      source.EmployeeType,
+      source.employeeType,
+      source['Employment_x0020_Type'],
+      source.SogHaasaka,
+      source.field_OData_EmploymentType,
+      source.OData__EmploymentType,
+      source.OData__x0045_mploymentType,
+      source['OData__EmploymentType'],
+      source['field@odata.EmploymentType'],
+      source.Title_EmploymentType
+    ];
+
+    for (const field of possibleFields) {
+      const value = extractFromFieldObject(field) || extractLookupValue(field, '');
+      if (value && typeof value === 'string' && value.trim()) {
+        extractedValue = value;
+        console.log('Found employmentType value:', value);
+        break;
       }
     }
   } else {
@@ -6701,22 +6706,21 @@ async function loadInstructorMonthData() {
     recYearEl.value = instrYearEl.value;
   }
   
-  // Reload records from server to ensure we have all months
-  console.log('loadInstructorMonthData - reloading records from server');
-  await loadMyRecordsFromServer();
+  const role = localStorage.getItem('role') || '';
+  console.log('loadInstructorMonthData - role:', role, 'month:', instrMonthEl?.value, 'year:', instrYearEl?.value);
   
-  // Update stats and summary table with filtered month
+  // For managers, ops controllers, admin, payroll - update admin dashboard first (priority)
+  if (['manager', 'operations_controller', 'system_admin', 'payroll_officer'].includes(role)) {
+    console.log('loadInstructorMonthData - calling updateAdminDashboard for manager/admin');
+    updateAdminDashboard(); // Don't await - run in parallel
+  }
+  
+  // All roles need to update personal stats if visible (instructors always, others if they have records panel)
+  console.log('loadInstructorMonthData - updating personal records stats');
+  await loadMyRecordsFromServer();
   updateStats();
   renderSummaryTable();
-  
-  // Also update instructor monthly approval status if on dashboard
   loadInstructorMonthlyApprovalStatus();
-  
-  // Update admin/manager dashboard if applicable (for managers, ops controllers, admin)
-  const role = localStorage.getItem('role') || '';
-  if (['manager', 'operations_controller', 'system_admin', 'payroll_officer'].includes(role)) {
-    updateAdminDashboard();
-  }
 }
 
 function changeRecordsMonth(direction) {
@@ -9179,12 +9183,16 @@ function populateEditForm(record) {
 
 // Approve single record from admin dashboard
 async function approveRecordFromAdmin(recordId) {
+  console.log('approveRecordFromAdmin called with recordId:', recordId);
+  
   if (!recordId) {
     showAlert('לא נמצא מזהה רשומה', 'error');
     return;
   }
   
   const user = getCurrentUserData();
+  console.log('Current user:', user);
+  
   if (!user) {
     showAlert('יש להתחבר למערכת', 'error');
     return;
@@ -9197,8 +9205,12 @@ async function approveRecordFromAdmin(recordId) {
   }
   
   if (!confirm('האם לאשר רשומה זו?')) {
+    console.log('User cancelled approval');
     return;
   }
+  
+  console.log('teamRecordsCache length:', typeof teamRecordsCache !== 'undefined' ? teamRecordsCache.length : 'undefined');
+  console.log('adminEmployeeRecordsCache keys:', typeof adminEmployeeRecordsCache !== 'undefined' ? Object.keys(adminEmployeeRecordsCache) : 'undefined');
   
   // Find the record in teamRecordsCache or adminEmployeeRecordsCache to get full details
   let record = (typeof teamRecordsCache !== 'undefined' ? teamRecordsCache : []).find(r => 
@@ -9212,6 +9224,8 @@ async function approveRecordFromAdmin(recordId) {
       if (record) break;
     }
   }
+  
+  console.log('Found record:', record);
   
   if (!record) {
     console.error('Record not found in cache, recordId:', recordId);
@@ -9248,11 +9262,14 @@ async function approveRecordFromAdmin(recordId) {
       approvedDate: new Date().toISOString()
     };
     
+    console.log('Sending payload:', payload);
     const data = await apiRequest('updaterecord', payload);
+    console.log('API response:', data);
     
     if (data.success) {
       showAlert('הרשומה אושרה בהצלחה!', 'success');
       // Refresh dashboard
+      console.log('Refreshing dashboard...');
       updateAdminDashboard();
     } else {
       throw new Error(data.message || 'Failed to approve record');
