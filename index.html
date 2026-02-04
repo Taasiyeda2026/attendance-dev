@@ -7239,6 +7239,25 @@ async function _addRecordInternal() {
     const data = await apiRequest(actionType, payload);
     
     if (data.success) {
+      // Upload files if any selected
+      if (selectedFiles.length > 0) {
+        showAlert('📎 מעלה קבצים מצורפים...', 'info');
+        const uploadResult = await uploadFilesToSharePoint(finalEmployeeId, date);
+        if (uploadResult.urls.length > 0 && (data.recordId || editingId)) {
+          // Update record with attachment URL
+          const attachmentUrl = uploadResult.urls.join(', ');
+          await apiRequest('updaterecord', {
+            action: 'updaterecord',
+            recordId: String(data.recordId || editingId),
+            employeeId: String(finalEmployeeId),
+            employeeName: String(finalEmployeeName),
+            team: String(localStorage.getItem("team") || ''),
+            employmentType: String(localStorage.getItem("employmentType") || 'תעשיידע'),
+            attachmentUrl: attachmentUrl
+          });
+        }
+      }
+      
       clearAddForm();
       // Clear editing state
       if (document.getElementById('addRecordPage')) {
@@ -9918,17 +9937,58 @@ function clearSelectedFiles() {
   if (input) input.value = '';
 }
 
-async function uploadFilesToSharePoint(recordId) {
-  if (selectedFiles.length === 0) return true;
+async function uploadFilesToSharePoint(employeeId, attendanceDate) {
+  if (selectedFiles.length === 0) return { success: true, urls: [] };
   
-  // Note: File upload to SharePoint requires additional Logic App configuration
-  // For now, we'll store file names as references
-  const fileNames = selectedFiles.map(f => f.name).join(', ');
-  console.log('Files to upload:', fileNames);
+  const uploadedUrls = [];
   
-  // TODO: Implement actual file upload when Logic App is configured
-  showAlert(`${selectedFiles.length} קבצים מוכנים להעלאה`, 'info');
-  return true;
+  for (const file of selectedFiles) {
+    try {
+      // Convert file to base64
+      const base64Content = await fileToBase64(file);
+      
+      const payload = {
+        action: 'uploadfile',
+        employeeId: String(employeeId),
+        attendanceDate: String(attendanceDate),
+        fileName: file.name,
+        fileContent: base64Content
+      };
+      
+      const response = await apiRequest('uploadfile', payload);
+      
+      if (response.success) {
+        uploadedUrls.push(response.fileUrl);
+        console.log('File uploaded successfully:', file.name);
+      } else {
+        console.error('Failed to upload file:', file.name);
+        showAlert(`שגיאה בהעלאת ${file.name}`, 'error');
+      }
+    } catch (error) {
+      console.error('Error uploading file:', file.name, error);
+      showAlert(`שגיאה בהעלאת ${file.name}`, 'error');
+    }
+  }
+  
+  if (uploadedUrls.length > 0) {
+    showAlert(`${uploadedUrls.length} קבצים הועלו בהצלחה`, 'success');
+  }
+  
+  return { success: uploadedUrls.length > 0, urls: uploadedUrls };
+}
+
+// Helper function to convert file to base64
+function fileToBase64(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = () => {
+      // Remove the data:mime/type;base64, prefix
+      const base64 = reader.result.split(',')[1];
+      resolve(base64);
+    };
+    reader.onerror = error => reject(error);
+  });
 }
 
 function clearAllData() {
