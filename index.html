@@ -3779,7 +3779,7 @@ function normalizePayload(action, data) {
         status: data.status || 'ממתין',
         approvedBy: String(data.approvedBy || ''),
         approvedDate: String(data.approvedDate || ''),
-        attachmentUrl: String(data.attachmentUrl || '')
+        attachmentsNames: String(data.attachmentsNames || '')
       });
       
     case 'deleterecord':
@@ -7255,7 +7255,7 @@ async function _addRecordInternal() {
         const uploadResult = await uploadFilesToSharePoint(finalEmployeeId, date);
         if (uploadResult.urls.length > 0 && (data.recordId || editingId)) {
           // Update record with attachment URL
-          const attachmentUrl = uploadResult.urls.join(', ');
+          const attachmentsNames = uploadResult.urls.join(', ');
           await apiRequest('updaterecord', {
             action: 'updaterecord',
             recordId: String(data.recordId || editingId),
@@ -7263,7 +7263,7 @@ async function _addRecordInternal() {
             employeeName: String(finalEmployeeName),
             team: String(localStorage.getItem("team") || ''),
             employmentType: String(localStorage.getItem("employmentType") || 'תעשיידע'),
-            attachmentUrl: attachmentUrl
+            attachmentsNames: attachmentsNames
           });
         }
       }
