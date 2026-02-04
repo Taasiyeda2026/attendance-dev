@@ -3682,9 +3682,16 @@ function isValidActivityType(activityType) {
  */
 function normalizePayload(action, data) {
   const cleanPayload = (payload) => {
-    return Object.fromEntries(
-      Object.entries(payload).filter(([_, value]) => value !== '' && value !== null && value !== undefined)
-    );
+    // Replace null/undefined with empty string, keep all fields for SharePoint
+    const cleaned = {};
+    for (const [key, value] of Object.entries(payload)) {
+      if (value === null || value === undefined) {
+        cleaned[key] = '';
+      } else {
+        cleaned[key] = value;
+      }
+    }
+    return cleaned;
   };
 
   const normalizedAction = String(action || '').toLowerCase();
@@ -3751,14 +3758,14 @@ function normalizePayload(action, data) {
     case 'updaterecord':
       return cleanPayload({
         action: 'updaterecord',
-        recordId: data.recordId || data.id || data.ID,
+        recordId: data.recordId,
         employeeId: String(data.employeeId || ''),
         employeeName: String(data.employeeName || ''),
         team: String(data.team || ''),
         employmentType: String(data.employmentType || ''),
         attendanceDate: data.attendanceDate,
-        startTime: data.startTime,
-        endTime: data.endTime,
+        startTime: data.startTime || '',
+        endTime: data.endTime || '',
         workHours: Number(data.workHours || 0),
         activityType: String(data.activityType || ''),
         schoolName: String(data.schoolName || ''),
@@ -3769,7 +3776,10 @@ function normalizePayload(action, data) {
         totalExpenses: Number(data.totalExpenses || 0),
         expensesDetails: String(data.expensesDetails || ''),
         notes: String(data.notes || ''),
-        status: data.status
+        status: data.status || 'ממתין',
+        approvedBy: String(data.approvedBy || ''),
+        approvedDate: String(data.approvedDate || ''),
+        attachmentUrl: String(data.attachmentUrl || '')
       });
       
     case 'deleterecord':
