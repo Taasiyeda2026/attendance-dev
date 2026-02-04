@@ -4583,7 +4583,8 @@ async function updateRecordOnServer(updatedRecord, originalDate, originalStartTi
       totalExpenses: Number(updatedRecord.totalExpenses) || 0,
       expensesDetails: updatedRecord.expensesDetail || updatedRecord.expensesDetails || '',
       notes: updatedRecord.notes || '',
-      status: updatedRecord.status || 'ממתין'
+      status: updatedRecord.status || 'ממתין',
+      attachmentsNames: updatedRecord.attachmentsNames || ''
     };
     
     const data = await apiRequest('updaterecord', payload);
@@ -9361,6 +9362,7 @@ async function approveRecordFromAdmin(recordId) {
       totalExpenses: Number(record.totalExpenses) || 0,
       expensesDetails: String(record.expensesDetails || record.expensesDetail || ''),
       notes: String(record.notes || ''),
+      attachmentsNames: String(record.attachmentsNames || ''),
       ...approvalData
     };
     
