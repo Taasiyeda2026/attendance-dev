@@ -5544,7 +5544,6 @@ async function loadApprovalsStatusPage() {
       const cards = teamEmps.map(emp => {
         const approvalDate = emp.instructorApprovalDate || emp.approvalDate || null;
         const isReleased = emp.released || false;
-        const employmentType = emp.employmentType || '—';
         const formattedApprovalDate = approvalDate ? new Date(approvalDate).toLocaleDateString('he-IL') : '';
         
         return `
@@ -5552,9 +5551,6 @@ async function loadApprovalsStatusPage() {
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
               <strong style="font-size: 16px; color: #1e293b;">${emp.name || emp.employeeName || '—'}</strong>
               <span style="font-size: 12px; color: #64748b;">#${emp.employeeId || '—'}</span>
-            </div>
-            <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 10px;">
-              <span style="background: #f1f5f9; padding: 3px 8px; border-radius: 6px; font-size: 12px; color: #475569;">${employmentType}</span>
             </div>
             <div style="display: flex; gap: 10px; flex-wrap: wrap;">
               <div style="flex: 1; min-width: 120px; background: ${approvalDate ? '#dcfce7' : '#fef3c7'}; padding: 8px 12px; border-radius: 8px; text-align: center;">
@@ -5593,14 +5589,12 @@ async function loadApprovalsStatusPage() {
       const rows = teamEmps.map(emp => {
         const approvalDate = emp.instructorApprovalDate || emp.approvalDate || null;
         const isReleased = emp.released || false;
-        const employmentType = emp.employmentType || '—';
         const formattedApprovalDate = approvalDate ? new Date(approvalDate).toLocaleDateString('he-IL') : '';
         
         return `
           <tr>
             <td>${emp.name || emp.employeeName || '—'}</td>
             <td>${emp.employeeId || '—'}</td>
-            <td>${employmentType}</td>
             <td style="text-align: center;">
               <span style="display: inline-flex; align-items: center; gap: 5px; padding: 4px 10px; border-radius: 20px; font-size: 13px; font-weight: 600; background: ${approvalDate ? '#dcfce7' : '#fef3c7'}; color: ${approvalDate ? '#166534' : '#92400e'};">
                 <i class="fas ${approvalDate ? 'fa-check-circle' : 'fa-clock'}"></i>
@@ -5635,7 +5629,6 @@ async function loadApprovalsStatusPage() {
               <tr style="background: #f8fafc;">
                 <th style="padding: 12px 15px;">שם עובד</th>
                 <th style="padding: 12px 15px;">מספר עובד</th>
-                <th style="padding: 12px 15px;">סוג העסקה</th>
                 <th style="padding: 12px 15px; text-align: center;">אישור מדריך</th>
                 <th style="padding: 12px 15px; text-align: center;">אישור מנהל</th>
               </tr>
@@ -9081,7 +9074,7 @@ function toggleMobileWeekDetails(empId, startDay, endDay) {
           </div>
           <div style="display: flex; gap: 8px;">
             ${!isApproved ? `<button onclick="event.stopPropagation(); editRecordFromAdmin('${recId}')" style="flex: 1; background: #3b82f6; color: white; border: none; padding: 6px 10px; border-radius: 6px; cursor: pointer; font-size: 12px;"><i class="fas fa-edit"></i> עריכה</button>` : ''}
-            ${!isApproved ? `<button onclick="event.stopPropagation(); approveRecordFromAdmin('${recId}')" style="flex: 1; background: #22c55e; color: white; border: none; padding: 6px 10px; border-radius: 6px; cursor: pointer; font-size: 12px;"><i class="fas fa-check"></i> אישור</button>` : '<span style="color: #22c55e; font-size: 12px;"><i class="fas fa-check-circle"></i> אושר</span>'}
+            ${!isApproved ? `<button onclick="event.stopPropagation(); approveRecordFromAdmin('${recId}')" data-approve-record="${recId}" style="flex: 1; background: #22c55e; color: white; border: none; padding: 6px 10px; border-radius: 6px; cursor: pointer; font-size: 12px;"><i class="fas fa-check"></i> אישור</button>` : '<span style="color: #22c55e; font-size: 12px;"><i class="fas fa-check-circle"></i> אושר</span>'}
           </div>
         </div>`;
       }).join('');
@@ -9221,7 +9214,7 @@ function populateEditForm(record) {
   showAlert('נטען לעריכה - בצע שינויים ולחץ שמור', 'info');
 }
 
-// Approve single record from admin dashboard
+// Approve single record from admin dashboard - Optimistic UI
 async function approveRecordFromAdmin(recordId) {
   console.log('approveRecordFromAdmin called with recordId:', recordId);
   
@@ -9231,52 +9224,94 @@ async function approveRecordFromAdmin(recordId) {
   }
   
   const user = getCurrentUserData();
-  console.log('Current user:', user);
-  
   if (!user) {
     showAlert('יש להתחבר למערכת', 'error');
     return;
   }
   
-  // Check permissions - only manager, system_admin can approve
+  // Check permissions
   if (!['manager', 'system_admin', 'operations_controller'].includes(user.role)) {
     showAlert('אין הרשאה לאשר רשומות', 'error');
     return;
   }
   
   if (!confirm('האם לאשר רשומה זו?')) {
-    console.log('User cancelled approval');
     return;
   }
   
-  console.log('teamRecordsCache length:', typeof teamRecordsCache !== 'undefined' ? teamRecordsCache.length : 'undefined');
-  console.log('adminEmployeeRecordsCache keys:', typeof adminEmployeeRecordsCache !== 'undefined' ? Object.keys(adminEmployeeRecordsCache) : 'undefined');
+  // Find the record in caches
+  let record = null;
+  let recordIndex = -1;
+  let cacheSource = null;
+  let empIdForCache = null;
   
-  // Find the record in teamRecordsCache or adminEmployeeRecordsCache to get full details
-  let record = (typeof teamRecordsCache !== 'undefined' ? teamRecordsCache : []).find(r => 
-    String(r.ID || r.id || r.recordId) === String(recordId)
-  );
-  
-  // If not found in teamRecordsCache, search in adminEmployeeRecordsCache
-  if (!record && typeof adminEmployeeRecordsCache !== 'undefined') {
-    for (const empId in adminEmployeeRecordsCache) {
-      record = adminEmployeeRecordsCache[empId].find(r => String(r.ID || r.id || r.recordId) === String(recordId));
-      if (record) break;
+  // Search in teamRecordsCache
+  if (typeof teamRecordsCache !== 'undefined' && Array.isArray(teamRecordsCache)) {
+    recordIndex = teamRecordsCache.findIndex(r => String(r.ID || r.id || r.recordId) === String(recordId));
+    if (recordIndex !== -1) {
+      record = teamRecordsCache[recordIndex];
+      cacheSource = 'teamRecordsCache';
     }
   }
   
-  console.log('Found record:', record);
+  // Search in adminEmployeeRecordsCache
+  if (!record && typeof adminEmployeeRecordsCache !== 'undefined') {
+    for (const empId in adminEmployeeRecordsCache) {
+      recordIndex = adminEmployeeRecordsCache[empId].findIndex(r => String(r.ID || r.id || r.recordId) === String(recordId));
+      if (recordIndex !== -1) {
+        record = adminEmployeeRecordsCache[empId][recordIndex];
+        cacheSource = 'adminEmployeeRecordsCache';
+        empIdForCache = empId;
+        break;
+      }
+    }
+  }
   
   if (!record) {
-    console.error('Record not found in cache, recordId:', recordId);
     showAlert('לא נמצאה הרשומה במטמון. נסה לרענן את הדף.', 'error');
     return;
   }
   
+  // Save original status for rollback
+  const originalStatus = record.status;
+  const originalApprovedBy = record.approvedBy;
+  const originalApprovedDate = record.approvedDate;
+  
+  // OPTIMISTIC UPDATE: Update cache immediately
+  const approvalData = {
+    status: 'approved',
+    approvedBy: user.empName || user.empNum,
+    approvedDate: new Date().toISOString()
+  };
+  
+  // Update record in cache (this updates by reference)
+  Object.assign(record, approvalData);
+  
+  // Also update the other cache if record exists there (keep both caches in sync)
+  const strRecordId = String(recordId);
+  if (cacheSource === 'teamRecordsCache' && typeof adminEmployeeRecordsCache !== 'undefined') {
+    // Found in teamRecordsCache, also update adminEmployeeRecordsCache
+    for (const empId in adminEmployeeRecordsCache) {
+      const otherRecord = adminEmployeeRecordsCache[empId].find(r => String(r.ID || r.id || r.recordId) === strRecordId);
+      if (otherRecord) {
+        Object.assign(otherRecord, approvalData);
+        break;
+      }
+    }
+  } else if (cacheSource === 'adminEmployeeRecordsCache' && typeof teamRecordsCache !== 'undefined') {
+    // Found in adminEmployeeRecordsCache, also update teamRecordsCache
+    const otherRecord = teamRecordsCache.find(r => String(r.ID || r.id || r.recordId) === strRecordId);
+    if (otherRecord) {
+      Object.assign(otherRecord, approvalData);
+    }
+  }
+  
+  // OPTIMISTIC UPDATE: Update DOM immediately
+  updateApprovalButtonInDOM(recordId, true);
+  showAlert('הרשומה אושרה!', 'success');
+  
+  // Send to API in background
   try {
-    showAlert('מאשר רשומה...', 'info');
-    
-    // Send full record data to prevent field deletion
     const payload = {
       action: 'updaterecord',
       recordId: String(recordId),
@@ -9297,27 +9332,97 @@ async function approveRecordFromAdmin(recordId) {
       totalExpenses: Number(record.totalExpenses) || 0,
       expensesDetails: String(record.expensesDetails || record.expensesDetail || ''),
       notes: String(record.notes || ''),
-      status: 'approved',
-      approvedBy: user.empName || user.empNum,
-      approvedDate: new Date().toISOString()
+      ...approvalData
     };
     
-    console.log('Sending payload:', payload);
     const data = await apiRequest('updaterecord', payload);
-    console.log('API response:', data);
     
-    if (data.success) {
-      showAlert('הרשומה אושרה בהצלחה!', 'success');
-      // Refresh dashboard
-      console.log('Refreshing dashboard...');
-      updateAdminDashboard();
-    } else {
+    if (!data.success) {
       throw new Error(data.message || 'Failed to approve record');
     }
+    console.log('Record approved successfully on server');
   } catch (error) {
-    console.error('Error approving record:', error);
+    console.error('Error approving record on server:', error);
+    
+    // ROLLBACK: Restore original status in cache
+    const rollbackData = {
+      status: originalStatus,
+      approvedBy: originalApprovedBy,
+      approvedDate: originalApprovedDate
+    };
+    Object.assign(record, rollbackData);
+    
+    // ROLLBACK: Also restore the other cache
+    if (cacheSource === 'teamRecordsCache' && typeof adminEmployeeRecordsCache !== 'undefined') {
+      for (const empId in adminEmployeeRecordsCache) {
+        const otherRecord = adminEmployeeRecordsCache[empId].find(r => String(r.ID || r.id || r.recordId) === strRecordId);
+        if (otherRecord) {
+          Object.assign(otherRecord, rollbackData);
+          break;
+        }
+      }
+    } else if (cacheSource === 'adminEmployeeRecordsCache' && typeof teamRecordsCache !== 'undefined') {
+      const otherRecord = teamRecordsCache.find(r => String(r.ID || r.id || r.recordId) === strRecordId);
+      if (otherRecord) {
+        Object.assign(otherRecord, rollbackData);
+      }
+    }
+    
+    // ROLLBACK: Restore DOM
+    updateApprovalButtonInDOM(recordId, false);
     showAlert('שגיאה באישור הרשומה: ' + (error.message || ''), 'error');
   }
+}
+
+// Store original HTML for rollback - keyed by recordId
+const approvalOriginalHTML = {};
+
+// Helper function to update approval button in DOM without full refresh
+function updateApprovalButtonInDOM(recordId, isApproved, saveOriginal = true) {
+  const strId = String(recordId);
+  
+  // Find by data attribute first (preferred), then by onclick
+  let approveBtn = document.querySelector(`[data-approve-record="${strId}"]`);
+  if (!approveBtn) {
+    approveBtn = document.querySelector(`button[onclick*="approveRecordFromAdmin('${strId}')"]`) ||
+                 document.querySelector(`button[onclick*='approveRecordFromAdmin("${strId}")']`);
+  }
+  
+  if (approveBtn) {
+    const cell = approveBtn.closest('td') || approveBtn.closest('div.record-actions') || approveBtn.parentElement;
+    if (cell) {
+      // Save original HTML for potential rollback
+      if (saveOriginal && isApproved) {
+        approvalOriginalHTML[strId] = cell.innerHTML;
+      }
+      
+      if (isApproved) {
+        cell.innerHTML = '<span style="color: #22c55e; font-weight: 600;"><i class="fas fa-check-circle"></i> מאושר</span>';
+      } else {
+        // Restore from saved HTML or recreate button
+        if (approvalOriginalHTML[strId]) {
+          cell.innerHTML = approvalOriginalHTML[strId];
+          delete approvalOriginalHTML[strId];
+        } else {
+          cell.innerHTML = `<button onclick="approveRecordFromAdmin('${strId}')" data-approve-record="${strId}" style="background: #22c55e; color: white; border: none; padding: 4px 8px; border-radius: 6px; cursor: pointer; font-size: 11px;" data-testid="button-approve-${strId}"><i class="fas fa-check"></i></button>`;
+        }
+      }
+    }
+  }
+  
+  // Also update status badge if exists (both desktop and mobile)
+  const statusBadges = document.querySelectorAll(`[data-record-status="${strId}"]`);
+  statusBadges.forEach(statusBadge => {
+    if (isApproved) {
+      statusBadge.style.background = '#dcfce7';
+      statusBadge.style.color = '#166534';
+      statusBadge.innerHTML = '<i class="fas fa-check-circle"></i> מאושר';
+    } else {
+      statusBadge.style.background = '#fef3c7';
+      statusBadge.style.color = '#92400e';
+      statusBadge.innerHTML = '<i class="fas fa-clock"></i> ממתין';
+    }
+  });
 }
 
 // Approve team month
@@ -9417,7 +9522,7 @@ function toggleAdminEmployeeDetails(empId) {
                   <td style="padding: 8px; text-align: center;"><span style="background: ${statusColor}; color: white; padding: 2px 8px; border-radius: 10px; font-size: 11px;">${status}</span></td>
                   <td style="padding: 8px; text-align: center; white-space: nowrap;">
                     ${!isApproved ? `<button onclick="event.stopPropagation(); editRecordFromAdmin('${recId}')" style="background: #3b82f6; color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; margin-left: 4px;" title="עריכה"><i class="fas fa-edit"></i></button>` : ''}
-                    ${!isApproved ? `<button onclick="event.stopPropagation(); approveRecordFromAdmin('${recId}')" style="background: #22c55e; color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer;" title="אישור"><i class="fas fa-check"></i></button>` : '<span style="color: #22c55e;"><i class="fas fa-check-circle"></i></span>'}
+                    ${!isApproved ? `<button onclick="event.stopPropagation(); approveRecordFromAdmin('${recId}')" data-approve-record="${recId}" style="background: #22c55e; color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer;" title="אישור"><i class="fas fa-check"></i></button>` : '<span style="color: #22c55e;"><i class="fas fa-check-circle"></i></span>'}
                   </td>
                 </tr>
               `;}).join('')}
