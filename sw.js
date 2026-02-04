@@ -1,4 +1,4 @@
-const CACHE_NAME = 'attendance-v63';
+const CACHE_NAME = 'attendance-v69';
 const urlsToCache = [
   './index.html',
   './manifest.json',
@@ -11,12 +11,14 @@ const urlsToCache = [
   './icons/icon-192x192.png',
   './icons/icon-384x384.png',
   './icons/icon-512x512.png',
+  './logo.png',
   'https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700&display=swap',
   'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css'
 ];
 
+// Install event - cache essential files
 self.addEventListener('install', (event) => {
-  console.log('[SW] Installing Service Worker...');
+  console.log('[SW] Installing Service Worker v68...');
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then((cache) => {
@@ -27,17 +29,26 @@ self.addEventListener('install', (event) => {
         console.error('[SW] Cache addAll failed:', error);
       })
   );
+  // Force immediate activation
   self.skipWaiting();
 });
 
+// Fetch event - serve from cache, fallback to network
 self.addEventListener('fetch', (event) => {
   const requestUrl = new URL(event.request.url);
   
+  // Skip non-http requests
   if (!requestUrl.protocol.startsWith('http')) {
     return;
   }
   
+  // Skip internal Replit routes
   if (requestUrl.origin === location.origin && requestUrl.pathname.startsWith('/_')) {
+    return;
+  }
+  
+  // Skip API requests - always go to network
+  if (requestUrl.pathname.includes('/api/') || requestUrl.hostname.includes('logic.azure.com')) {
     return;
   }
   
@@ -76,14 +87,19 @@ self.addEventListener('fetch', (event) => {
           return response;
         }).catch((error) => {
           console.error('[SW] Fetch failed:', error);
-          return caches.match('./index.html');
+          // Return cached index.html for navigation requests
+          if (event.request.mode === 'navigate') {
+            return caches.match('./index.html');
+          }
+          return new Response('Offline', { status: 503 });
         });
       })
   );
 });
 
+// Activate event - clean old caches
 self.addEventListener('activate', (event) => {
-  console.log('[SW] Activating Service Worker...');
+  console.log('[SW] Activating Service Worker v68...');
   const cacheWhitelist = [CACHE_NAME];
   event.waitUntil(
     caches.keys().then((cacheNames) => {
@@ -97,13 +113,15 @@ self.addEventListener('activate', (event) => {
       );
     })
   );
+  // Take control of all pages immediately
   self.clients.claim();
 });
 
+// Message handler for skip waiting
 self.addEventListener('message', (event) => {
   if (event.data && event.data.type === 'SKIP_WAITING') {
     self.skipWaiting();
   }
 });
 
-console.log('[SW] Service Worker loaded');
+console.log('[SW] Service Worker v68 loaded');

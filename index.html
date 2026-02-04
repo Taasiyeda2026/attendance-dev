@@ -3629,7 +3629,11 @@ function normalizeEmploymentType(source, defaultValue = '') {
         source['Employment_x0020_Type'],
         source.SogHaasaka,
         source.field_OData_EmploymentType,
-        source.OData__EmploymentType
+        source.OData__EmploymentType,
+        source.OData__x0045_mploymentType,
+        source['OData__EmploymentType'],
+        source['field@odata.EmploymentType'],
+        source.Title_EmploymentType
       ];
 
       for (const field of possibleFields) {
@@ -3833,8 +3837,26 @@ function normalizeEmployeeFromServer(emp) {
   console.log('All fields:', Object.keys(emp));
   console.log('Full employee object:', JSON.stringify(emp, null, 2));
   
+  // Check ALL fields that might contain employment type
+  console.log('=== Checking ALL possible EmploymentType fields ===');
+  const allFields = Object.keys(emp);
+  const empTypeFields = allFields.filter(k => 
+    k.toLowerCase().includes('employ') || 
+    k.toLowerCase().includes('type') ||
+    k.toLowerCase().includes('haasaka') ||
+    k.toLowerCase().includes('העסקה')
+  );
+  console.log('Potential employmentType fields found:', empTypeFields);
+  empTypeFields.forEach(f => console.log(`  ${f}:`, emp[f]));
+  
+  // Direct check for EmploymentType
+  console.log('=== Direct field check ===');
+  console.log('emp.EmploymentType =', emp.EmploymentType);
+  console.log('emp.employmentType =', emp.employmentType);
+  console.log('typeof emp.EmploymentType =', typeof emp.EmploymentType);
+  
   const empType = normalizeEmploymentType(emp, 'תעשיידע');
-  console.log('Normalized employmentType:', empType);
+  console.log('Normalized employmentType result:', empType);
   
   // Extract employee name - try all possible field names from SharePoint
   const empName = emp.EmployeeName || emp.employeeName || emp.Title || emp.title || '';
@@ -4263,7 +4285,7 @@ function hasPermission(action, targetTeam = null) {
     case 'view_own':
       return true;
     case 'view_team':
-      return role === 'manager';
+      return role === 'manager' || role === 'operations_controller';
     case 'view_all':
       return ['operations_controller', 'system_admin', 'payroll_officer'].includes(role);
     case 'edit_own':
@@ -4271,6 +4293,9 @@ function hasPermission(action, targetTeam = null) {
     case 'edit_team':
       if (role === 'manager') {
         return user.team === targetTeam;
+      }
+      if (role === 'operations_controller') {
+        return true; // Can edit all teams
       }
       return role === 'system_admin';
     case 'edit_all':
@@ -8669,6 +8694,10 @@ async function updateAdminDashboard() {
     };
     
     // Filter to current month - support both DD/MM/YYYY and YYYY-MM-DD formats
+    console.log('=== Admin Dashboard Date Filtering ===');
+    console.log('Total records from server:', data.records.length);
+    console.log('Filter for month:', currentMonth + 1, 'year:', currentYear);
+    
     const currentMonthRecords = data.records.filter(rec => {
       if (!rec.attendanceDate) return false;
       const dateStr = rec.attendanceDate;
@@ -8684,10 +8713,13 @@ async function updateAdminDashboard() {
         recYear = parseInt(parts[0]);
         recMonth = parseInt(parts[1]) - 1;
       } else {
+        console.log('Unknown date format:', dateStr);
         return false;
       }
       return recMonth === currentMonth && recYear === currentYear;
     });
+    
+    console.log('Records after month filter:', currentMonthRecords.length);
     
     // Group by employee
     const employeeData = {};
@@ -9390,6 +9422,18 @@ function populateTeamFilter() {
   const teamSelect = document.getElementById('reportTeam');
   if (!teamSelect) return;
   
+  const role = localStorage.getItem("role") || '';
+  const userTeam = localStorage.getItem("team") || '';
+  
+  // Manager can only see their own team - hide filter or lock it
+  if (role === 'manager' && userTeam) {
+    teamSelect.innerHTML = `<option value="${userTeam}">${userTeam}</option>`;
+    teamSelect.value = userTeam;
+    teamSelect.disabled = true;
+    return;
+  }
+  
+  teamSelect.disabled = false;
   const currentValue = teamSelect.value;
   teamSelect.innerHTML = '<option value="all">הכל</option>';
   
@@ -9410,8 +9454,10 @@ function populateTeamFilter() {
 
 function getFilteredRecordsByMonth(recordsList, month, year) {
   return recordsList.filter(rec => {
-    if (!rec.date) return false;
-    const recDate = new Date(rec.date);
+    const dateStr = rec.date || rec.attendanceDate;
+    if (!dateStr) return false;
+    const recDate = parseRecordDate(dateStr);
+    if (!recDate) return false;
     return recDate.getMonth() + 1 === parseInt(month) && recDate.getFullYear() === parseInt(year);
   });
 }
@@ -9454,6 +9500,14 @@ async function loadReportData() {
     
     reportRecords = getFilteredRecordsByMonth(reportRecords, month, year);
     
+    // Manager can only see their own team
+    if (user.role === 'manager') {
+      const managerTeam = user.team || localStorage.getItem('team') || '';
+      if (managerTeam) {
+        reportRecords = reportRecords.filter(rec => rec.team === managerTeam);
+      }
+    }
+    
     if (employmentType !== 'all') {
       reportRecords = reportRecords.filter(rec => rec.employmentType === employmentType);
     }
@@ -9463,7 +9517,7 @@ async function loadReportData() {
     }
     
     if (activityType !== 'all') {
-      reportRecords = reportRecords.filter(rec => rec.activity === activityType);
+      reportRecords = reportRecords.filter(rec => (rec.activity || rec.activityType) === activityType);
     }
     
     updateReportStats();
