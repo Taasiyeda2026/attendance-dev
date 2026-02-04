@@ -5418,6 +5418,18 @@ async function loadApprovalsStatusPage() {
     return;
   }
 
+  // Build employment type lookup from teamRecordsCache (which has the data)
+  const employmentTypeLookup = {};
+  if (typeof teamRecordsCache !== 'undefined' && Array.isArray(teamRecordsCache)) {
+    teamRecordsCache.forEach(rec => {
+      const empId = String(rec.employeeId || rec.empNum || '').trim();
+      if (empId && !employmentTypeLookup[empId]) {
+        employmentTypeLookup[empId] = normalizeEmploymentType(rec, '');
+      }
+    });
+  }
+  console.log('Employment type lookup built from teamRecordsCache:', Object.keys(employmentTypeLookup).length, 'entries');
+  
   // Remove duplicates by employeeId - use Map to aggregate data per employee
   console.log('loadApprovalsStatusPage: Raw data from API:', approvalsData.length, 'records');
   const employeeMap = new Map();
@@ -5462,10 +5474,13 @@ async function loadApprovalsStatusPage() {
       if (!existing.employmentType && emp.employmentType) existing.employmentType = emp.employmentType;
     } else {
       // First occurrence - add to map
-      employeeMap.set(id, {
+      // Enrich with employmentType from lookup if missing
+      const enrichedEmp = {
         ...emp,
-        employeeId: id // Ensure normalized ID
-      });
+        employeeId: id, // Ensure normalized ID
+        employmentType: emp.employmentType || employmentTypeLookup[id] || ''
+      };
+      employeeMap.set(id, enrichedEmp);
     }
   });
   approvalsData = Array.from(employeeMap.values());
@@ -8004,7 +8019,9 @@ function getMonthKeyFromRecords(recordsList) {
   return monthKeys.size === 1 ? Array.from(monthKeys)[0] : null;
 }
 
-function createDetailedSheet(recordsList) {
+function createDetailedSheet(recordsList, options = {}) {
+  const hideEmploymentType = options.hideEmploymentType || false;
+  
   const headers = [
     'מספר עובד',
     'שם עובד',
@@ -8022,13 +8039,16 @@ function createDetailedSheet(recordsList) {
     'פירוט הוצאות',
     'הערות',
     'קבצים מצורפים',
-    'צוות',
-    'סוג העסקה'
+    'צוות'
   ];
+  
+  if (!hideEmploymentType) {
+    headers.push('סוג העסקה');
+  }
 
   const data = [headers];
   recordsList.forEach(rec => {
-    data.push([
+    const row = [
       rec.employeeId || '',
       rec.employeeName || '',
       rec.attendanceDate || '',
@@ -8045,9 +8065,14 @@ function createDetailedSheet(recordsList) {
       rec.expensesDetails || '',
       rec.notes || '',
       rec.attachmentsNames || '',
-      rec.team || '',
-      rec.employmentType || ''
-    ]);
+      rec.team || ''
+    ];
+    
+    if (!hideEmploymentType) {
+      row.push(rec.employmentType || '');
+    }
+    
+    data.push(row);
   });
 
   const ws = XLSX.utils.aoa_to_sheet(data);
@@ -8232,7 +8257,7 @@ function exportAttendanceWorkbook(recordsList, options = {}) {
   const wb = XLSX.utils.book_new();
   const monthKey = options.monthKey || getMonthKeyFromRecords(normalizedRecords);
 
-  XLSX.utils.book_append_sheet(wb, createDetailedSheet(normalizedRecords), 'פירוט מלא');
+  XLSX.utils.book_append_sheet(wb, createDetailedSheet(normalizedRecords, { hideEmploymentType: options.hideEmploymentType }), 'פירוט מלא');
 
   if (options.includeSummary) {
     XLSX.utils.book_append_sheet(wb, createMonthlySummarySheet(normalizedRecords, monthKey), 'סיכום חודשי');
@@ -8249,9 +8274,10 @@ function exportAttendanceWorkbook(recordsList, options = {}) {
 
 function exportToExcel() {
   const user = getCurrentUserData();
-  const includeSummary = user?.role !== 'instructor';
+  const isInstructor = user?.role === 'instructor';
   exportAttendanceWorkbook(records, {
-    includeSummary,
+    includeSummary: !isInstructor,
+    hideEmploymentType: isInstructor,
     filePrefix: 'דוח_נוכחות'
   });
 }
