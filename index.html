@@ -9317,7 +9317,7 @@ function toggleAdminEmployeeDetails(empId) {
                 const isApproved = statusRaw === 'approved';
                 return `
                 <tr style="border-bottom: 1px solid #e2e8f0;">
-                  <td style="padding: 8px; text-align: right;">${rec.attendanceDate || ''}</td>
+                  <td style="padding: 8px; text-align: right; white-space: nowrap;">${rec.attendanceDate || ''}</td>
                   <td style="padding: 8px; text-align: center;">${rec.startTime || ''}</td>
                   <td style="padding: 8px; text-align: center;">${rec.endTime || ''}</td>
                   <td style="padding: 8px; text-align: center; font-weight: 600;">${(rec.workHours || 0).toFixed(1)}</td>
