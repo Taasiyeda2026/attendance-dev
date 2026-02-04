@@ -2909,20 +2909,6 @@
                 <label for="programField">תוכנית <span style="color: #ef4444;">*</span></label>
                 <select id="programField" required style="max-width: 100%;">
                   <option value="">בחר תוכנית</option>
-                  <option value="השמיים אינם הגבול">השמיים אינם הגבול</option>
-                  <option value="התנסות בתעשייה">התנסות בתעשייה</option>
-                  <option value="ביומימיקרי">ביומימיקרי</option>
-                  <option value="ביומימיקרי לחטיבות">ביומימיקרי לחטיבות</option>
-                  <option value="בינה מלאכותית">בינה מלאכותית</option>
-                  <option value="יישומי AI">יישומי AI</option>
-                  <option value="מייקרים טכנו-כיף">מייקרים טכנו-כיף</option>
-                  <option value="מנהיגות ירוקה">מנהיגות ירוקה</option>
-                  <option value="מקורות">מקורות</option>
-                  <option value="משחקי קופסה">משחקי קופסה</option>
-                  <option value="פורצות דרך">פורצות דרך</option>
-                  <option value="רוקחים עולם">רוקחים עולם</option>
-                  <option value="טכנולוגיות החלל">טכנולוגיות החלל</option>
-                  <option value="תמיר">תמיר</option>
                 </select>
               </div>
             </div>
@@ -3452,20 +3438,6 @@
             <label for="editProgram" class="required-label">תוכנית</label>
             <select id="editProgram" required>
               <option value="">בחר תוכנית</option>
-              <option value="השמיים אינם הגבול">השמיים אינם הגבול</option>
-              <option value="התנסות בתעשייה">התנסות בתעשייה</option>
-              <option value="ביומימיקרי">ביומימיקרי</option>
-              <option value="ביומימיקרי לחטיבות">ביומימיקרי לחטיבות</option>
-              <option value="בינה מלאכותית">בינה מלאכותית</option>
-              <option value="יישומי AI">יישומי AI</option>
-              <option value="מייקרים טכנו-כיף">מייקרים טכנו-כיף</option>
-              <option value="מנהיגות ירוקה">מנהיגות ירוקה</option>
-              <option value="מקורות">מקורות</option>
-              <option value="משחקי קופסה">משחקי קופסה</option>
-              <option value="פורצות דרך">פורצות דרך</option>
-              <option value="רוקחים עולם">רוקחים עולם</option>
-              <option value="טכנולוגיות החלל">טכנולוגיות החלל</option>
-              <option value="תמיר">תמיר</option>
             </select>
           </div>
           <div class="form-field">
@@ -3668,23 +3640,6 @@ const ACTIVITY_TYPES = [
   'סיור',
   'קורס',
   'תפעול'
-];
-
-const PROGRAMS_LIST = [
-  'השמיים אינם הגבול',
-  'התנסות בתעשייה',
-  'ביומימיקרי',
-  'ביומימיקרי לחטיבות',
-  'בינה מלאכותית',
-  'יישומי AI',
-  'מייקרים טכנו-כיף',
-  'מנהיגות ירוקה',
-  'מקורות',
-  'משחקי קופסה',
-  'פורצות דרך',
-  'רוקחים עולם',
-  'טכנולוגיות החלל',
-  'תמיר'
 ];
 
 // =============== State ===============
@@ -4133,115 +4088,35 @@ async function apiRequest(action, data, retryCount = 0) {
 // =============== Users ===============
 // Authentication moved to server-side for security
 
-// =============== Schools Data ===============
-const schoolsData = [
-  {"רשות":"בנימינה","בית ספר":"מתנ\"ס"},
-  {"רשות":"ג'דיידה מכר","בית ספר":"ג'דיידה יסודי"},
-  {"רשות":"הרצליה","בית ספר":"ויצו פנינים אילנות"},
-  {"רשות":"חיפה","בית ספר":"לאובק"},
-  {"רשות":"ירושלים","בית ספר":"ביכורים"},
-  {"רשות":"כיסרא סמיה","בית ספר":"כיסרא סמיה"},
-  {"רשות":"ירכא","בית ספר":"ירכא אל-רואי"},
-  {"רשות":"ירכא","בית ספר":"ירכא אל-אמין"},
-  {"רשות":"ג'וליס","בית ספר":"דרכא"},
-  {"רשות":"עין קיניה","בית ספר":"עין קיניה"},
-  {"רשות":"בוקעתא","בית ספר":"בוקעתא"},
-  {"רשות":"מג'דל שמס","בית ספר":"מג'דל שמס"},
-  {"רשות":"יהוד","בית ספר":"הרצל"},
-  {"רשות":"יהוד","בית ספר":"יהודה הלוי"},
-  {"רשות":"יהוד","בית ספר":"היובל"},
-  {"רשות":"אשכול","בית ספר":"נופי הבשור"},
-  {"רשות":"מנשה","בית ספר":"נטעים"},
-  {"רשות":"מטה יהודה","בית ספר":"אלון"},
-  {"רשות":"מטה יהודה","בית ספר":"מתיתיהו"},
-  {"רשות":"מטה יהודה","בית ספר":"האלה"},
-  {"רשות":"מטה יהודה","בית ספר":"הרטוב היסודי"},
-  {"רשות":"מטה יהודה","בית ספר":"עין הרים"},
-  {"רשות":"מטה יהודה","בית ספר":"השחר"},
-  {"רשות":"מטה יהודה","בית ספר":"יסודי עין נקובא-ראפה"},
-  {"רשות":"מטה יהודה","בית ספר":"קרוב"},
-  {"רשות":"מטה יהודה","בית ספר":"נווה שלום"},
-  {"רשות":"מטה יהודה","בית ספר":"קסם"},
-  {"רשות":"מסעדה","בית ספר":"מסעדה יסודי"},
-  {"רשות":"נהריה","בית ספר":"גולדה"},
-  {"רשות":"נהריה","בית ספר":"ישיבת אבירי יעקב"},
-  {"רשות":"נהריה","בית ספר":"מדעים"},
-  {"רשות":"נהריה","בית ספר":"רמב\"ם"},
-  {"רשות":"נתניה","בית ספר":"בר אילן"},
-  {"רשות":"נתניה","בית ספר":"אלדד"},
-  {"רשות":"נתניה","בית ספר":"ריגלר"},
-  {"רשות":"נתניה","בית ספר":"אלתרמן"},
-  {"רשות":"נתניה","בית ספר":"אורט גוטמן"},
-  {"רשות":"נתניה","בית ספר":"שחפים חנ\"מ (אלומות לשעבר)"},
-  {"רשות":"עין אלאסד","בית ספר":"עין אלאסד"},
-  {"רשות":"עכו","בית ספר":"גורדון"},
-  {"רשות":"עכו","בית ספר":"העליה השניה"},
-  {"רשות":"עכו","בית ספר":"חילמי"},
-  {"רשות":"עמק הירדן - אפיקים","בית ספר":"אפיקי ירדן"},
-  {"רשות":"עמק הירדן - אשדות יעקב","בית ספר":"מול גלעד"},
-  {"רשות":"עמק הירדן - גינוסר","בית ספר":"נופי ארבל"},
-  {"רשות":"עמק הירדן - דגניה א'","בית ספר":"בית חינוך דגניה"},
-  {"רשות":"עמק הירדן - כנרת","בית ספר":"כנרת"},
-  {"רשות":"קריית טבעון","בית ספר":"כפר הנוער רמת הדסה"},
-  {"רשות":"קריית שמונה","בית ספר":"מתנ\"ס קריית שמונה"},
-  {"רשות":"קריית שמונה","בית ספר":"עוזיאל"},
-  {"רשות":"ראשון לציון","בית ספר":"גימנסיה"},
-  {"רשות":"ראשון לציון","בית ספר":"תיכון המעיין"},
-  {"רשות":"רחובות","בית ספר":"בכור לוי"},
-  {"רשות":"רחובות","בית ספר":"נבון רחובות"},
-  {"רשות":"בוסתן הגליל","בית ספר":"מיטר"},
-  {"רשות":"אופקים","בית ספר":"בן גוריון"},
-  {"רשות":"אשדוד","בית ספר":"חווה חקלאית - אשכול"},
-  {"רשות":"אשדוד","בית ספר":"חווה חקלאית - יחד"},
-  {"רשות":"אשדוד","בית ספר":"מקיף ה'"},
-  {"רשות":"אשדוד","בית ספר":"מקיף ט'"},
-  {"רשות":"אשכול","בית ספר":"מרחבי אשכול"},
-  {"רשות":"אשכול","בית ספר":"שדות אשכול"},
-  {"רשות":"אשכול","בית ספר":"שמש גבולות"},
-  {"רשות":"אשקלון","בית ספר":"אילנות"},
-  {"רשות":"אשקלון","בית ספר":"בראשית"},
-  {"רשות":"אשקלון","בית ספר":"דרכא מקיף ה'"},
-  {"רשות":"אשקלון","בית ספר":"נוף ים ב'"},
-  {"רשות":"באר יעקב","בית ספר":"צאלון"},
-  {"רשות":"באר שבע","בית ספר":"התומר"},
-  {"רשות":"באר שבע","בית ספר":"חווה חקלאית - התומר"},
-  {"רשות":"באר שבע","בית ספר":"שובו"},
-  {"רשות":"באר שבע","בית ספר":"חווה חקלאית - רננות"},
-  {"רשות":"באר שבע","בית ספר":"מקיף ג'"},
-  {"רשות":"גדרה","בית ספר":"דרכא רמון"},
-  {"רשות":"דימונה","בית ספר":"נווה עמרם"},
-  {"רשות":"יבנה","בית ספר":"ביאליק"},
-  {"רשות":"יבנה","בית ספר":"נבון יבנה"},
-  {"רשות":"יבנה","בית ספר":"פרדס צפוני"},
-  {"רשות":"יד בנימין","בית ספר":"יד בנימין"},
-  {"רשות":"לכיש","בית ספר":"רבקה גובר"},
-  {"רשות":"מ.א חוף אשקלון","בית ספר":"באר גנים"},
-  {"רשות":"מ.א חוף אשקלון","בית ספר":"חופים"},
-  {"רשות":"מ.א חוף אשקלון","בית ספר":"מורשה"},
-  {"רשות":"מ.א חוף אשקלון","בית ספר":"ניצן"},
-  {"רשות":"מ.א חוף אשקלון","בית ספר":"ניצני קליף"},
-  {"רשות":"מ.א חוף אשקלון","בית ספר":"שדות סילבר"},
-  {"רשות":"מודיעין","בית ספר":"תיכון ב'"},
-  {"רשות":"נס ציונה","בית ספר":"בן גוריון"},
-  {"רשות":"קריית גת","בית ספר":"אורט גרוס"},
-  {"רשות":"קריית גת","בית ספר":"אורט מאיר"},
-  {"רשות":"קריית גת","בית ספר":"בן צבי"},
-  {"רשות":"קריית גת","בית ספר":"דוד אלעזר"},
-  {"רשות":"קריית גת","בית ספר":"משואה"},
-  {"רשות":"קריית מלאכי","בית ספר":"דרור"},
-  {"רשות":"קריית מלאכי","בית ספר":"עמל גבעתי"},
-  {"רשות":"רמלה","בית ספר":"חטיבת עידנים"},
-  {"רשות":"רמלה","בית ספר":"מקיף יגאל אלון"},
-  {"רשות":"רמלה","בית ספר":"תיכון פרופ נגר"},
-  {"רשות":"שדרות","בית ספר":"חניתה ב'"},
-  {"רשות":"אבן שמואל","בית ספר":"שפיר"},
-  {"רשות":"שפיר","בית ספר":"תתמ\"ד"},
-  {"רשות":"שער הנגב","בית ספר":"שדות רוחמה"}
-];
+// =============== Static Data (Schools/Programs) ===============
+let staticData = { schools: [], programs: [], municipalities: [] };
+let schoolsData = [];
+let programsData = [];
 
-// Sort and add Zoom at beginning
-schoolsData.sort((a, b) => a['בית ספר'].localeCompare(b['בית ספר'], 'he'));
-schoolsData.unshift({"רשות":"זום","בית ספר":"זום"});
+async function loadStaticData() {
+  try {
+    const response = await fetch('./data/static-data.json');
+    if (!response.ok) throw new Error('Failed to load static data');
+    const data = await response.json();
+    staticData = data || staticData;
+    schoolsData = Array.isArray(data?.schools) ? [...data.schools] : [];
+    programsData = Array.isArray(data?.programs) ? [...data.programs] : [];
+
+    const zoomIndex = schoolsData.findIndex(school => school['בית ספר'] === 'זום');
+    const zoomEntry = zoomIndex >= 0 ? schoolsData.splice(zoomIndex, 1)[0] : null;
+    schoolsData.sort((a, b) => a['בית ספר'].localeCompare(b['בית ספר'], 'he'));
+    if (zoomEntry) {
+      schoolsData.unshift(zoomEntry);
+    }
+
+    programsData.sort((a, b) => a.localeCompare(b, 'he'));
+  } catch (error) {
+    console.error('Failed to load static data:', error);
+    staticData = { schools: [], programs: [], municipalities: [] };
+    schoolsData = [];
+    programsData = [];
+  }
+}
 
 // =============== Role Management ===============
 function normalizeRole(role) {
@@ -4338,37 +4213,54 @@ function updateMenuByRole(role) {
   // Normalize the role (in case it wasn't normalized earlier)
   const normalizedRole = normalizeRole(role);
   console.log('updateMenuByRole called with:', role, '-> normalized to:', normalizedRole);
+  const canViewOwn = hasPermission('view_own');
+  const canEditOwn = hasPermission('edit_own');
+  const canViewTeam = hasPermission('view_team');
+  const canViewAll = hasPermission('view_all');
+  const isAdmin = hasPermission('admin');
+  const isManager = canViewTeam && !canViewAll;
+  const isOpsController = canViewTeam && canViewAll;
+  const isPayrollOfficer = canViewAll && !canViewTeam && !isAdmin;
   
   // Handle sidebar nav items via data-roles
   const navItems = document.querySelectorAll('#sidebarNav .nav-item');
   navItems.forEach(item => {
     const allowedRoles = item.getAttribute('data-roles');
-    if (allowedRoles === 'all') {
-      item.style.display = 'flex';
-    } else {
-      const roles = allowedRoles.split(',').map(r => r.trim());
-      const isAllowed = roles.includes(normalizedRole);
-      console.log('Menu item:', item.querySelector('span')?.textContent, 'roles:', roles, 'allowed:', isAllowed);
-      item.style.display = isAllowed ? 'flex' : 'none';
-    }
+    const roles = allowedRoles ? allowedRoles.split(',').map(r => r.trim()) : [];
+    const isAllowed = !allowedRoles || allowedRoles === 'all'
+      ? canViewOwn
+      : (roles.length === 1 && roles[0] === 'instructor')
+        ? canEditOwn
+        : (roles.length === 1 && roles[0] === 'system_admin')
+          ? isAdmin
+          : (roles.includes('manager') || roles.includes('operations_controller') || roles.includes('system_admin') || roles.includes('payroll_officer'))
+            ? (canViewTeam || canViewAll)
+            : false;
+    console.log('Menu item:', item.querySelector('span')?.textContent, 'roles:', roles, 'allowed:', isAllowed);
+    item.style.display = isAllowed ? 'flex' : 'none';
   });
 
   // Handle mobile bottom nav items via data-roles
   const mobileNavItems = document.querySelectorAll('#mobileBottomNav .mobile-nav-item');
   mobileNavItems.forEach(item => {
     const allowedRoles = item.getAttribute('data-roles');
-    if (!allowedRoles || allowedRoles === 'all') {
-      item.style.display = 'flex';
-    } else {
-      const roles = allowedRoles.split(',').map(r => r.trim());
-      item.style.display = roles.includes(normalizedRole) ? 'flex' : 'none';
-    }
+    const roles = allowedRoles ? allowedRoles.split(',').map(r => r.trim()) : [];
+    const isAllowed = !allowedRoles || allowedRoles === 'all'
+      ? canViewOwn
+      : (roles.length === 1 && roles[0] === 'instructor')
+        ? canEditOwn
+        : (roles.length === 1 && roles[0] === 'system_admin')
+          ? isAdmin
+          : (roles.includes('manager') || roles.includes('operations_controller') || roles.includes('system_admin') || roles.includes('payroll_officer'))
+            ? (canViewTeam || canViewAll)
+            : false;
+    item.style.display = isAllowed ? 'flex' : 'none';
   });
 
   // Hide dashboard "add record" button for non-instructors
   const dashboardAddBtn = document.getElementById('dashboardAddRecordBtn');
   if (dashboardAddBtn) {
-    dashboardAddBtn.style.display = (role === 'instructor') ? 'flex' : 'none';
+    dashboardAddBtn.style.display = canEditOwn ? 'flex' : 'none';
   }
 
   // Show appropriate dashboard based on role
@@ -4382,9 +4274,9 @@ function updateMenuByRole(role) {
   if (regularDashboardContent) regularDashboardContent.style.display = 'none';
   
   // Show the appropriate dashboard
-  if (role === 'payroll_officer') {
+  if (isPayrollOfficer) {
     if (payrollDashboard) payrollDashboard.style.display = 'block';
-  } else if (role === 'system_admin' || role === 'operations_controller') {
+  } else if (isAdmin || isOpsController) {
     if (adminControllerDashboard) adminControllerDashboard.style.display = 'block';
     // Show filters for admin and operations_controller
     const filters = document.getElementById('adminDashboardFilters');
@@ -4395,7 +4287,7 @@ function updateMenuByRole(role) {
     const filterTeam = document.getElementById('filterTeam');
     if (filterTeam) {
       // Show team filter for system_admin on all devices
-      filterTeam.style.display = role === 'system_admin' ? 'block' : 'none';
+      filterTeam.style.display = isAdmin ? 'block' : 'none';
     }
     // Show employment type filter for both system_admin and operations_controller
     const filterEmploymentType = document.getElementById('filterEmploymentType');
@@ -4405,9 +4297,9 @@ function updateMenuByRole(role) {
     // Show approval buttons only for system_admin
     const adminApprovalCard = document.getElementById('adminApprovalCard');
     if (adminApprovalCard) {
-      adminApprovalCard.style.display = role === 'system_admin' ? 'block' : 'none';
+      adminApprovalCard.style.display = isAdmin ? 'block' : 'none';
     }
-  } else if (role === 'manager') {
+  } else if (isManager) {
     // Manager sees adminControllerDashboard filtered to their team
     if (adminControllerDashboard) adminControllerDashboard.style.display = 'block';
     // Show month/year filters for manager, hide team filter (they only see their team)
@@ -4420,7 +4312,7 @@ function updateMenuByRole(role) {
     if (filterEmploymentType) filterEmploymentType.style.display = 'inline-block';
     // Hide approval buttons for managers - only system_admin can approve teams from dashboard
     const adminApprovalCard = document.getElementById('adminApprovalCard');
-    if (adminApprovalCard) adminApprovalCard.style.display = 'none';
+    if (adminApprovalCard) adminApprovalCard.style.display = hasPermission('admin') ? 'block' : 'none';
     // Update the title to show manager's team
     const title = adminControllerDashboard.querySelector('.card-title');
     if (title) {
@@ -5073,19 +4965,31 @@ function showPage(event, pageName) {
   }
   
   // Role guard: non-instructors cannot access 'records' page, redirect to dashboard
-  const role = localStorage.getItem("role") || '';
-  if (pageName === 'records' && role !== 'instructor') {
+  const canEditOwn = hasPermission('edit_own');
+  const canViewTeam = hasPermission('view_team');
+  const canViewAll = hasPermission('view_all');
+  const isAdmin = hasPermission('admin');
+  const isPayrollOfficer = canViewAll && !canViewTeam && !isAdmin;
+  if (pageName === 'records' && !canEditOwn) {
     pageName = 'dashboard';
   }
 
   // Role guard: only instructors can access 'add-record' page
-  if (pageName === 'add-record' && role !== 'instructor') {
+  if (pageName === 'add-record' && !canEditOwn) {
     showAlert('❌ רק מדריכים יכולים להוסיף ימי עבודה', 'error');
     pageName = 'dashboard';
   }
 
   // Role guard: payroll_officer can access dashboard and reports only
-  if (role === 'payroll_officer' && !['dashboard', 'reports'].includes(pageName)) {
+  if (isPayrollOfficer && !['dashboard', 'reports'].includes(pageName)) {
+    pageName = 'dashboard';
+  }
+
+  if (pageName === 'reports' && !(canViewTeam || canViewAll)) {
+    pageName = 'dashboard';
+  }
+
+  if (pageName === 'admin' && !isAdmin) {
     pageName = 'dashboard';
   }
   
@@ -5221,6 +5125,9 @@ function updateMonthlyApprovalVisibility() {
   const approvalsCard = document.getElementById('monthlyApprovalsCard');
   const resetButton = document.getElementById('resetMonthBtn');
   const unlockButton = document.getElementById('unlockMonthBtn');
+  const canEditOwn = hasPermission('edit_own');
+  const canViewTeam = hasPermission('view_team');
+  const isAdmin = hasPermission('admin');
 
   if (!user) {
     if (approvalContainer) approvalContainer.style.display = 'none';
@@ -5231,15 +5138,15 @@ function updateMonthlyApprovalVisibility() {
 
   // Show container with grid for instructors
   if (approvalContainer) {
-    approvalContainer.style.display = user.role === 'instructor' ? 'grid' : 'none';
+    approvalContainer.style.display = canEditOwn ? 'grid' : 'none';
   }
 
   if (instructorCard) {
-    instructorCard.style.display = user.role === 'instructor' ? 'block' : 'none';
+    instructorCard.style.display = canEditOwn ? 'block' : 'none';
   }
 
   if (approvalsCard) {
-    approvalsCard.style.display = ['manager', 'system_admin', 'operations_controller'].includes(user.role) ? 'block' : 'none';
+    approvalsCard.style.display = (canViewTeam || isAdmin) ? 'block' : 'none';
   }
 
   // Show approve to payroll button for managers and operations_controller
@@ -5250,11 +5157,11 @@ function updateMonthlyApprovalVisibility() {
 
   // Show reset/unlock buttons for managers and admins
   if (resetButton) {
-    resetButton.style.display = ['manager', 'system_admin', 'operations_controller'].includes(user.role) ? 'inline-flex' : 'none';
+    resetButton.style.display = (canViewTeam || isAdmin) ? 'inline-flex' : 'none';
   }
 
   if (unlockButton) {
-    unlockButton.style.display = user.role === 'system_admin' ? 'inline-flex' : 'none';
+    unlockButton.style.display = isAdmin ? 'inline-flex' : 'none';
   }
 }
 
@@ -6880,10 +6787,13 @@ function updateStats() {
 function updateDashboard() {
   updateStats();
   // Update appropriate dashboard based on role
-  const role = localStorage.getItem("role") || '';
-  if (role === 'payroll_officer') {
+  const canViewTeam = hasPermission('view_team');
+  const canViewAll = hasPermission('view_all');
+  const isAdmin = hasPermission('admin');
+  const isPayrollOfficer = canViewAll && !canViewTeam && !isAdmin;
+  if (isPayrollOfficer) {
     loadPayrollSummary();
-  } else if (role === 'system_admin' || role === 'operations_controller' || role === 'manager') {
+  } else if (canViewTeam || isAdmin) {
     // Update admin dashboard for admins, controllers, and managers
     loadAdminDashboard();
   }
@@ -6961,11 +6871,14 @@ async function loadInstructorMonthData() {
     updateRecordsWeekSelector();
   }
   
-  const role = localStorage.getItem('role') || '';
-  console.log('loadInstructorMonthData - role:', role, 'month:', instrMonthEl?.value, 'year:', instrYearEl?.value);
+  const canViewTeam = hasPermission('view_team');
+  const canViewAll = hasPermission('view_all');
+  const isAdmin = hasPermission('admin');
+  const isPayrollOfficer = canViewAll && !canViewTeam && !isAdmin;
+  console.log('loadInstructorMonthData - permissions:', { canViewTeam, canViewAll, isAdmin, isPayrollOfficer }, 'month:', instrMonthEl?.value, 'year:', instrYearEl?.value);
   
   // For managers, ops controllers, admin, payroll - update admin dashboard first (priority)
-  if (['manager', 'operations_controller', 'system_admin', 'payroll_officer'].includes(role)) {
+  if (canViewTeam || isAdmin || isPayrollOfficer) {
     console.log('loadInstructorMonthData - calling updateAdminDashboard for manager/admin');
     updateAdminDashboard(); // Don't await - run in parallel
   }
@@ -8211,6 +8124,30 @@ function populateSchools() {
     option.onclick = () => selectSchool(school);
     optionsContainer.appendChild(option);
   });
+}
+
+function populatePrograms() {
+  const programSelect = document.getElementById('programField');
+  const editProgramSelect = document.getElementById('editProgram');
+  if (programSelect) {
+    programSelect.innerHTML = '<option value="">בחר תוכנית</option>';
+    programsData.forEach(program => {
+      const option = document.createElement('option');
+      option.value = program;
+      option.textContent = program;
+      programSelect.appendChild(option);
+    });
+  }
+
+  if (editProgramSelect) {
+    editProgramSelect.innerHTML = '<option value="">בחר תוכנית</option>';
+    programsData.forEach(program => {
+      const option = document.createElement('option');
+      option.value = program;
+      option.textContent = program;
+      editProgramSelect.appendChild(option);
+    });
+  }
 }
 
 function toggleSearchableDropdown(dropdownId) {
@@ -10259,8 +10196,10 @@ function clearAllData() {
 }
 
 // =============== Initialize ===============
-window.addEventListener('DOMContentLoaded', function() {
+window.addEventListener('DOMContentLoaded', async function() {
+  await loadStaticData();
   populateSchools();
+  populatePrograms();
   populateTimeDropdowns();
   initFileUpload();
 
