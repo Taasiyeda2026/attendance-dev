@@ -4519,13 +4519,17 @@ async function updateRecordOnServer(updatedRecord, originalDate, originalStartTi
     
     showAlert('🔄 מעדכן רשומה...', 'info');
     
+    // CRITICAL: For admin/manager edits, we MUST use the original record's employee data
+    // Only fall back to localStorage for instructor editing their OWN records
+    const isEditingOwnRecord = String(updatedRecord.empNum || updatedRecord.employeeId) === localStorage.getItem("employeeId");
+    
     const payload = {
       action: 'updaterecord',
       recordId: String(recordId),
-      employeeId: String(updatedRecord.empNum || updatedRecord.employeeId || localStorage.getItem("employeeId") || ''),
-      employeeName: String(updatedRecord.empName || updatedRecord.employeeName || localStorage.getItem("employeeName") || ''),
-      team: String(updatedRecord.team || localStorage.getItem("team") || ''),
-      employmentType: String(updatedRecord.employmentType || localStorage.getItem("employmentType") || ''),
+      employeeId: String(updatedRecord.empNum || updatedRecord.employeeId || (isEditingOwnRecord ? localStorage.getItem("employeeId") : '')),
+      employeeName: String(updatedRecord.empName || updatedRecord.employeeName || (isEditingOwnRecord ? localStorage.getItem("employeeName") : '')),
+      team: String(updatedRecord.team || (isEditingOwnRecord ? localStorage.getItem("team") : '')),
+      employmentType: String(updatedRecord.employmentType || (isEditingOwnRecord ? localStorage.getItem("employmentType") : '')),
       attendanceDate: updatedRecord.date || updatedRecord.attendanceDate,
       startTime: updatedRecord.start || updatedRecord.startTime,
       endTime: updatedRecord.end || updatedRecord.endTime,
@@ -5384,15 +5388,58 @@ async function loadApprovalsStatusPage() {
     return;
   }
 
-  // Remove duplicates by employeeId (convert to string to handle number/string mismatches)
-  const seenEmployeeIds = new Set();
-  approvalsData = approvalsData.filter(emp => {
-    const id = String(emp.employeeId || emp.id || '');
-    if (!id || seenEmployeeIds.has(id)) return false;
-    seenEmployeeIds.add(id);
-    return true;
+  // Remove duplicates by employeeId - use Map to aggregate data per employee
+  console.log('loadApprovalsStatusPage: Raw data from API:', approvalsData.length, 'records');
+  const employeeMap = new Map();
+  
+  // Helper to parse date strings to Date objects for comparison
+  const parseDate = (dateStr) => {
+    if (!dateStr) return null;
+    const d = new Date(dateStr);
+    return isNaN(d.getTime()) ? null : d;
+  };
+  
+  approvalsData.forEach(emp => {
+    // Normalize employeeId to string and trim any whitespace
+    const rawId = emp.employeeId || emp.id || '';
+    const id = String(rawId).trim();
+    if (!id) return;
+    
+    // If employee already seen, merge approval info (keep most recent approval dates)
+    if (employeeMap.has(id)) {
+      const existing = employeeMap.get(id);
+      
+      // Keep latest instructor approval date (compare as Date)
+      const existingInstDate = parseDate(existing.instructorApprovalDate);
+      const newInstDate = parseDate(emp.instructorApprovalDate);
+      if (newInstDate && (!existingInstDate || newInstDate > existingInstDate)) {
+        existing.instructorApprovalDate = emp.instructorApprovalDate;
+      }
+      
+      // Keep latest manager approval date (compare as Date)
+      const existingMgrDate = parseDate(existing.managerApprovalDate);
+      const newMgrDate = parseDate(emp.managerApprovalDate);
+      if (newMgrDate && (!existingMgrDate || newMgrDate > existingMgrDate)) {
+        existing.managerApprovalDate = emp.managerApprovalDate;
+      }
+      
+      // Keep released status if true
+      if (emp.released) existing.released = true;
+      
+      // Keep non-empty values for other fields
+      if (!existing.employeeName && emp.employeeName) existing.employeeName = emp.employeeName;
+      if (!existing.team && emp.team) existing.team = emp.team;
+      if (!existing.employmentType && emp.employmentType) existing.employmentType = emp.employmentType;
+    } else {
+      // First occurrence - add to map
+      employeeMap.set(id, {
+        ...emp,
+        employeeId: id // Ensure normalized ID
+      });
+    }
   });
-  console.log('loadApprovalsStatusPage: After duplicate removal:', approvalsData.length, 'employees');
+  approvalsData = Array.from(employeeMap.values());
+  console.log('loadApprovalsStatusPage: After duplicate removal:', approvalsData.length, 'unique employees');
 
   // Client-side team filter for managers (backup if server doesn't filter)
   if (user.role === 'manager' && user.team) {
