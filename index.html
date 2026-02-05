@@ -4395,20 +4395,13 @@ function canEditRecord(record) {
     return !recordTeam || recordTeam.trim().toLowerCase() === (user.team || '').trim().toLowerCase();
   }
 
-  // instructor can edit only their own records, unless month is approved
+  // instructor can edit only their own records
   if (role === 'instructor') {
     const recordEmpNum = record.empNum || record.employeeId;
     const userEmpNum = user.empNum || localStorage.getItem('employeeId');
 
     // Must be own record
     if (String(recordEmpNum) !== String(userEmpNum)) {
-      return false;
-    }
-
-    const recordDateStr = record.date || record.attendanceDate;
-    if (!recordDateStr) return false;
-
-    if (instructorApprovalInfo && instructorApprovalInfo.instructorApprovalDate) {
       return false;
     }
 
@@ -4445,13 +4438,6 @@ function getEditBlockReason(record) {
 
     if (String(recordEmpNum) !== String(userEmpNum)) {
       return 'ניתן לערוך רק רשומות שלך';
-    }
-
-    const recordDateStr = record.date || record.attendanceDate;
-    if (!recordDateStr) return 'תאריך רשומה לא תקין';
-
-    if (instructorApprovalInfo && instructorApprovalInfo.instructorApprovalDate) {
-      return 'החודש נסגר על ידי העובד ואינו ניתן לעריכה';
     }
 
     return null;
@@ -4613,12 +4599,6 @@ async function updateRecordOnServer(updatedRecord, originalDate, originalStartTi
   }
   
   try {
-    const canUpdate = await ensureMonthEditable(
-      String(updatedRecord.empNum || localStorage.getItem("employeeId") || ''),
-      updatedRecord.date || updatedRecord.attendanceDate
-    );
-    if (!canUpdate) return false;
-    
     showAlert('🔄 מעדכן רשומה...', 'info');
     
     // CRITICAL: For admin/manager edits, we MUST use the original record's employee data
@@ -4674,12 +4654,6 @@ async function deleteRecordOnServer(record) {
   }
   
   try {
-    const canDelete = await ensureMonthEditable(
-      String(record.empNum || localStorage.getItem("employeeId") || ''),
-      record.date || record.attendanceDate
-    );
-    if (!canDelete) return false;
-    
     showAlert('🔄 מוחק רשומה...', 'info');
     
     const payload = {
@@ -5234,7 +5208,7 @@ async function approveMonthlyReport(whichMonth = 'current') {
     return;
   }
 
-  if (!confirm('האם לאשר סיום דיווח חודש? לאחר האישור לא ניתן לערוך רשומות.')) {
+  if (!confirm('האם לאשר סיום דיווח חודש?')) {
     return;
   }
 
@@ -7833,14 +7807,6 @@ async function editRecord(index) {
     return;
   }
 
-  const canUpdate = await ensureMonthEditable(
-    String(rec.empNum || localStorage.getItem("employeeId") || ''),
-    rec.date || rec.attendanceDate
-  );
-  if (!canUpdate) {
-    return;
-  }
-  
   editingIndex = index;
   
   document.getElementById('editDate').value = rec.date;
