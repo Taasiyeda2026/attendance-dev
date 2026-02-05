@@ -4409,11 +4409,7 @@ function canEditRecord(record) {
     if (!recordDateStr) return false;
 
     if (instructorApprovalInfo && instructorApprovalInfo.instructorApprovalDate) {
-      const recordDate = new Date(recordDateStr);
-      const recordMonthKey = `${recordDate.getFullYear()}-${String(recordDate.getMonth() + 1).padStart(2, '0')}`;
-      if (instructorApprovalInfo.monthKey === recordMonthKey) {
-        return false;
-      }
+      return false;
     }
 
     return true;
@@ -4454,13 +4450,8 @@ function getEditBlockReason(record) {
     const recordDateStr = record.date || record.attendanceDate;
     if (!recordDateStr) return 'תאריך רשומה לא תקין';
 
-    const recordDate = new Date(recordDateStr);
-    const recordMonthKey = `${recordDate.getFullYear()}-${String(recordDate.getMonth() + 1).padStart(2, '0')}`;
-
     if (instructorApprovalInfo && instructorApprovalInfo.instructorApprovalDate) {
-      if (instructorApprovalInfo.monthKey === recordMonthKey) {
-        return 'החודש נסגר על ידי העובד ואינו ניתן לעריכה';
-      }
+      return 'החודש נסגר על ידי העובד ואינו ניתן לעריכה';
     }
 
     return null;
@@ -6162,7 +6153,6 @@ async function renderTeamTable(recordsList) {
     return;
   }
 
-  const user = getCurrentUserData();
   const canRelease = user && ['manager', 'operations_controller', 'system_admin'].includes(user.role);
   
   const tableHTML = `
@@ -7626,34 +7616,22 @@ function renderRecordsTable() {
 
   // Group records by week
   function getWeekNumber(dateStr) {
-    if (!dateStr) return 0;
-    try {
-      const date = new Date(dateStr.split('/').reverse().join('-'));
-      if (isNaN(date.getTime())) return 0;
-      const startOfYear = new Date(date.getFullYear(), 0, 1);
-      const days = Math.floor((date - startOfYear) / (24 * 60 * 60 * 1000));
-      return Math.ceil((days + startOfYear.getDay() + 1) / 7);
-    } catch (e) {
-      return 0;
-    }
+    const date = parseRecordDate(dateStr);
+    if (!date) return 0;
+    const startOfYear = new Date(date.getFullYear(), 0, 1);
+    const days = Math.floor((date - startOfYear) / (24 * 60 * 60 * 1000));
+    return Math.ceil((days + startOfYear.getDay() + 1) / 7);
   }
 
   function getWeekRange(dateStr) {
-    if (!dateStr) return '';
-    try {
-      const parts = dateStr.split('/');
-      if (parts.length < 3) return '';
-      const date = new Date(parts[2], parts[1] - 1, parts[0]);
-      if (isNaN(date.getTime())) return '';
-      const dayOfWeek = date.getDay();
-      const startOfWeek = new Date(date);
-      startOfWeek.setDate(date.getDate() - dayOfWeek);
-      const endOfWeek = new Date(startOfWeek);
-      endOfWeek.setDate(startOfWeek.getDate() + 6);
-      return `${startOfWeek.getDate()}/${startOfWeek.getMonth()+1} - ${endOfWeek.getDate()}/${endOfWeek.getMonth()+1}`;
-    } catch (e) {
-      return '';
-    }
+    const date = parseRecordDate(dateStr);
+    if (!date) return '';
+    const dayOfWeek = date.getDay();
+    const startOfWeek = new Date(date);
+    startOfWeek.setDate(date.getDate() - dayOfWeek);
+    const endOfWeek = new Date(startOfWeek);
+    endOfWeek.setDate(startOfWeek.getDate() + 6);
+    return `${startOfWeek.getDate()}/${startOfWeek.getMonth()+1} - ${endOfWeek.getDate()}/${endOfWeek.getMonth()+1}`;
   }
 
   // Group records by week
@@ -7663,8 +7641,9 @@ function renderRecordsTable() {
     rec._originalIndex = records.findIndex(r => 
       r.date === rec.date && r.empNum === rec.empNum && r.activity === rec.activity && r.hours === rec.hours
     );
-    const weekNum = getWeekNumber(rec.date);
-    const weekRange = getWeekRange(rec.date);
+    const recDateStr = rec.date || rec.attendanceDate;
+    const weekNum = getWeekNumber(recDateStr);
+    const weekRange = getWeekRange(recDateStr);
     const key = `${weekNum}_${weekRange}`;
     if (!weekGroups[key]) {
       weekGroups[key] = { weekNum, weekRange, records: [] };
