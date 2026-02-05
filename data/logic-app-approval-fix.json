@@ -53,6 +53,7 @@
           "content": "@triggerBody()",
           "schema": {
             "type": "object",
+            "required": ["action", "recordId"],
             "properties": {
               "action": { "type": "string" },
               "employeeId": { "type": "string" },
