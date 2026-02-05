@@ -6020,7 +6020,7 @@ async function renderTeamTable(recordsList) {
     return;
   }
 
-  const user = getCurrentUserData();
+  const currentUser = getCurrentUserData();
   const monthSelect = document.getElementById('teamMonthFilter');
   const yearSelect = document.getElementById('teamYearFilter');
   const month = monthSelect ? parseInt(monthSelect.value, 10) : (new Date().getMonth() + 1);
@@ -6030,7 +6030,7 @@ async function renderTeamTable(recordsList) {
 
   if (isApprovalsSupported()) {
     try {
-      const teamFilter = user?.role === 'manager' ? (user.team || 'all') : 'all';
+      const teamFilter = currentUser?.role === 'manager' ? (currentUser.team || 'all') : 'all';
       const approvalData = await apiRequest('getteamapprovalstatus', {
         team: teamFilter,
         monthKey
@@ -6099,7 +6099,7 @@ async function renderTeamTable(recordsList) {
   const grandTotalRecords = summaryList.reduce((sum, emp) => sum + emp.totalRecords, 0);
 
   if (isMobileView()) {
-    const canRelease = user && ['manager', 'operations_controller', 'system_admin'].includes(user.role);
+    const canRelease = currentUser && ['manager', 'operations_controller', 'system_admin'].includes(currentUser.role);
     
     const employeeCards = summaryList.map(emp => {
       const pendingCount = Math.max(emp.totalRecords - emp.approvedRecords, 0);
