@@ -3644,6 +3644,8 @@ const ACTIVITY_TYPES = [
 
 // =============== State ===============
 let records = [];
+let myRecords = [];
+let isMyRecordsLoading = false;
 let currentUser = '';
 let editingIndex = -1;
 
@@ -4545,10 +4547,15 @@ async function loadMyRecordsFromServer(options = {}) {
   const employeeId = localStorage.getItem("employeeId");
   if (!employeeId) {
     records = [];
+    myRecords = [];
+    isMyRecordsLoading = false;
     renderRecordsTable();
     updateStats();
     return;
   }
+
+  isMyRecordsLoading = true;
+  renderRecordsTable();
 
   try {
     if (!options.backgroundRefresh) {
@@ -4570,15 +4577,14 @@ async function loadMyRecordsFromServer(options = {}) {
     const data = await apiRequest('getemployeerecords', {
       employeeId: employeeId,
       monthKey,
-      weekRange: isMobileView() && mobileWeekRange ? {
-        startDate: mobileWeekRange.startDate,
-        endDate: mobileWeekRange.endDate
-      } : ''
+      weekRange: ''
     });
 
     if (!data.success || !Array.isArray(data.records)) {
       console.warn("No records or failed:", data);
+      myRecords = [];
       records = [];
+      isMyRecordsLoading = false;
       renderRecordsTable();
       updateStats();
       showAlert('✅ אין ימי עבודה קיימים', 'info');
@@ -4593,19 +4599,12 @@ async function loadMyRecordsFromServer(options = {}) {
       return normalized;
     });
 
-    if (isMobileView() && mobileWeekRange) {
-      normalizedRecords = normalizedRecords.filter(rec => {
-        const recDate = parseRecordDate(rec.date || rec.attendanceDate);
-        if (!recDate) return false;
-        const recIso = toISODate(recDate);
-        return recIso >= mobileWeekRange.startDate && recIso <= mobileWeekRange.endDate;
-      });
-    }
-
-    records = normalizedRecords;
+    myRecords = normalizedRecords;
+    records = myRecords;
 
     // Initialize month selectors to current month before updating stats
     initInstructorMonthSelectors();
+    isMyRecordsLoading = false;
     renderRecordsTable();
     updateStats();
     updateRecordsLockBanner();
@@ -4613,6 +4612,8 @@ async function loadMyRecordsFromServer(options = {}) {
     console.error('Load records error:', error);
     // Don't reset records on error - keep existing data
     showAlert('⚠️ ' + (error.message || 'שגיאה בטעינת ימי עבודה'), 'error');
+  } finally {
+    isMyRecordsLoading = false;
   }
 }
 
@@ -7014,11 +7015,7 @@ function handleWeekSelectionChange() {
   const selectedIndex = Number(weekSelect.value);
   mobileWeekRange = weeks[selectedIndex] || weeks[0] || null;
 
-  if (isMobileView()) {
-    loadMyRecordsFromServer();
-  } else {
-    renderRecordsTable();
-  }
+  renderRecordsTable();
 }
 
 async function loadRecordsForMonth() {
@@ -7594,7 +7591,9 @@ function renderRecordsTable() {
   const selectedMonth = recMonthEl ? parseInt(recMonthEl.value) - 1 : now.getMonth();
   const selectedYear = recYearEl ? parseInt(recYearEl.value) : now.getFullYear();
   
-  const filteredRecords = records.filter(r => {
+  const sourceRecords = Array.isArray(myRecords) ? myRecords : records;
+
+  let filteredRecords = sourceRecords.filter(r => {
     if (!r.date) return false;
     // Parse date - support both DD/MM/YYYY and YYYY-MM-DD formats
     let recMonth, recYear;
@@ -7629,6 +7628,15 @@ function renderRecordsTable() {
     return parseDate(a.date) - parseDate(b.date);
   });
   
+  if (isMobileView() && mobileWeekRange) {
+    filteredRecords = filteredRecords.filter(rec => {
+      const recDate = parseRecordDate(rec.date || rec.attendanceDate);
+      if (!recDate) return false;
+      const recIso = toISODate(recDate);
+      return recIso >= mobileWeekRange.startDate && recIso <= mobileWeekRange.endDate;
+    });
+  }
+
   document.getElementById('totalRecordsCount').textContent = filteredRecords.length;
   
   const totalHours = filteredRecords.reduce((sum, rec) => sum + (rec.hours || 0), 0);
@@ -7637,6 +7645,10 @@ function renderRecordsTable() {
   if (!recordsContainer) return;
   
   if (filteredRecords.length === 0) {
+    if (isMyRecordsLoading) {
+      recordsContainer.innerHTML = '<div style="padding: 40px;"></div>';
+      return;
+    }
     recordsContainer.innerHTML = '<p style="text-align: center; color: #94a3b8; padding: 40px;">אין רשומות להצגה לחודש זה</p>';
     return;
   }
