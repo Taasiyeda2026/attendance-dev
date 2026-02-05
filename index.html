@@ -4537,11 +4537,11 @@ function generateRecordId() {
   return 'rec_' + Date.now() + '_' + Math.random().toString(16).slice(2);
 }
 
-async function syncFromSharePoint(employeeId) {
-  await loadMyRecordsFromServer();
+async function syncFromSharePoint(employeeId, options = {}) {
+  await loadMyRecordsFromServer(options);
 }
 
-async function loadMyRecordsFromServer() {
+async function loadMyRecordsFromServer(options = {}) {
   const employeeId = localStorage.getItem("employeeId");
   if (!employeeId) {
     records = [];
@@ -4551,7 +4551,9 @@ async function loadMyRecordsFromServer() {
   }
 
   try {
-    showAlert('🔄 טוען ימי עבודה מהשרת...', 'info');
+    if (!options.backgroundRefresh) {
+      showAlert('🔄 טוען ימי עבודה מהשרת...', 'info');
+    }
     
     const role = localStorage.getItem("role") || '';
     const team = localStorage.getItem("team") || '';
@@ -7544,9 +7546,8 @@ async function _addRecordInternal() {
         pageHeader.textContent = 'הוספת דיווח';
       }
       
-      await syncFromSharePoint(empNum);
+      await syncFromSharePoint(empNum, { backgroundRefresh: true });
       showAlert(isEditing ? '✅ הרשומה עודכנה בהצלחה!' : '✅ הדיווח נשלח בהצלחה!', 'success');
-      showPage(null, 'dashboard');
     } else {
       showAlert('❌ ' + (data.message || 'שגיאה בשליחה'), 'error');
     }
@@ -8088,7 +8089,7 @@ async function saveEdit() {
         return;
       }
 
-      await loadMyRecordsFromServer();
+      await loadMyRecordsFromServer({ backgroundRefresh: true });
       closeEditModal();
       showAlert('✅ הרשומה עודכנה בהצלחה ונשמרה בשרת', 'success');
     }
