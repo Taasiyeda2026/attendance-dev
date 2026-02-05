@@ -4409,11 +4409,7 @@ function canEditRecord(record) {
     if (!recordDateStr) return false;
 
     if (instructorApprovalInfo && instructorApprovalInfo.instructorApprovalDate) {
-      const recordDate = new Date(recordDateStr);
-      const recordMonthKey = `${recordDate.getFullYear()}-${String(recordDate.getMonth() + 1).padStart(2, '0')}`;
-      if (instructorApprovalInfo.monthKey === recordMonthKey) {
-        return false;
-      }
+      return false;
     }
 
     return true;
@@ -4454,13 +4450,8 @@ function getEditBlockReason(record) {
     const recordDateStr = record.date || record.attendanceDate;
     if (!recordDateStr) return 'תאריך רשומה לא תקין';
 
-    const recordDate = new Date(recordDateStr);
-    const recordMonthKey = `${recordDate.getFullYear()}-${String(recordDate.getMonth() + 1).padStart(2, '0')}`;
-
     if (instructorApprovalInfo && instructorApprovalInfo.instructorApprovalDate) {
-      if (instructorApprovalInfo.monthKey === recordMonthKey) {
-        return 'החודש נסגר על ידי העובד ואינו ניתן לעריכה';
-      }
+      return 'החודש נסגר על ידי העובד ואינו ניתן לעריכה';
     }
 
     return null;
@@ -5939,6 +5930,8 @@ async function loadTeamRecords(resetFilters = false) {
   const selectedMonth = monthSelect ? parseInt(monthSelect.value) : now.getMonth() + 1;
   const selectedYear = yearSelect ? parseInt(yearSelect.value) : now.getFullYear();
 
+  const normalizeTeamValue = (teamValue) => extractLookupValue(teamValue, '').trim().toLowerCase();
+
   // Get selected team filter value
   const selectedTeamFilter = teamFilterSelect ? teamFilterSelect.value : 'all';
 
@@ -5980,15 +5973,17 @@ async function loadTeamRecords(resetFilters = false) {
       // Manager always sees only their own team
       if (user.role === 'manager' && user.team) {
         filteredRecords = data.records.filter(rec => {
-          const recTeam = (rec.team || rec.Team || '').trim().toLowerCase();
-          return recTeam === (user.team || '').trim().toLowerCase();
+          const recTeam = normalizeTeamValue(rec.team || rec.Team);
+          const managerTeam = normalizeTeamValue(user.team);
+          return recTeam === managerTeam;
         });
       }
       // Admin/operations_controller can filter by selected team
       else if (selectedTeamFilter !== 'all' && (user.role === 'system_admin' || user.role === 'operations_controller')) {
         filteredRecords = data.records.filter(rec => {
-          const recTeam = (rec.team || rec.Team || '').trim().toLowerCase();
-          return recTeam === selectedTeamFilter.trim().toLowerCase();
+          const recTeam = normalizeTeamValue(rec.team || rec.Team);
+          const normalizedSelectedTeam = normalizeTeamValue(selectedTeamFilter);
+          return recTeam === normalizedSelectedTeam;
         });
       }
       
@@ -6029,7 +6024,7 @@ async function renderTeamTable(recordsList) {
     return;
   }
 
-  const user = getCurrentUserData();
+  const currentUser = getCurrentUserData();
   const monthSelect = document.getElementById('teamMonthFilter');
   const yearSelect = document.getElementById('teamYearFilter');
   const month = monthSelect ? parseInt(monthSelect.value, 10) : (new Date().getMonth() + 1);
@@ -6039,7 +6034,7 @@ async function renderTeamTable(recordsList) {
 
   if (isApprovalsSupported()) {
     try {
-      const teamFilter = user?.role === 'manager' ? (user.team || 'all') : 'all';
+      const teamFilter = currentUser?.role === 'manager' ? (currentUser.team || 'all') : 'all';
       const approvalData = await apiRequest('getteamapprovalstatus', {
         team: teamFilter,
         monthKey
@@ -6108,7 +6103,7 @@ async function renderTeamTable(recordsList) {
   const grandTotalRecords = summaryList.reduce((sum, emp) => sum + emp.totalRecords, 0);
 
   if (isMobileView()) {
-    const canRelease = user && ['manager', 'operations_controller', 'system_admin'].includes(user.role);
+    const canRelease = currentUser && ['manager', 'operations_controller', 'system_admin'].includes(currentUser.role);
     
     const employeeCards = summaryList.map(emp => {
       const pendingCount = Math.max(emp.totalRecords - emp.approvedRecords, 0);
@@ -6162,8 +6157,7 @@ async function renderTeamTable(recordsList) {
     return;
   }
 
-  const user = getCurrentUserData();
-  const canRelease = user && ['manager', 'operations_controller', 'system_admin'].includes(user.role);
+  const canRelease = currentUser && ['manager', 'operations_controller', 'system_admin'].includes(currentUser.role);
   
   const tableHTML = `
     <div style="margin-bottom: 15px;">
@@ -7626,34 +7620,22 @@ function renderRecordsTable() {
 
   // Group records by week
   function getWeekNumber(dateStr) {
-    if (!dateStr) return 0;
-    try {
-      const date = new Date(dateStr.split('/').reverse().join('-'));
-      if (isNaN(date.getTime())) return 0;
-      const startOfYear = new Date(date.getFullYear(), 0, 1);
-      const days = Math.floor((date - startOfYear) / (24 * 60 * 60 * 1000));
-      return Math.ceil((days + startOfYear.getDay() + 1) / 7);
-    } catch (e) {
-      return 0;
-    }
+    const date = parseRecordDate(dateStr);
+    if (!date) return 0;
+    const startOfYear = new Date(date.getFullYear(), 0, 1);
+    const days = Math.floor((date - startOfYear) / (24 * 60 * 60 * 1000));
+    return Math.ceil((days + startOfYear.getDay() + 1) / 7);
   }
 
   function getWeekRange(dateStr) {
-    if (!dateStr) return '';
-    try {
-      const parts = dateStr.split('/');
-      if (parts.length < 3) return '';
-      const date = new Date(parts[2], parts[1] - 1, parts[0]);
-      if (isNaN(date.getTime())) return '';
-      const dayOfWeek = date.getDay();
-      const startOfWeek = new Date(date);
-      startOfWeek.setDate(date.getDate() - dayOfWeek);
-      const endOfWeek = new Date(startOfWeek);
-      endOfWeek.setDate(startOfWeek.getDate() + 6);
-      return `${startOfWeek.getDate()}/${startOfWeek.getMonth()+1} - ${endOfWeek.getDate()}/${endOfWeek.getMonth()+1}`;
-    } catch (e) {
-      return '';
-    }
+    const date = parseRecordDate(dateStr);
+    if (!date) return '';
+    const dayOfWeek = date.getDay();
+    const startOfWeek = new Date(date);
+    startOfWeek.setDate(date.getDate() - dayOfWeek);
+    const endOfWeek = new Date(startOfWeek);
+    endOfWeek.setDate(startOfWeek.getDate() + 6);
+    return `${startOfWeek.getDate()}/${startOfWeek.getMonth()+1} - ${endOfWeek.getDate()}/${endOfWeek.getMonth()+1}`;
   }
 
   // Group records by week
@@ -7663,8 +7645,9 @@ function renderRecordsTable() {
     rec._originalIndex = records.findIndex(r => 
       r.date === rec.date && r.empNum === rec.empNum && r.activity === rec.activity && r.hours === rec.hours
     );
-    const weekNum = getWeekNumber(rec.date);
-    const weekRange = getWeekRange(rec.date);
+    const recDateStr = rec.date || rec.attendanceDate;
+    const weekNum = getWeekNumber(recDateStr);
+    const weekRange = getWeekRange(recDateStr);
     const key = `${weekNum}_${weekRange}`;
     if (!weekGroups[key]) {
       weekGroups[key] = { weekNum, weekRange, records: [] };
@@ -9231,93 +9214,84 @@ function toggleMobileAdminDetails(empId) {
 }
 
 // Group records by week of month - uses explicit month/year for stability
+function getWeekSegmentForMonthDate(recDate, targetMonth, targetYear) {
+  if (!recDate) return null;
+  if (recDate.getMonth() !== targetMonth || recDate.getFullYear() !== targetYear) return null;
+
+  const totalDays = new Date(targetYear, targetMonth + 1, 0).getDate();
+  const daysPerWeek = Math.ceil(totalDays / 4);
+  const day = recDate.getDate();
+  const weekIndex = Math.min(Math.floor((day - 1) / daysPerWeek), 3);
+  const startDay = weekIndex * daysPerWeek + 1;
+  const endDay = Math.min((weekIndex + 1) * daysPerWeek, totalDays);
+
+  return {
+    weekNum: weekIndex + 1,
+    startDay,
+    endDay,
+    dateRange: `${startDay}-${endDay}`,
+    weekKey: `${startDay}-${endDay}`
+  };
+}
+
 function groupRecordsByWeek(records, month, year) {
   if (!records || records.length === 0) return [];
-  
+
   // Use passed month/year, or fallback to current date
   const now = new Date();
   const targetMonth = (month !== undefined) ? month : now.getMonth();
   const targetYear = (year !== undefined) ? year : now.getFullYear();
-  
-  // Calculate week ranges for this month
-  const lastDayOfMonth = new Date(targetYear, targetMonth + 1, 0);
-  const totalDays = lastDayOfMonth.getDate();
-  
-  // Create 4 week ranges (equal segments of ~7-8 days each)
-  const daysPerWeek = Math.ceil(totalDays / 4);
-  const weeks = [];
-  
-  for (let i = 0; i < 4; i++) {
-    const startDay = i * daysPerWeek + 1;
-    const endDay = Math.min((i + 1) * daysPerWeek, totalDays);
-    weeks.push({
-      weekNum: i + 1,
-      startDay: startDay,
-      endDay: endDay,
-      dateRange: `${startDay}-${endDay}`,
-      records: []
-    });
-  }
-  
-  // Sort records into weeks - only include records from the target month/year
+
+  const weekGroups = {};
+
   records.forEach(rec => {
     const recDate = parseRecordDate(rec.attendanceDate || rec.date);
-    if (recDate && recDate.getMonth() === targetMonth && recDate.getFullYear() === targetYear) {
-      const day = recDate.getDate();
-      for (let i = 0; i < weeks.length; i++) {
-        if (day >= weeks[i].startDay && day <= weeks[i].endDay) {
-          weeks[i].records.push(rec);
-          break;
-        }
-      }
+    const segment = getWeekSegmentForMonthDate(recDate, targetMonth, targetYear);
+    if (!segment) return;
+
+    if (!weekGroups[segment.weekKey]) {
+      weekGroups[segment.weekKey] = {
+        weekNum: segment.weekNum,
+        startDay: segment.startDay,
+        endDay: segment.endDay,
+        dateRange: segment.dateRange,
+        records: []
+      };
     }
+
+    weekGroups[segment.weekKey].records.push(rec);
   });
-  
-  // Return only weeks with records
-  return weeks.filter(w => w.records.length > 0);
+
+  return Object.values(weekGroups)
+    .filter(group => group.records.length > 0)
+    .sort((a, b) => a.weekNum - b.weekNum);
 }
 
-// Parse date from DD/MM/YYYY or YYYY-MM-DD format
-function parseRecordDate(dateStr) {
-  if (!dateStr) return null;
-  if (dateStr.includes('/')) {
-    const parts = dateStr.split('/');
-    if (parts.length >= 3) {
-      return new Date(parseInt(parts[2]), parseInt(parts[1]) - 1, parseInt(parts[0]));
-    }
-  } else if (dateStr.includes('-')) {
-    return new Date(dateStr);
-  }
-  return null;
-}
-
-// Toggle week records in mobile view - uses startDay/endDay for stability
+// Toggle week records in mobile view - uses the same week key computation as groupRecordsByWeek
 function toggleMobileWeekDetails(empId, startDay, endDay) {
   const weekKey = `${startDay}-${endDay}`;
   const recordsDiv = document.getElementById(`week-records-${empId}-${weekKey}`);
   const chevron = document.getElementById(`week-chevron-${empId}-${weekKey}`);
   if (!recordsDiv) return;
-  
+
   if (recordsDiv.style.display === 'none') {
-    // Get current month/year from dashboard filters
+    // Get current month/year from dashboard filters (with instructor fallback, same as group source)
     const now = new Date();
-    const dashboardMonth = document.getElementById('dashboardMonth');
-    const dashboardYear = document.getElementById('dashboardYear');
+    const dashboardMonth = document.getElementById('dashboardMonth') || document.getElementById('instructorMonth');
+    const dashboardYear = document.getElementById('dashboardYear') || document.getElementById('instructorYear');
     const currentMonth = dashboardMonth ? parseInt(dashboardMonth.value) - 1 : now.getMonth();
     const currentYear = dashboardYear ? parseInt(dashboardYear.value) : now.getFullYear();
-    
+
     // Get records for this employee
     const allRecords = adminEmployeeRecordsCache[empId] || [];
-    
-    // Filter records for this specific week by day range
+
+    // Filter records for this specific week using identical key computation
     const weekRecords = allRecords.filter(rec => {
       const recDate = parseRecordDate(rec.attendanceDate || rec.date);
-      if (!recDate) return false;
-      if (recDate.getMonth() !== currentMonth || recDate.getFullYear() !== currentYear) return false;
-      const day = recDate.getDate();
-      return day >= startDay && day <= endDay;
+      const segment = getWeekSegmentForMonthDate(recDate, currentMonth, currentYear);
+      return !!segment && segment.weekKey === weekKey;
     });
-    
+
     if (weekRecords.length === 0) {
       recordsDiv.innerHTML = '<p style="color: #64748b; text-align: center; padding: 10px;">אין רשומות</p>';
     } else {
@@ -9327,7 +9301,7 @@ function toggleMobileWeekDetails(empId, startDay, endDay) {
         const dateB = parseRecordDate(b.attendanceDate || b.date);
         return (dateA || 0) - (dateB || 0);
       });
-      
+
       recordsDiv.innerHTML = weekRecords.map(rec => {
         const date = formatDateHebrew(rec.attendanceDate || rec.date);
         const recId = rec.ID || rec.id || '';
@@ -9337,7 +9311,7 @@ function toggleMobileWeekDetails(empId, startDay, endDay) {
         const isApproved = statusInfo.isChecked;
         const hours = parseFloat(rec.workHours || rec.hours || 0).toFixed(1);
         const km = parseFloat(rec.kilometers || rec.km || 0).toFixed(0);
-        
+
         return `<div style="padding: 10px 0; border-bottom: 1px dashed #e2e8f0;">
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
             <strong style="font-size: 13px;">${date}</strong>
@@ -9348,12 +9322,12 @@ function toggleMobileWeekDetails(empId, startDay, endDay) {
           </div>
           <div style="display: flex; gap: 8px;">
             ${!isApproved ? `<button onclick="event.stopPropagation(); editRecordFromAdmin('${recId}')" style="flex: 1; background: #3b82f6; color: white; border: none; padding: 6px 10px; border-radius: 6px; cursor: pointer; font-size: 12px;"><i class="fas fa-edit"></i> עריכה</button>` : ''}
-            ${!isApproved ? (canApprove ? `<button onclick="event.stopPropagation(); approveRecordFromAdmin('${recId}')" data-approve-record="${recId}" style="flex: 1; background: #22c55e; color: white; border: none; padding: 6px 10px; border-radius: 6px; cursor: pointer; font-size: 12px;"><i class="fas fa-check"></i> אישור בדיקה</button>` : '<span style="color: #94a3b8; font-size: 12px;">טיוטה</span>') : '<span style="color: #22c55e; font-size: 12px;"><i class="fas fa-check-circle"></i> נבדק</span>'}
+            ${!isApproved ? ((getCurrentUserData() && getCurrentUserData().role === 'manager') ? `<button onclick="event.stopPropagation(); approveRecordFromAdmin('${recId}')" data-approve-record="${recId}" style="flex: 1; background: #22c55e; color: white; border: none; padding: 6px 10px; border-radius: 6px; cursor: pointer; font-size: 12px;"><i class="fas fa-check"></i> אישור בדיקה</button>` : '<span style="color: #94a3b8; font-size: 12px;">טיוטה</span>') : '<span style="color: #22c55e; font-size: 12px;"><i class="fas fa-check-circle"></i> נבדק</span>'}
           </div>
         </div>`;
       }).join('');
     }
-    
+
     recordsDiv.style.display = 'block';
     if (chevron) chevron.style.transform = 'rotate(180deg)';
   } else {
@@ -9727,7 +9701,7 @@ function toggleAdminEmployeeDetails(empId) {
                   <td style="padding: 8px; text-align: center;"><span style="background: ${statusColor}; color: white; padding: 2px 8px; border-radius: 10px; font-size: 11px;">${status}</span></td>
                   <td style="padding: 8px; text-align: center; white-space: nowrap;">
                     ${!isApproved ? `<button onclick="event.stopPropagation(); editRecordFromAdmin('${recId}')" style="background: #3b82f6; color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; margin-left: 4px;" title="עריכה"><i class="fas fa-edit"></i></button>` : ''}
-                    ${!isApproved ? (canApprove ? `<button onclick="event.stopPropagation(); approveRecordFromAdmin('${recId}')" data-approve-record="${recId}" style="background: #22c55e; color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer;" title="אישור בדיקה"><i class="fas fa-check"></i></button>` : '<span style="color: #94a3b8;">טיוטה</span>') : '<span style="color: #22c55e;"><i class="fas fa-check-circle"></i></span>'}
+                    ${!isApproved ? ((getCurrentUserData() && getCurrentUserData().role === 'manager') ? `<button onclick="event.stopPropagation(); approveRecordFromAdmin('${recId}')" data-approve-record="${recId}" style="background: #22c55e; color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer;" title="אישור בדיקה"><i class="fas fa-check"></i></button>` : '<span style="color: #94a3b8;">טיוטה</span>') : '<span style="color: #22c55e;"><i class="fas fa-check-circle"></i></span>'}
                   </td>
                 </tr>
               `;}).join('')}
