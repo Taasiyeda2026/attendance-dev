@@ -5930,6 +5930,8 @@ async function loadTeamRecords(resetFilters = false) {
   const selectedMonth = monthSelect ? parseInt(monthSelect.value) : now.getMonth() + 1;
   const selectedYear = yearSelect ? parseInt(yearSelect.value) : now.getFullYear();
 
+  const normalizeTeamValue = (teamValue) => extractLookupValue(teamValue, '').trim().toLowerCase();
+
   // Get selected team filter value
   const selectedTeamFilter = teamFilterSelect ? teamFilterSelect.value : 'all';
 
@@ -5971,15 +5973,17 @@ async function loadTeamRecords(resetFilters = false) {
       // Manager always sees only their own team
       if (user.role === 'manager' && user.team) {
         filteredRecords = data.records.filter(rec => {
-          const recTeam = (rec.team || rec.Team || '').trim().toLowerCase();
-          return recTeam === (user.team || '').trim().toLowerCase();
+          const recTeam = normalizeTeamValue(rec.team || rec.Team);
+          const managerTeam = normalizeTeamValue(user.team);
+          return recTeam === managerTeam;
         });
       }
       // Admin/operations_controller can filter by selected team
       else if (selectedTeamFilter !== 'all' && (user.role === 'system_admin' || user.role === 'operations_controller')) {
         filteredRecords = data.records.filter(rec => {
-          const recTeam = (rec.team || rec.Team || '').trim().toLowerCase();
-          return recTeam === selectedTeamFilter.trim().toLowerCase();
+          const recTeam = normalizeTeamValue(rec.team || rec.Team);
+          const normalizedSelectedTeam = normalizeTeamValue(selectedTeamFilter);
+          return recTeam === normalizedSelectedTeam;
         });
       }
       
