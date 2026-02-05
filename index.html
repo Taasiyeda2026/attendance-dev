@@ -9045,7 +9045,7 @@ async function updateAdminDashboard() {
     const employeeData = {};
     
     currentMonthRecords.forEach(rec => {
-      const empId = rec.employeeId || 'unknown';
+      const empId = getRecordEmployeeId(rec) || 'unknown';
       const empName = extractValue(rec.employeeName) || extractValue(rec.EmployeeName) || 'לא ידוע';
       
       // Try to get employmentType and team from employees list first
