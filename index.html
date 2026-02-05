@@ -4010,8 +4010,8 @@ function normalizeRecordStatus(statusRaw) {
   if (['נעול', 'locked'].includes(normalized)) {
     return { label: 'נעול', isChecked: false, isLocked: true };
   }
-  if (['נבדק', 'checked', 'approved', 'אושר'].includes(normalized)) {
-    return { label: 'נבדק', isChecked: true, isLocked: false };
+  if (normalized === 'approved') {
+    return { label: 'מאושר', isChecked: true, isLocked: false };
   }
   if (['טיוטה', 'draft', 'ממתין', 'pending', 'נשלח', 'submitted', ''].includes(normalized)) {
     return { label: 'טיוטה', isChecked: false, isLocked: false };
@@ -4429,6 +4429,10 @@ function canEditRecord(record) {
       return false;
     }
 
+    if (isRecordChecked(record.status)) {
+      return false;
+    }
+
     return true;
   }
 
@@ -4466,6 +4470,10 @@ function getEditBlockReason(record) {
 
     if (String(recordEmpNum) !== String(userEmpNum)) {
       return 'ניתן לערוך רק רשומות שלך';
+    }
+
+    if (isRecordChecked(record.status)) {
+      return 'לא ניתן לערוך רשומה מאושרת';
     }
 
     return null;
@@ -9392,7 +9400,7 @@ function toggleMobileWeekDetails(empId, startDay, endDay) {
           </div>
           <div style="display: flex; gap: 8px;">
             ${!isApproved ? `<button onclick="event.stopPropagation(); editRecordFromAdmin('${recId}')" style="flex: 1; background: #3b82f6; color: white; border: none; padding: 6px 10px; border-radius: 6px; cursor: pointer; font-size: 12px;"><i class="fas fa-edit"></i> עריכה</button>` : ''}
-            ${!isApproved ? ((getCurrentUserData() && ['manager', 'operations_controller'].includes(getCurrentUserData().role)) ? `<button onclick="event.stopPropagation(); approveRecordFromAdmin('${recId}')" data-approve-record="${recId}" style="flex: 1; background: #22c55e; color: white; border: none; padding: 6px 10px; border-radius: 6px; cursor: pointer; font-size: 12px;"><i class="fas fa-check"></i> אישור בדיקה</button>` : '<span style="color: #94a3b8; font-size: 12px;">טיוטה</span>') : '<span style="color: #22c55e; font-size: 12px;"><i class="fas fa-check-circle"></i> נבדק</span>'}
+            ${!isApproved ? ((getCurrentUserData() && ['manager', 'operations_controller'].includes(getCurrentUserData().role)) ? `<button onclick="event.stopPropagation(); approveRecordFromAdmin('${recId}')" data-approve-record="${recId}" style="flex: 1; background: #22c55e; color: white; border: none; padding: 6px 10px; border-radius: 6px; cursor: pointer; font-size: 12px;"><i class="fas fa-check"></i> אישור בדיקה</button>` : '<span style="color: #94a3b8; font-size: 12px;">טיוטה</span>') : '<span style="color: #22c55e; font-size: 12px;"><i class="fas fa-check-circle"></i> מאושר</span>'}
           </div>
         </div>`;
       }).join('');
@@ -9646,8 +9654,8 @@ async function approveRecordFromAdmin(recordId) {
       }
     }
 
-    await updateAdminDashboard();
-    showAlert('הרשומה סומנה כנבדקה!', 'success');
+    await loadTeamRecords(false, { backgroundRefresh: true });
+    showAlert('הרשומה אושרה בהצלחה!', 'success');
     console.log('Record approved successfully on server');
   } catch (error) {
     console.error('Error approving record on server:', error);
@@ -9682,7 +9690,7 @@ function updateApprovalButtonInDOM(recordId, isApproved, saveOriginal = true) {
       }
       
       if (isApproved) {
-        cell.innerHTML = '<span style="color: #22c55e; font-weight: 600;"><i class="fas fa-check-circle"></i> נבדק</span>';
+        cell.innerHTML = '<span style="color: #22c55e; font-weight: 600;"><i class="fas fa-check-circle"></i> מאושר</span>';
       } else {
         // Restore from saved HTML or recreate button
         if (approvalOriginalHTML[strId]) {
@@ -9701,7 +9709,7 @@ function updateApprovalButtonInDOM(recordId, isApproved, saveOriginal = true) {
     if (isApproved) {
       statusBadge.style.background = '#dcfce7';
       statusBadge.style.color = '#166534';
-      statusBadge.innerHTML = '<i class="fas fa-check-circle"></i> נבדק';
+      statusBadge.innerHTML = '<i class="fas fa-check-circle"></i> מאושר';
     } else {
       statusBadge.style.background = '#fef3c7';
       statusBadge.style.color = '#92400e';
