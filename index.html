@@ -8999,7 +8999,8 @@ async function updateAdminDashboard() {
     const data = await apiRequest('getsummary', {});
     
     if (!data.success || !Array.isArray(data.records)) {
-      tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; padding: 40px; color: #64748b;">אין נתונים להצגה</td></tr>';
+      if (tbody) tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; padding: 40px; color: #64748b;">אין נתונים להצגה</td></tr>';
+      if (mobileContainer) mobileContainer.innerHTML = '<p style="text-align: center; color: #64748b; padding: 40px;">אין נתונים להצגה</p>';
       return;
     }
     
@@ -9020,7 +9021,7 @@ async function updateAdminDashboard() {
     
     const currentMonthRecords = data.records.filter(rec => {
       if (!rec.attendanceDate) return false;
-      const dateStr = rec.attendanceDate;
+      const dateStr = rec.attendanceDate || rec.AttendanceDate || rec.date || '';
       let recMonth, recYear;
       if (dateStr.includes('/')) {
         const parts = dateStr.split('/');
