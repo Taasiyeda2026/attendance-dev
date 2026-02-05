@@ -9636,6 +9636,7 @@ async function approveRecordFromAdmin(recordId) {
     applyRecordUpdateToCaches(recordId, approvalData);
     await refreshApprovedRecordInBackground(recordId, record.employeeId || record.empNum, approvalData);
 
+    await loadTeamRecords(false, { backgroundRefresh: true });
     showAlert('הרשומה אושרה בהצלחה!', 'success');
     console.log('Record approved successfully on server');
   } catch (error) {
