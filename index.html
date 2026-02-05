@@ -6162,7 +6162,6 @@ async function renderTeamTable(recordsList) {
     return;
   }
 
-  const user = getCurrentUserData();
   const canRelease = user && ['manager', 'operations_controller', 'system_admin'].includes(user.role);
   
   const tableHTML = `
