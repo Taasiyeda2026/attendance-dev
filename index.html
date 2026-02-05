@@ -4419,17 +4419,13 @@ function canEditRecord(record) {
     return !recordTeam || recordTeam.trim().toLowerCase() === (user.team || '').trim().toLowerCase();
   }
 
-  // instructor can edit only their own records that were not manager-approved
+  // instructor can edit only their own records
   if (role === 'instructor') {
     const recordEmpNum = record.empNum || record.employeeId;
     const userEmpNum = user.empNum || localStorage.getItem('employeeId');
 
     // Must be own record
     if (String(recordEmpNum) !== String(userEmpNum)) {
-      return false;
-    }
-
-    if (isRecordChecked(record.status)) {
       return false;
     }
 
@@ -4470,10 +4466,6 @@ function getEditBlockReason(record) {
 
     if (String(recordEmpNum) !== String(userEmpNum)) {
       return 'ניתן לערוך רק רשומות שלך';
-    }
-
-    if (isRecordChecked(record.status)) {
-      return 'הרשומה אושרה ואינה ניתנת לעריכה';
     }
 
     return null;
@@ -8940,42 +8932,10 @@ async function exportApprovalStatusOnly() {
 let adminEmployeeRecordsCache = {}; // Cache for expanded employee records
 let adminDashboardRecordsCache = []; // Cache for export data
 
-
-function normalizeEmployeeIdValue(value) {
-  if (value === null || value === undefined) return '';
-  if (typeof value === 'object') {
-    if (value.Value !== undefined) return String(value.Value).trim();
-    if (value.LookupId !== undefined) return String(value.LookupId).trim();
-    if (value.Id !== undefined) return String(value.Id).trim();
-    if (value.id !== undefined) return String(value.id).trim();
-  }
-  return String(value).trim();
-}
-
-function getRecordEmployeeId(record) {
-  if (!record) return '';
-  return normalizeEmployeeIdValue(record.employeeId || record.EmployeeId || record.empNum || record.EmpNum || '');
-}
-
 function getEmployeeRecordsFromTeamState(empId) {
-  const targetId = normalizeEmployeeIdValue(empId);
-  if (!targetId) return [];
-
-  if (Array.isArray(teamRecordsCache)) {
-    const teamMatches = teamRecordsCache.filter(rec => getRecordEmployeeId(rec) === targetId);
-    if (teamMatches.length) return teamMatches;
-  }
-
-  const adminCachedEntry = Object.entries(adminEmployeeRecordsCache || {}).find(([key]) => normalizeEmployeeIdValue(key) === targetId);
-  if (adminCachedEntry && Array.isArray(adminCachedEntry[1]) && adminCachedEntry[1].length) {
-    return adminCachedEntry[1];
-  }
-
-  if (Array.isArray(adminDashboardRecordsCache) && adminDashboardRecordsCache.length) {
-    return adminDashboardRecordsCache.filter(rec => getRecordEmployeeId(rec) === targetId);
-  }
-
-  return [];
+  const targetId = String(empId || '').trim();
+  if (!targetId || !Array.isArray(teamRecordsCache)) return [];
+  return teamRecordsCache.filter(rec => String(rec.employeeId || rec.empNum || rec.EmployeeId || '').trim() === targetId);
 }
 
 function loadAdminDashboard() {
@@ -9649,22 +9609,8 @@ async function approveRecordFromAdmin(recordId) {
       }
     }
 
-    await loadTeamRecords(false, { backgroundRefresh: true });
-
-    const refreshedEmpId = String(empIdForCache || record.employeeId || record.empNum || record.EmployeeId || '').trim();
-    if (refreshedEmpId) {
-      const adminDetailsRow = document.getElementById(`admin-details-${refreshedEmpId}`);
-      if (adminDetailsRow && adminDetailsRow.style.display !== 'none') {
-        toggleAdminEmployeeDetails(refreshedEmpId);
-        toggleAdminEmployeeDetails(refreshedEmpId);
-      }
-      const mobileDetails = document.getElementById(`mobile-details-${refreshedEmpId}`);
-      if (mobileDetails && mobileDetails.style.display !== 'none') {
-        toggleMobileAdminDetails(refreshedEmpId);
-        toggleMobileAdminDetails(refreshedEmpId);
-      }
-    }
-
+    await loadTeamRecords();
+    updateAdminDashboard();
     showAlert('הרשומה סומנה כנבדקה!', 'success');
     console.log('Record approved successfully on server');
   } catch (error) {
