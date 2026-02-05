@@ -8934,8 +8934,35 @@ let adminDashboardRecordsCache = []; // Cache for export data
 
 function getEmployeeRecordsFromTeamState(empId) {
   const targetId = String(empId || '').trim();
-  if (!targetId || !Array.isArray(teamRecordsCache)) return [];
+  if (!targetId) return [];
+
+  if (adminEmployeeRecordsCache && Array.isArray(adminEmployeeRecordsCache[targetId])) {
+    return adminEmployeeRecordsCache[targetId];
+  }
+
+  if (!Array.isArray(teamRecordsCache)) return [];
   return teamRecordsCache.filter(rec => String(rec.employeeId || rec.empNum || rec.EmployeeId || '').trim() === targetId);
+}
+
+function resolveRecordEmployeeId(record) {
+  if (!record || typeof record !== 'object') return '';
+
+  const candidateValues = [
+    record.employeeId,
+    record.empNum,
+    record.EmployeeId,
+    record.employeeNumber,
+    record.EmployeeNumber,
+    record.userId,
+    record.UserId
+  ];
+
+  for (const candidate of candidateValues) {
+    const normalized = String(candidate || '').trim();
+    if (normalized) return normalized;
+  }
+
+  return '';
 }
 
 function loadAdminDashboard() {
@@ -9020,23 +9047,30 @@ async function updateAdminDashboard() {
     console.log('Filter for month:', currentMonth + 1, 'year:', currentYear);
     
     const currentMonthRecords = data.records.filter(rec => {
-      if (!rec.attendanceDate) return false;
-      const dateStr = rec.attendanceDate || rec.AttendanceDate || rec.date || '';
-      let recMonth, recYear;
+      if (!rec || typeof rec !== 'object') return false;
+
+      const dateStr = String(rec.attendanceDate || rec.AttendanceDate || rec.date || rec.Date || '').trim();
+      if (!dateStr) return false;
+
+      let recMonth;
+      let recYear;
+
       if (dateStr.includes('/')) {
         const parts = dateStr.split('/');
         if (parts.length < 3) return false;
-        recMonth = parseInt(parts[1]) - 1;
-        recYear = parseInt(parts[2]);
+        recMonth = parseInt(parts[1], 10) - 1;
+        recYear = parseInt(parts[2], 10);
       } else if (dateStr.includes('-')) {
         const parts = dateStr.split('-');
         if (parts.length < 3) return false;
-        recYear = parseInt(parts[0]);
-        recMonth = parseInt(parts[1]) - 1;
+        recYear = parseInt(parts[0], 10);
+        recMonth = parseInt(parts[1], 10) - 1;
       } else {
         console.log('Unknown date format:', dateStr);
         return false;
       }
+
+      if (Number.isNaN(recMonth) || Number.isNaN(recYear)) return false;
       return recMonth === currentMonth && recYear === currentYear;
     });
     
@@ -9046,7 +9080,9 @@ async function updateAdminDashboard() {
     const employeeData = {};
     
     currentMonthRecords.forEach(rec => {
-      const empId = getRecordEmployeeId(rec) || 'unknown';
+      if (!rec || typeof rec !== 'object') return;
+
+      const empId = resolveRecordEmployeeId(rec) || 'unknown';
       const empName = extractValue(rec.employeeName) || extractValue(rec.EmployeeName) || 'לא ידוע';
       
       // Try to get employmentType and team from employees list first
@@ -9610,8 +9646,7 @@ async function approveRecordFromAdmin(recordId) {
       }
     }
 
-    await loadTeamRecords();
-    updateAdminDashboard();
+    await updateAdminDashboard();
     showAlert('הרשומה סומנה כנבדקה!', 'success');
     console.log('Record approved successfully on server');
   } catch (error) {
