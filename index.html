@@ -3806,7 +3806,7 @@ function normalizePayload(action, data) {
         
         // Notes & Attachments
         notes: String(data.notes || ''),
-        status: String(data.status || 'ממתין'),
+        status: String(data.status || 'pending'),
         ...(data.attachmentsNames ? { attachmentsNames: data.attachmentsNames } : {})
       });
       
@@ -3851,10 +3851,14 @@ function normalizePayload(action, data) {
         totalExpenses: Number(data.totalExpenses || 0),
         expensesDetails: String(data.expensesDetails || ''),
         notes: String(data.notes || ''),
-        status: data.status || 'ממתין',
-        approvedBy: String(data.approvedBy || ''),
-        approvedDate: String(data.approvedDate || ''),
         attachmentsNames: String(data.attachmentsNames || '')
+      });
+
+    case 'approverecord':
+      return cleanPayload({
+        action: 'approverecord',
+        recordId: String(data.recordId || ''),
+        approvedBy: String(data.approvedBy || '')
       });
       
     case 'deleterecord':
@@ -9593,50 +9597,35 @@ async function approveRecordFromAdmin(recordId) {
     return;
   }
   
-  // Prepare approval payload (no optimistic UI)
-  const approvalData = {
-    status: 'approved',
-    approvedBy: user.empName || user.empNum,
-    approvedDate: new Date().toISOString().slice(0, 10)
-  };
-  
-  // Send to API in background
+  // Send approval request to dedicated API action
   try {
     const payload = {
-      action: 'updaterecord',
+      action: 'approverecord',
       recordId: String(recordId),
-      employeeId: String(record.employeeId || record.empNum || ''),
-      employeeName: String(record.employeeName || record.empName || ''),
-      team: String(record.team || ''),
-      employmentType: normalizeEmploymentType(record, ''),
-      attendanceDate: record.attendanceDate || record.date,
-      startTime: record.startTime || record.start,
-      endTime: record.endTime || record.end,
-      workHours: Number(record.workHours || record.hours) || 0,
-      activityType: String(record.activityType || record.activity || ''),
-      schoolName: String(record.schoolName || record.school || ''),
-      municipality: String(record.municipality || ''),
-      programName: String(record.programName || record.program || ''),
-      sessionNumber: Number(record.sessionNumber || record.session) || 0,
-      kilometers: Number(record.kilometers || record.km) || 0,
-      totalExpenses: Number(record.totalExpenses) || 0,
-      expensesDetails: String(record.expensesDetails || record.expensesDetail || ''),
-      notes: String(record.notes || ''),
-      attachmentsNames: String(record.attachmentsNames || ''),
-      ...approvalData
+      approvedBy: String(user.role || '')
     };
-    
-    const data = await apiRequest('updaterecord', payload);
-    
-    if (!data.success) {
+
+    const data = await apiRequest('approverecord', payload);
+
+    if (!data.success || !data.record) {
       throw new Error(data.message || 'Failed to approve record');
     }
+    if (String(data.record.status || '') !== 'approved') {
+      throw new Error('Approval response missing canonical approved status');
+    }
+
+    const approvalData = {
+      status: String(data.record.status || ''),
+      approvedBy: String(data.record.approvedBy || ''),
+      approvedDate: String(data.record.approvedDate || ''),
+      ID: String(data.record.ID || recordId)
+    };
+
     // Update only the relevant record in local cache and DOM
     Object.assign(record, approvalData);
     applyRecordUpdateToCaches(recordId, approvalData);
-    await refreshApprovedRecordInBackground(recordId, record.employeeId || record.empNum, approvalData);
+    updateApprovalButtonInDOM(recordId, approvalData.status === 'approved', false);
 
-    await loadTeamRecords(false, { backgroundRefresh: true });
     showAlert('הרשומה אושרה בהצלחה!', 'success');
     console.log('Record approved successfully on server');
   } catch (error) {

@@ -9,36 +9,97 @@
         "inputs": {
           "schema": {
             "type": "object",
+            "required": [
+              "action"
+            ],
             "properties": {
-              "action": { "type": "string" },
-              "employeeId": { "type": "string" },
-              "employeeName": { "type": "string" },
-              "personalCode": { "type": "string" },
-              "recordId": { "type": "string" },
-              "attendanceDate": { "type": "string" },
-              "startTime": { "type": "string" },
-              "endTime": { "type": "string" },
-              "workHours": { "type": "number" },
-              "activityType": { "type": "string" },
-              "schoolName": { "type": "string" },
-              "municipality": { "type": "string" },
-              "programName": { "type": "string" },
-              "kilometers": { "type": "number" },
-              "sessionNumber": { "type": "number" },
-              "totalExpenses": { "type": "number" },
-              "expensesDetails": { "type": "string" },
-              "notes": { "type": "string" },
-              "status": { "type": "string" },
-              "team": { "type": "string" },
-              "employmentType": { "type": "string" },
-              "monthKey": { "type": "string" },
-              "month": { "type": "string" },
-              "mode": { "type": "string" },
-              "approvedBy": { "type": "string" },
-              "approvedDate": { "type": "string" },
-              "attachmentsNames": { "type": "string" },
-              "fileName": { "type": "string" },
-              "fileContent": { "type": "string" }
+              "action": {
+                "type": "string"
+              },
+              "employeeId": {
+                "type": "string"
+              },
+              "employeeName": {
+                "type": "string"
+              },
+              "personalCode": {
+                "type": "string"
+              },
+              "recordId": {
+                "type": "string"
+              },
+              "attendanceDate": {
+                "type": "string"
+              },
+              "startTime": {
+                "type": "string"
+              },
+              "endTime": {
+                "type": "string"
+              },
+              "workHours": {
+                "type": "number"
+              },
+              "activityType": {
+                "type": "string"
+              },
+              "schoolName": {
+                "type": "string"
+              },
+              "municipality": {
+                "type": "string"
+              },
+              "programName": {
+                "type": "string"
+              },
+              "kilometers": {
+                "type": "number"
+              },
+              "sessionNumber": {
+                "type": "number"
+              },
+              "totalExpenses": {
+                "type": "number"
+              },
+              "expensesDetails": {
+                "type": "string"
+              },
+              "notes": {
+                "type": "string"
+              },
+              "status": {
+                "type": "string"
+              },
+              "team": {
+                "type": "string"
+              },
+              "employmentType": {
+                "type": "string"
+              },
+              "monthKey": {
+                "type": "string"
+              },
+              "month": {
+                "type": "string"
+              },
+              "mode": {
+                "type": "string"
+              },
+              "approvedBy": {
+                "type": "string"
+              },
+              "approvedDate": {
+                "type": "string"
+              },
+              "attachmentsNames": {
+                "type": "string"
+              },
+              "fileName": {
+                "type": "string"
+              },
+              "fileContent": {
+                "type": "string"
+              }
             }
           }
         }
@@ -52,43 +113,106 @@
           "content": "@triggerBody()",
           "schema": {
             "type": "object",
+            "required": [
+              "action"
+            ],
             "properties": {
-              "action": { "type": "string" },
-              "employeeId": { "type": "string" },
-              "personalCode": { "type": "string" },
-              "recordId": { "type": "string" },
-              "attendanceDate": { "type": "string" },
-              "startTime": { "type": "string" },
-              "endTime": { "type": "string" },
-              "workHours": { "type": "number" },
-              "activityType": { "type": "string" },
-              "schoolName": { "type": "string" },
-              "municipality": { "type": "string" },
-              "programName": { "type": "string" },
-              "kilometers": { "type": "number" },
-              "sessionNumber": { "type": "number" },
-              "totalExpenses": { "type": "number" },
-              "expensesDetails": { "type": "string" },
-              "notes": { "type": "string" },
-              "status": { "type": "string" },
-              "team": { "type": "string" },
-              "employmentType": { "type": "string" },
-              "employeeName": { "type": "string" },
-              "monthKey": { "type": "string" },
-              "month": { "type": "string" },
-              "mode": { "type": "string" },
-              "approvedBy": { "type": "string" },
-              "approvedDate": { "type": "string" },
-              "attachmentsNames": { "type": "string" },
-              "fileName": { "type": "string" },
-              "fileContent": { "type": "string" }
+              "action": {
+                "type": "string"
+              },
+              "employeeId": {
+                "type": "string"
+              },
+              "personalCode": {
+                "type": "string"
+              },
+              "recordId": {
+                "type": "string"
+              },
+              "attendanceDate": {
+                "type": "string"
+              },
+              "startTime": {
+                "type": "string"
+              },
+              "endTime": {
+                "type": "string"
+              },
+              "workHours": {
+                "type": "number"
+              },
+              "activityType": {
+                "type": "string"
+              },
+              "schoolName": {
+                "type": "string"
+              },
+              "municipality": {
+                "type": "string"
+              },
+              "programName": {
+                "type": "string"
+              },
+              "kilometers": {
+                "type": "number"
+              },
+              "sessionNumber": {
+                "type": "number"
+              },
+              "totalExpenses": {
+                "type": "number"
+              },
+              "expensesDetails": {
+                "type": "string"
+              },
+              "notes": {
+                "type": "string"
+              },
+              "status": {
+                "type": "string"
+              },
+              "team": {
+                "type": "string"
+              },
+              "employmentType": {
+                "type": "string"
+              },
+              "employeeName": {
+                "type": "string"
+              },
+              "monthKey": {
+                "type": "string"
+              },
+              "month": {
+                "type": "string"
+              },
+              "mode": {
+                "type": "string"
+              },
+              "approvedBy": {
+                "type": "string"
+              },
+              "approvedDate": {
+                "type": "string"
+              },
+              "attachmentsNames": {
+                "type": "string"
+              },
+              "fileName": {
+                "type": "string"
+              },
+              "fileContent": {
+                "type": "string"
+              }
             }
           }
         }
       },
       "Initialize_CORS_Headers": {
         "runAfter": {
-          "Parse_Request_Body": ["Succeeded"]
+          "Parse_Request_Body": [
+            "Succeeded"
+          ]
         },
         "type": "InitializeVariable",
         "inputs": {
@@ -108,14 +232,18 @@
       },
       "Normalize_Action": {
         "runAfter": {
-          "Initialize_CORS_Headers": ["Succeeded"]
+          "Initialize_CORS_Headers": [
+            "Succeeded"
+          ]
         },
         "type": "Compose",
         "inputs": "@toLower(trim(coalesce(body('Parse_Request_Body')?['action'], '')))"
       },
       "Switch_Action": {
         "runAfter": {
-          "Normalize_Action": ["Succeeded"]
+          "Normalize_Action": [
+            "Succeeded"
+          ]
         },
         "cases": {
           "auth": {
@@ -151,7 +279,9 @@
                   }
                 },
                 "runAfter": {
-                  "Auth_Get_Employee": ["Succeeded"]
+                  "Auth_Get_Employee": [
+                    "Succeeded"
+                  ]
                 },
                 "else": {
                   "actions": {
@@ -188,7 +318,10 @@
               },
               "Auth_Response_Failed": {
                 "runAfter": {
-                  "Auth_Get_Employee": ["Failed", "TimedOut"]
+                  "Auth_Get_Employee": [
+                    "Failed",
+                    "TimedOut"
+                  ]
                 },
                 "type": "Response",
                 "inputs": {
@@ -232,7 +365,7 @@
                     "notes": "@triggerBody()?['notes']",
                     "team": "@triggerBody()?['team']",
                     "employmentType": "@triggerBody()?['employmentType']",
-                    "status": "@coalesce(triggerBody()?['status'], 'ממתין')",
+                    "status": "@coalesce(triggerBody()?['status'], 'pending')",
                     "attachmentsNames": "@triggerBody()?['attachmentsNames']"
                   },
                   "path": "/datasets/@{encodeURIComponent(encodeURIComponent('https://think365orgil.sharepoint.com/sites/taasiyeda2026'))}/tables/@{encodeURIComponent(encodeURIComponent('Attendance'))}/items"
@@ -240,7 +373,9 @@
               },
               "Submit_Response_Success": {
                 "runAfter": {
-                  "Submit_Create_Record": ["Succeeded"]
+                  "Submit_Create_Record": [
+                    "Succeeded"
+                  ]
                 },
                 "type": "Response",
                 "inputs": {
@@ -255,7 +390,10 @@
               },
               "Submit_Response_Failed": {
                 "runAfter": {
-                  "Submit_Create_Record": ["Failed", "TimedOut"]
+                  "Submit_Create_Record": [
+                    "Failed",
+                    "TimedOut"
+                  ]
                 },
                 "type": "Response",
                 "inputs": {
@@ -290,7 +428,9 @@
               },
               "Employee_Response": {
                 "runAfter": {
-                  "Employee_Get_Records": ["Succeeded"]
+                  "Employee_Get_Records": [
+                    "Succeeded"
+                  ]
                 },
                 "type": "Response",
                 "inputs": {
@@ -304,7 +444,10 @@
               },
               "Employee_Response_Failed": {
                 "runAfter": {
-                  "Employee_Get_Records": ["Failed", "TimedOut"]
+                  "Employee_Get_Records": [
+                    "Failed",
+                    "TimedOut"
+                  ]
                 },
                 "type": "Response",
                 "inputs": {
@@ -339,7 +482,9 @@
               },
               "Summary_Response": {
                 "runAfter": {
-                  "Summary_Get_Records": ["Succeeded"]
+                  "Summary_Get_Records": [
+                    "Succeeded"
+                  ]
                 },
                 "type": "Response",
                 "inputs": {
@@ -353,7 +498,10 @@
               },
               "Summary_Response_Failed": {
                 "runAfter": {
-                  "Summary_Get_Records": ["Failed", "TimedOut"]
+                  "Summary_Get_Records": [
+                    "Failed",
+                    "TimedOut"
+                  ]
                 },
                 "type": "Response",
                 "inputs": {
@@ -395,9 +543,6 @@
                     "kilometers": "@triggerBody()?['kilometers']",
                     "expensesDetails": "@triggerBody()?['expensesDetails']",
                     "notes": "@triggerBody()?['notes']",
-                    "status": "@triggerBody()?['status']",
-                    "approvedBy": "@triggerBody()?['approvedBy']",
-                    "approvedDate": "@triggerBody()?['approvedDate']",
                     "team": "@triggerBody()?['team']",
                     "employmentType": "@triggerBody()?['employmentType']",
                     "attachmentsNames": "@triggerBody()?['attachmentsNames']"
@@ -407,7 +552,9 @@
               },
               "Update_Response": {
                 "runAfter": {
-                  "Update_Record": ["Succeeded"]
+                  "Update_Record": [
+                    "Succeeded"
+                  ]
                 },
                 "type": "Response",
                 "inputs": {
@@ -421,7 +568,10 @@
               },
               "Update_Response_Failed": {
                 "runAfter": {
-                  "Update_Record": ["Failed", "TimedOut"]
+                  "Update_Record": [
+                    "Failed",
+                    "TimedOut"
+                  ]
                 },
                 "type": "Response",
                 "inputs": {
@@ -430,6 +580,96 @@
                   "body": {
                     "success": false,
                     "error": "שגיאה בעדכון רשומה"
+                  }
+                }
+              }
+            }
+          },
+          "approverecord": {
+            "case": "approverecord",
+            "actions": {
+              "Validate_Approve_RecordId": {
+                "type": "If",
+                "expression": "@not(empty(triggerBody()?['recordId']))",
+                "actions": {
+                  "Compose_Approved_Date": {
+                    "type": "Compose",
+                    "inputs": "@utcNow()"
+                  },
+                  "Approve_Record_Patch": {
+                    "runAfter": {
+                      "Compose_Approved_Date": [
+                        "Succeeded"
+                      ]
+                    },
+                    "type": "ApiConnection",
+                    "inputs": {
+                      "host": {
+                        "connection": {
+                          "name": "@parameters('$connections')['sharepointonline']['connectionId']"
+                        }
+                      },
+                      "method": "patch",
+                      "body": {
+                        "status": "approved",
+                        "approvedBy": "@coalesce(triggerBody()?['approvedBy'], 'manager')",
+                        "approvedDate": "@outputs('Compose_Approved_Date')"
+                      },
+                      "path": "/datasets/@{encodeURIComponent(encodeURIComponent('https://think365orgil.sharepoint.com/sites/taasiyeda2026'))}/tables/@{encodeURIComponent(encodeURIComponent('Attendance'))}/items/@{encodeURIComponent(triggerBody()?['recordId'])}"
+                    }
+                  },
+                  "Approve_Response": {
+                    "runAfter": {
+                      "Approve_Record_Patch": [
+                        "Succeeded"
+                      ]
+                    },
+                    "type": "Response",
+                    "inputs": {
+                      "statusCode": 200,
+                      "headers": "@variables('CORSHeaders')",
+                      "body": {
+                        "success": true,
+                        "record": {
+                          "ID": "@string(triggerBody()?['recordId'])",
+                          "status": "approved",
+                          "approvedBy": "@string(coalesce(triggerBody()?['approvedBy'], 'manager'))",
+                          "approvedDate": "@string(outputs('Compose_Approved_Date'))"
+                        }
+                      }
+                    }
+                  },
+                  "Approve_Response_Failed": {
+                    "runAfter": {
+                      "Approve_Record_Patch": [
+                        "Failed",
+                        "TimedOut"
+                      ]
+                    },
+                    "type": "Response",
+                    "inputs": {
+                      "statusCode": 500,
+                      "headers": "@variables('CORSHeaders')",
+                      "body": {
+                        "success": false,
+                        "error": "שגיאה באישור רשומה"
+                      }
+                    }
+                  }
+                },
+                "else": {
+                  "actions": {
+                    "Approve_Response_BadRequest": {
+                      "type": "Response",
+                      "inputs": {
+                        "statusCode": 400,
+                        "headers": "@variables('CORSHeaders')",
+                        "body": {
+                          "success": false,
+                          "error": "recordId חסר או לא תקין"
+                        }
+                      }
+                    }
                   }
                 }
               }
@@ -452,7 +692,9 @@
               },
               "Delete_Response": {
                 "runAfter": {
-                  "Delete_Record": ["Succeeded"]
+                  "Delete_Record": [
+                    "Succeeded"
+                  ]
                 },
                 "type": "Response",
                 "inputs": {
@@ -466,7 +708,10 @@
               },
               "Delete_Response_Failed": {
                 "runAfter": {
-                  "Delete_Record": ["Failed", "TimedOut"]
+                  "Delete_Record": [
+                    "Failed",
+                    "TimedOut"
+                  ]
                 },
                 "type": "Response",
                 "inputs": {
@@ -500,7 +745,9 @@
               },
               "Export_Response": {
                 "runAfter": {
-                  "Export_Get_All": ["Succeeded"]
+                  "Export_Get_All": [
+                    "Succeeded"
+                  ]
                 },
                 "type": "Response",
                 "inputs": {
@@ -514,7 +761,10 @@
               },
               "Export_Response_Failed": {
                 "runAfter": {
-                  "Export_Get_All": ["Failed", "TimedOut"]
+                  "Export_Get_All": [
+                    "Failed",
+                    "TimedOut"
+                  ]
                 },
                 "type": "Response",
                 "inputs": {
@@ -567,7 +817,9 @@
               },
               "GetApproval_Response": {
                 "runAfter": {
-                  "GetApproval_Query": ["Succeeded"]
+                  "GetApproval_Query": [
+                    "Succeeded"
+                  ]
                 },
                 "type": "Response",
                 "inputs": {
@@ -607,7 +859,9 @@
               },
               "SetInstructor_Response": {
                 "runAfter": {
-                  "Create_InstructorApproval": ["Succeeded"]
+                  "Create_InstructorApproval": [
+                    "Succeeded"
+                  ]
                 },
                 "type": "Response",
                 "inputs": {
@@ -662,13 +916,17 @@
                   }
                 },
                 "runAfter": {
-                  "CheckExisting_Manager": ["Succeeded"]
+                  "CheckExisting_Manager": [
+                    "Succeeded"
+                  ]
                 },
                 "type": "Foreach"
               },
               "SetManager_Response": {
                 "runAfter": {
-                  "ForEach_SetReleased": ["Succeeded"]
+                  "ForEach_SetReleased": [
+                    "Succeeded"
+                  ]
                 },
                 "type": "Response",
                 "inputs": {
@@ -705,7 +963,9 @@
               },
               "GetTeamApprovals_Response": {
                 "runAfter": {
-                  "GetTeamApprovals_Query": ["Succeeded"]
+                  "GetTeamApprovals_Query": [
+                    "Succeeded"
+                  ]
                 },
                 "type": "Response",
                 "inputs": {
@@ -742,7 +1002,9 @@
               },
               "Upload_Response": {
                 "runAfter": {
-                  "Create_File": ["Succeeded"]
+                  "Create_File": [
+                    "Succeeded"
+                  ]
                 },
                 "type": "Response",
                 "inputs": {
@@ -757,7 +1019,10 @@
               },
               "Upload_Response_Failed": {
                 "runAfter": {
-                  "Create_File": ["Failed", "TimedOut"]
+                  "Create_File": [
+                    "Failed",
+                    "TimedOut"
+                  ]
                 },
                 "type": "Response",
                 "inputs": {
