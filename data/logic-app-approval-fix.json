@@ -9,6 +9,7 @@
         "inputs": {
           "schema": {
             "type": "object",
+            "required": ["action", "recordId"],
             "properties": {
               "action": { "type": "string" },
               "employeeId": { "type": "string" },
@@ -395,9 +396,6 @@
                     "kilometers": "@triggerBody()?['kilometers']",
                     "expensesDetails": "@triggerBody()?['expensesDetails']",
                     "notes": "@triggerBody()?['notes']",
-                    "status": "@triggerBody()?['status']",
-                    "approvedBy": "@triggerBody()?['approvedBy']",
-                    "approvedDate": "@triggerBody()?['approvedDate']",
                     "team": "@triggerBody()?['team']",
                     "employmentType": "@triggerBody()?['employmentType']",
                     "attachmentsNames": "@triggerBody()?['attachmentsNames']"
@@ -430,6 +428,68 @@
                   "body": {
                     "success": false,
                     "error": "שגיאה בעדכון רשומה"
+                  }
+                }
+              }
+            }
+          },
+          "approverecord": {
+            "case": "approverecord",
+            "actions": {
+              "Compose_Approved_Date": {
+                "type": "Compose",
+                "inputs": "@utcNow()"
+              },
+              "Approve_Record_Patch": {
+                "runAfter": {
+                  "Compose_Approved_Date": ["Succeeded"]
+                },
+                "type": "ApiConnection",
+                "inputs": {
+                  "host": {
+                    "connection": {
+                      "name": "@parameters('$connections')['sharepointonline']['connectionId']"
+                    }
+                  },
+                  "method": "patch",
+                  "body": {
+                    "status": "approved",
+                    "approvedBy": "@coalesce(triggerBody()?['approvedBy'], 'manager')",
+                    "approvedDate": "@outputs('Compose_Approved_Date')"
+                  },
+                  "path": "/datasets/@{encodeURIComponent(encodeURIComponent('https://think365orgil.sharepoint.com/sites/taasiyeda2026'))}/tables/@{encodeURIComponent(encodeURIComponent('Attendance'))}/items/@{encodeURIComponent(triggerBody()?['recordId'])}"
+                }
+              },
+              "Approve_Response": {
+                "runAfter": {
+                  "Approve_Record_Patch": ["Succeeded"]
+                },
+                "type": "Response",
+                "inputs": {
+                  "statusCode": 200,
+                  "headers": "@variables('CORSHeaders')",
+                  "body": {
+                    "success": true,
+                    "record": {
+                      "ID": "@string(body('Approve_Record_Patch')?['ID'])",
+                      "status": "@string(body('Approve_Record_Patch')?['status'])",
+                      "approvedBy": "@string(body('Approve_Record_Patch')?['approvedBy'])",
+                      "approvedDate": "@string(body('Approve_Record_Patch')?['approvedDate'])"
+                    }
+                  }
+                }
+              },
+              "Approve_Response_Failed": {
+                "runAfter": {
+                  "Approve_Record_Patch": ["Failed", "TimedOut"]
+                },
+                "type": "Response",
+                "inputs": {
+                  "statusCode": 500,
+                  "headers": "@variables('CORSHeaders')",
+                  "body": {
+                    "success": false,
+                    "error": "שגיאה באישור רשומה"
                   }
                 }
               }
