@@ -6166,7 +6166,7 @@ async function renderTeamTable(recordsList) {
     return;
   }
 
-  const canRelease = user && ['manager', 'operations_controller', 'system_admin'].includes(user.role);
+  const canRelease = currentUser && ['manager', 'operations_controller', 'system_admin'].includes(currentUser.role);
   
   const tableHTML = `
     <div style="margin-bottom: 15px;">
