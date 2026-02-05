@@ -8920,6 +8920,12 @@ async function exportApprovalStatusOnly() {
 let adminEmployeeRecordsCache = {}; // Cache for expanded employee records
 let adminDashboardRecordsCache = []; // Cache for export data
 
+function getEmployeeRecordsFromTeamState(empId) {
+  const targetId = String(empId || '').trim();
+  if (!targetId || !Array.isArray(teamRecordsCache)) return [];
+  return teamRecordsCache.filter(rec => String(rec.employeeId || rec.empNum || rec.EmployeeId || '').trim() === targetId);
+}
+
 function loadAdminDashboard() {
   // Set default month/year if not already set
   const now = new Date();
@@ -9173,7 +9179,7 @@ function toggleMobileAdminDetails(empId) {
   if (!detailsDiv) return;
   
   if (detailsDiv.style.display === 'none') {
-    const records = adminEmployeeRecordsCache[empId] || [];
+    const records = getEmployeeRecordsFromTeamState(empId);
     if (records.length === 0) {
       detailsDiv.innerHTML = '<p style="color: #64748b; text-align: center;">אין רשומות</p>';
     } else {
@@ -9298,7 +9304,7 @@ function toggleMobileWeekDetails(empId, startDay, endDay) {
     const currentYear = dashboardYear ? parseInt(dashboardYear.value) : now.getFullYear();
 
     // Get records for this employee
-    const allRecords = adminEmployeeRecordsCache[empId] || [];
+    const allRecords = getEmployeeRecordsFromTeamState(empId);
 
     // Filter records for this specific week using identical key computation
     const weekRecords = allRecords.filter(rec => {
@@ -9671,9 +9677,9 @@ function toggleAdminEmployeeDetails(empId) {
     detailsRow.style.display = 'table-row';
     chevron.style.transform = 'rotate(-90deg)';
     
-    // Load details if not already loaded
-    if (!detailsContent.dataset.loaded) {
-      const records = adminEmployeeRecordsCache[empId] || [];
+    // Always render from latest team state
+    {
+      const records = getEmployeeRecordsFromTeamState(empId);
       
       if (records.length === 0) {
         detailsContent.innerHTML = '<p style="text-align: center; color: #64748b;">אין ימי עבודה</p>';
@@ -9729,7 +9735,6 @@ function toggleAdminEmployeeDetails(empId) {
           </table>
         `;
       }
-      detailsContent.dataset.loaded = 'true';
     }
   } else {
     // Collapse
