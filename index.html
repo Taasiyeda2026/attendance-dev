@@ -3806,7 +3806,7 @@ function normalizePayload(action, data) {
         
         // Notes & Attachments
         notes: String(data.notes || ''),
-        status: String(data.status || 'ממתין'),
+        status: String(data.status || 'pending'),
         ...(data.attachmentsNames ? { attachmentsNames: data.attachmentsNames } : {})
       });
       
