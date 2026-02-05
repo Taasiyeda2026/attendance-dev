@@ -6334,7 +6334,7 @@ function renderEmployeeDetailsModal(employeeId, employeeName, detailedRecords) {
   const title = document.getElementById('employeeDetailsTitle');
   const user = getCurrentUserData();
   const canEdit = user && ['manager', 'system_admin'].includes(user.role);
-  const canApprove = user && user.role === 'manager';
+  const canApprove = user && ['manager', 'operations_controller'].includes(user.role);
 
   title.textContent = employeeName ? `פירוט שעות - ${employeeName}` : 'פירוט שעות';
 
@@ -9070,7 +9070,7 @@ async function updateAdminDashboard() {
     
     // For managers - filter to their team only (case-insensitive)
     const currentUser = getCurrentUserData();
-    const canApprove = currentUser && currentUser.role === 'manager';
+    const canApprove = currentUser && ['manager', 'operations_controller'].includes(currentUser.role);
     if (currentUser && currentUser.role === 'manager' && currentUser.team) {
       const managerTeam = currentUser.team.trim().toLowerCase();
       console.log('Dashboard manager team filter:', currentUser.team, '- Total employees before filter:', filteredEmployees.length);
@@ -9337,7 +9337,7 @@ function toggleMobileWeekDetails(empId, startDay, endDay) {
           </div>
           <div style="display: flex; gap: 8px;">
             ${!isApproved ? `<button onclick="event.stopPropagation(); editRecordFromAdmin('${recId}')" style="flex: 1; background: #3b82f6; color: white; border: none; padding: 6px 10px; border-radius: 6px; cursor: pointer; font-size: 12px;"><i class="fas fa-edit"></i> עריכה</button>` : ''}
-            ${!isApproved ? ((getCurrentUserData() && getCurrentUserData().role === 'manager') ? `<button onclick="event.stopPropagation(); approveRecordFromAdmin('${recId}')" data-approve-record="${recId}" style="flex: 1; background: #22c55e; color: white; border: none; padding: 6px 10px; border-radius: 6px; cursor: pointer; font-size: 12px;"><i class="fas fa-check"></i> אישור בדיקה</button>` : '<span style="color: #94a3b8; font-size: 12px;">טיוטה</span>') : '<span style="color: #22c55e; font-size: 12px;"><i class="fas fa-check-circle"></i> נבדק</span>'}
+            ${!isApproved ? ((getCurrentUserData() && ['manager', 'operations_controller'].includes(getCurrentUserData().role)) ? `<button onclick="event.stopPropagation(); approveRecordFromAdmin('${recId}')" data-approve-record="${recId}" style="flex: 1; background: #22c55e; color: white; border: none; padding: 6px 10px; border-radius: 6px; cursor: pointer; font-size: 12px;"><i class="fas fa-check"></i> אישור בדיקה</button>` : '<span style="color: #94a3b8; font-size: 12px;">טיוטה</span>') : '<span style="color: #22c55e; font-size: 12px;"><i class="fas fa-check-circle"></i> נבדק</span>'}
           </div>
         </div>`;
       }).join('');
@@ -9493,7 +9493,7 @@ async function approveRecordFromAdmin(recordId) {
   }
   
   // Check permissions
-  if (!['manager'].includes(user.role)) {
+  if (!['manager', 'operations_controller'].includes(user.role)) {
     showAlert('אין הרשאה לאשר רשומות', 'error');
     return;
   }
@@ -9721,7 +9721,7 @@ function toggleAdminEmployeeDetails(empId) {
                   <td style="padding: 8px; text-align: center;"><span style="background: ${statusColor}; color: white; padding: 2px 8px; border-radius: 10px; font-size: 11px;">${status}</span></td>
                   <td style="padding: 8px; text-align: center; white-space: nowrap;">
                     ${!isApproved ? `<button onclick="event.stopPropagation(); editRecordFromAdmin('${recId}')" style="background: #3b82f6; color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; margin-left: 4px;" title="עריכה"><i class="fas fa-edit"></i></button>` : ''}
-                    ${!isApproved ? ((getCurrentUserData() && getCurrentUserData().role === 'manager') ? `<button onclick="event.stopPropagation(); approveRecordFromAdmin('${recId}')" data-approve-record="${recId}" style="background: #22c55e; color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer;" title="אישור בדיקה"><i class="fas fa-check"></i></button>` : '<span style="color: #94a3b8;">טיוטה</span>') : '<span style="color: #22c55e;"><i class="fas fa-check-circle"></i></span>'}
+                    ${!isApproved ? ((getCurrentUserData() && ['manager', 'operations_controller'].includes(getCurrentUserData().role)) ? `<button onclick="event.stopPropagation(); approveRecordFromAdmin('${recId}')" data-approve-record="${recId}" style="background: #22c55e; color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer;" title="אישור בדיקה"><i class="fas fa-check"></i></button>` : '<span style="color: #94a3b8;">טיוטה</span>') : '<span style="color: #22c55e;"><i class="fas fa-check-circle"></i></span>'}
                   </td>
                 </tr>
               `;}).join('')}
