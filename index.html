@@ -4409,11 +4409,7 @@ function canEditRecord(record) {
     if (!recordDateStr) return false;
 
     if (instructorApprovalInfo && instructorApprovalInfo.instructorApprovalDate) {
-      const recordDate = new Date(recordDateStr);
-      const recordMonthKey = `${recordDate.getFullYear()}-${String(recordDate.getMonth() + 1).padStart(2, '0')}`;
-      if (instructorApprovalInfo.monthKey === recordMonthKey) {
-        return false;
-      }
+      return false;
     }
 
     return true;
@@ -4454,13 +4450,8 @@ function getEditBlockReason(record) {
     const recordDateStr = record.date || record.attendanceDate;
     if (!recordDateStr) return 'תאריך רשומה לא תקין';
 
-    const recordDate = new Date(recordDateStr);
-    const recordMonthKey = `${recordDate.getFullYear()}-${String(recordDate.getMonth() + 1).padStart(2, '0')}`;
-
     if (instructorApprovalInfo && instructorApprovalInfo.instructorApprovalDate) {
-      if (instructorApprovalInfo.monthKey === recordMonthKey) {
-        return 'החודש נסגר על ידי העובד ואינו ניתן לעריכה';
-      }
+      return 'החודש נסגר על ידי העובד ואינו ניתן לעריכה';
     }
 
     return null;
