@@ -473,7 +473,7 @@
                     "success": true,
                     "record": {
                       "ID": "@string(body('Approve_Record_Patch')?['ID'])",
-                      "status": "approved",
+                      "status": "@string(body('Approve_Record_Patch')?['status'])",
                       "approvedBy": "@string(body('Approve_Record_Patch')?['approvedBy'])",
                       "approvedDate": "@string(body('Approve_Record_Patch')?['approvedDate'])"
                     }
