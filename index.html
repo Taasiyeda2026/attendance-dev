@@ -9602,7 +9602,7 @@ async function approveRecordFromAdmin(recordId) {
     const payload = {
       action: 'approverecord',
       recordId: String(recordId),
-      approvedBy: String(user.role || '')
+      approvedBy: String(user.empName || user.empNum || '')
     };
 
     const data = await apiRequest('approverecord', payload);
@@ -9610,13 +9610,10 @@ async function approveRecordFromAdmin(recordId) {
     if (!data.success || !data.record) {
       throw new Error(data.message || 'Failed to approve record');
     }
-    if (String(data.record.status || '') !== 'approved') {
-      throw new Error('Approval response missing canonical approved status');
-    }
 
     const approvalData = {
-      status: String(data.record.status || ''),
-      approvedBy: String(data.record.approvedBy || ''),
+      status: String(data.record.status || 'approved'),
+      approvedBy: String(data.record.approvedBy || payload.approvedBy),
       approvedDate: String(data.record.approvedDate || ''),
       ID: String(data.record.ID || recordId)
     };
@@ -9624,7 +9621,7 @@ async function approveRecordFromAdmin(recordId) {
     // Update only the relevant record in local cache and DOM
     Object.assign(record, approvalData);
     applyRecordUpdateToCaches(recordId, approvalData);
-    updateApprovalButtonInDOM(recordId, approvalData.status === 'approved', false);
+    updateApprovalButtonInDOM(recordId, isRecordChecked(approvalData.status), false);
 
     showAlert('הרשומה אושרה בהצלחה!', 'success');
     console.log('Record approved successfully on server');
