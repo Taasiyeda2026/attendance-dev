@@ -4005,17 +4005,24 @@ function normalizeRecordFromServer(rec) {
 
 function normalizeRecordStatus(statusRaw) {
   const normalized = String(statusRaw || '').trim().toLowerCase();
+  if (['נעול', 'locked'].includes(normalized)) {
+    return { label: 'נעול', isChecked: false, isLocked: true };
+  }
   if (['נבדק', 'checked', 'approved', 'אושר'].includes(normalized)) {
-    return { label: 'נבדק', isChecked: true };
+    return { label: 'נבדק', isChecked: true, isLocked: false };
   }
   if (['טיוטה', 'draft', 'ממתין', 'pending', 'נשלח', 'submitted', ''].includes(normalized)) {
-    return { label: 'טיוטה', isChecked: false };
+    return { label: 'טיוטה', isChecked: false, isLocked: false };
   }
-  return { label: 'טיוטה', isChecked: false };
+  return { label: 'טיוטה', isChecked: false, isLocked: false };
 }
 
 function isRecordChecked(statusRaw) {
   return normalizeRecordStatus(statusRaw).isChecked;
+}
+
+function isRecordLocked(statusRaw) {
+  return normalizeRecordStatus(statusRaw).isLocked;
 }
 
 function parseRecordDate(dateStr) {
@@ -4061,7 +4068,10 @@ async function apiRequest(action, data, retryCount = 0) {
       console.error('Payload:', JSON.stringify(sanitizedPayload, null, 2));
       console.error('Response:', response.status, response.statusText);
       console.error('Error data:', errorData);
-      throw new Error(errorData.message || `Server error: ${response.status}`);
+      const requestError = new Error(errorData.message || `Server error: ${response.status}`);
+      requestError.status = response.status;
+      requestError.action = action;
+      throw requestError;
     }
 
     return await response.json();
@@ -4083,6 +4093,12 @@ async function apiRequest(action, data, retryCount = 0) {
     }
     throw error;
   }
+}
+
+
+function isLockedMonthError(error) {
+  if (!error) return false;
+  return Number(error.status) === 403 || String(error.message || '').includes('403');
 }
 
 // =============== Users ===============
@@ -4373,6 +4389,12 @@ function canEditRecord(record) {
   if (!isRecordUpdateSupported()) {
     return false;
   }
+  if (!record) return false;
+
+  if (isRecordLocked(record.status)) {
+    return false;
+  }
+
   const user = getCurrentUserData();
   if (!user) return false;
   
@@ -4414,6 +4436,10 @@ function canEditRecord(record) {
 
 // Helper function to get detailed reason why editing is blocked
 function getEditBlockReason(record) {
+  if (record && isRecordLocked(record.status)) {
+    return 'החודש נעול – אין אפשרות לעריכה';
+  }
+
   const user = getCurrentUserData();
   if (!user) return 'משתמש לא מחובר';
 
@@ -4451,6 +4477,10 @@ function canDeleteRecord(record) {
     return false;
   }
   if (!record) return false;
+
+  if (isRecordLocked(record.status)) {
+    return false;
+  }
   
   const user = getCurrentUserData();
   if (!user) return false;
@@ -4467,11 +4497,8 @@ function canDeleteRecord(record) {
     return true;
   }
   
-  // Check if record has double approval (instructor + manager)
-  const hasDoubleApproval = record && isRecordChecked(record.status) && record.managerApproved;
-  
-  // After double approval, only admin can delete
-  if (hasDoubleApproval) {
+  // Approved records are locked for non-admin users
+  if (isRecordChecked(record.status)) {
     return false;
   }
   
@@ -4640,6 +4667,10 @@ async function updateRecordOnServer(updatedRecord, originalDate, originalStartTi
     }
   } catch (error) {
     console.error('Update record error:', error);
+    if (isLockedMonthError(error)) {
+      showAlert('החודש נעול – אין אפשרות לעריכה', 'error');
+      return false;
+    }
     showAlert('❌ שגיאה בעדכון רשומה: ' + (error.message || 'שגיאה לא ידועה'), 'error');
     return false;
   }
@@ -4672,6 +4703,10 @@ async function deleteRecordOnServer(record) {
     }
   } catch (error) {
     console.error('Delete record error:', error);
+    if (isLockedMonthError(error)) {
+      showAlert('החודש נעול – אין אפשרות לעריכה', 'error');
+      return false;
+    }
     showAlert('❌ שגיאה במחיקת רשומה: ' + (error.message || 'שגיאה לא ידועה'), 'error');
     return false;
   }
@@ -7511,6 +7546,10 @@ async function _addRecordInternal() {
     console.error('Endpoint:', isEditing ? 'updaterecord' : 'submit');
     console.error('Payload:', JSON.stringify(payload, null, 2));
     console.error('Error:', error.message || error);
+    if (isEditing && isLockedMonthError(error)) {
+      showAlert('החודש נעול – אין אפשרות לעריכה', 'error');
+      return;
+    }
     showAlert('❌ ' + (error.message || 'שגיאה בשליחה לשרת'), 'error');
   }
 }
@@ -9488,7 +9527,7 @@ async function approveRecordFromAdmin(recordId) {
   
   // Prepare approval payload (no optimistic UI)
   const approvalData = {
-    status: 'נבדק',
+    status: 'approved',
     approvedBy: user.empName || user.empNum,
     approvedDate: new Date().toISOString()
   };
@@ -9542,11 +9581,16 @@ async function approveRecordFromAdmin(recordId) {
       }
     }
 
-    updateApprovalButtonInDOM(recordId, true);
+    await loadTeamRecords();
+    updateAdminDashboard();
     showAlert('הרשומה סומנה כנבדקה!', 'success');
     console.log('Record approved successfully on server');
   } catch (error) {
     console.error('Error approving record on server:', error);
+    if (isLockedMonthError(error)) {
+      showAlert('החודש נעול – אין אפשרות לעריכה', 'error');
+      return;
+    }
     showAlert('שגיאה באישור הרשומה: ' + (error.message || ''), 'error');
   }
 }
