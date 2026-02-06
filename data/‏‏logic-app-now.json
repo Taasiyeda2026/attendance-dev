@@ -405,6 +405,7 @@
                             },
                             "Submit_Check_Locked": {
                                 "type": "ApiConnection",
+                                "runAfter": {},
                                 "inputs": {
                                     "host": {
                                         "connection": {
@@ -468,6 +469,19 @@
                                                     "success": false,
                                                     "error": "החודש נעול לעדכון או שההרשאה אינה מספיקה"
                                                 }
+                                            }
+                                        },
+                                        "Submit_Terminate": {
+                                            "type": "Terminate",
+                                            "inputs": {
+                                                "status": "Failed",
+                                                "code": "Forbidden",
+                                                "message": "Forbidden"
+                                            },
+                                            "runAfter": {
+                                                "Submit_Response_Forbidden": [
+                                                    "Succeeded"
+                                                ]
                                             }
                                         }
                                     }
@@ -588,6 +602,7 @@
                             },
                             "Summary_Check_Role": {
                                 "type": "If",
+                                "runAfter": {},
                                 "expression": {
                                     "or": [
                                         {
@@ -621,6 +636,19 @@
                                                     "success": false,
                                                     "error": "אין הרשאה לצפייה בסיכום"
                                                 }
+                                            }
+                                        },
+                                        "Summary_Terminate": {
+                                            "type": "Terminate",
+                                            "inputs": {
+                                                "status": "Failed",
+                                                "code": "Forbidden",
+                                                "message": "Forbidden"
+                                            },
+                                            "runAfter": {
+                                                "Summary_Response_Forbidden": [
+                                                    "Succeeded"
+                                                ]
                                             }
                                         }
                                     }
@@ -706,6 +734,7 @@
                             },
                             "Update_Check_Locked": {
                                 "type": "ApiConnection",
+                                "runAfter": {},
                                 "inputs": {
                                     "host": {
                                         "connection": {
@@ -770,6 +799,19 @@
                                                     "error": "החודש נעול לעדכון או שההרשאה אינה מספיקה"
                                                 }
                                             }
+                                        },
+                                        "Update_Terminate": {
+                                            "type": "Terminate",
+                                            "inputs": {
+                                                "status": "Failed",
+                                                "code": "Forbidden",
+                                                "message": "Forbidden"
+                                            },
+                                            "runAfter": {
+                                                "Update_Response_Forbidden": [
+                                                    "Succeeded"
+                                                ]
+                                            }
                                         }
                                     }
                                 }
@@ -831,6 +873,7 @@
                             },
                             "Delete_Check_Locked": {
                                 "type": "ApiConnection",
+                                "runAfter": {},
                                 "inputs": {
                                     "host": {
                                         "connection": {
@@ -894,6 +937,19 @@
                                                     "success": false,
                                                     "error": "החודש נעול לעדכון או שההרשאה אינה מספיקה"
                                                 }
+                                            }
+                                        },
+                                        "Delete_Terminate": {
+                                            "type": "Terminate",
+                                            "inputs": {
+                                                "status": "Failed",
+                                                "code": "Forbidden",
+                                                "message": "Forbidden"
+                                            },
+                                            "runAfter": {
+                                                "Delete_Response_Forbidden": [
+                                                    "Succeeded"
+                                                ]
                                             }
                                         }
                                     }
@@ -959,6 +1015,7 @@
                             },
                             "Export_Check_Role": {
                                 "type": "If",
+                                "runAfter": {},
                                 "expression": {
                                     "equals": [
                                         "@toLower(coalesce(triggerBody()?['mode'], 'employee'))",
@@ -982,6 +1039,19 @@
                                                     "success": false,
                                                     "error": "אין הרשאה לייצוא נתונים"
                                                 }
+                                            }
+                                        },
+                                        "Export_Terminate": {
+                                            "type": "Terminate",
+                                            "inputs": {
+                                                "status": "Failed",
+                                                "code": "Forbidden",
+                                                "message": "Forbidden"
+                                            },
+                                            "runAfter": {
+                                                "Export_Response_Forbidden": [
+                                                    "Succeeded"
+                                                ]
                                             }
                                         }
                                     }
@@ -1013,6 +1083,7 @@
                             },
                             "ResetMonth_Check_Role": {
                                 "type": "If",
+                                "runAfter": {},
                                 "expression": {
                                     "equals": [
                                         "@toLower(coalesce(triggerBody()?['mode'], 'employee'))",
@@ -1036,6 +1107,19 @@
                                                     "success": false,
                                                     "error": "אין הרשאה לאיפוס חודש"
                                                 }
+                                            }
+                                        },
+                                        "ResetMonth_Terminate": {
+                                            "type": "Terminate",
+                                            "inputs": {
+                                                "status": "Failed",
+                                                "code": "Forbidden",
+                                                "message": "Forbidden"
+                                            },
+                                            "runAfter": {
+                                                "ResetMonth_Response_Forbidden": [
+                                                    "Succeeded"
+                                                ]
                                             }
                                         }
                                     }
@@ -1149,6 +1233,7 @@
                             },
                             "InstructorApproval_Check_Role": {
                                 "type": "If",
+                                "runAfter": {},
                                 "expression": {
                                     "equals": [
                                         "@toLower(coalesce(triggerBody()?['mode'], 'employee'))",
@@ -1172,6 +1257,19 @@
                                                     "success": false,
                                                     "error": "אין הרשאה לשליחת אישור חודשי"
                                                 }
+                                            }
+                                        },
+                                        "InstructorApproval_Terminate": {
+                                            "type": "Terminate",
+                                            "inputs": {
+                                                "status": "Failed",
+                                                "code": "Forbidden",
+                                                "message": "Forbidden"
+                                            },
+                                            "runAfter": {
+                                                "InstructorApproval_Response_Forbidden": [
+                                                    "Succeeded"
+                                                ]
                                             }
                                         }
                                     }
@@ -1331,6 +1429,7 @@
                             },
                             "ManagerApproval_Check_Role": {
                                 "type": "If",
+                                "runAfter": {},
                                 "expression": {
                                     "or": [
                                         {
@@ -1364,6 +1463,19 @@
                                                     "success": false,
                                                     "error": "אין הרשאה לאישור מנהל"
                                                 }
+                                            }
+                                        },
+                                        "ManagerApproval_Terminate": {
+                                            "type": "Terminate",
+                                            "inputs": {
+                                                "status": "Failed",
+                                                "code": "Forbidden",
+                                                "message": "Forbidden"
+                                            },
+                                            "runAfter": {
+                                                "ManagerApproval_Response_Forbidden": [
+                                                    "Succeeded"
+                                                ]
                                             }
                                         }
                                     }
@@ -1412,6 +1524,7 @@
                             },
                             "GetTeamApproval_Check_Role": {
                                 "type": "If",
+                                "runAfter": {},
                                 "expression": {
                                     "or": [
                                         {
@@ -1445,6 +1558,19 @@
                                                     "success": false,
                                                     "error": "אין הרשאה לצפייה בסטטוס אישורים"
                                                 }
+                                            }
+                                        },
+                                        "GetTeamApproval_Terminate": {
+                                            "type": "Terminate",
+                                            "inputs": {
+                                                "status": "Failed",
+                                                "code": "Forbidden",
+                                                "message": "Forbidden"
+                                            },
+                                            "runAfter": {
+                                                "GetTeamApproval_Response_Forbidden": [
+                                                    "Succeeded"
+                                                ]
                                             }
                                         }
                                     }
@@ -1514,6 +1640,7 @@
                             },
                             "Upload_Check_Locked": {
                                 "type": "ApiConnection",
+                                "runAfter": {},
                                 "inputs": {
                                     "host": {
                                         "connection": {
@@ -1577,6 +1704,19 @@
                                                     "success": false,
                                                     "error": "החודש נעול לעדכון או שההרשאה אינה מספיקה"
                                                 }
+                                            }
+                                        },
+                                        "Upload_Terminate": {
+                                            "type": "Terminate",
+                                            "inputs": {
+                                                "status": "Failed",
+                                                "code": "Forbidden",
+                                                "message": "Forbidden"
+                                            },
+                                            "runAfter": {
+                                                "Upload_Response_Forbidden": [
+                                                    "Succeeded"
+                                                ]
                                             }
                                         }
                                     }
