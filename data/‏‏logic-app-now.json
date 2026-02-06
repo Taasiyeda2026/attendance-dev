@@ -403,28 +403,8 @@
                   }
                 }
               },
-              "Submit_Check_Locked": {
-                "type": "ApiConnection",
-                "inputs": {
-                  "host": {
-                    "connection": {
-                      "name": "@parameters('$connections')['sharepointonline']['connectionId']"
-                    }
-                  },
-                  "method": "get",
-                  "path": "/datasets/@{encodeURIComponent(encodeURIComponent('https://think365orgil.sharepoint.com/sites/taasiyeda2026'))}/tables/@{encodeURIComponent(encodeURIComponent('511f5724-d561-4c60-831b-6b22ef1548d6'))}/items",
-                  "queries": {
-                    "$filter": "employeeId eq '@{triggerBody()?['employeeId']}' and monthKey eq '@{triggerBody()?['monthKey']}' and released eq true"
-                  }
-                }
-              },
               "Submit_Check_Authorization": {
                 "type": "If",
-                "runAfter": {
-                  "Submit_Check_Locked": [
-                    "Succeeded"
-                  ]
-                },
                 "expression": {
                   "or": [
                     {
@@ -721,10 +701,60 @@
                   }
                 }
               },
-              "Update_Check_Authorization": {
+              "Update_Block_When_Locked": {
                 "type": "If",
                 "runAfter": {
                   "Update_Check_Locked": [
+                    "Succeeded"
+                  ]
+                },
+                "expression": {
+                  "and": [
+                    {
+                      "greater": [
+                        "@length(body('Update_Check_Locked')?['value'])",
+                        0
+                      ]
+                    },
+                    {
+                      "not": {
+                        "equals": [
+                          "@toLower(coalesce(triggerBody()?['mode'], ''))",
+                          "system_admin"
+                        ]
+                      }
+                    }
+                  ]
+                },
+                "actions": {
+                  "Update_Locked_Response_Forbidden": {
+                    "type": "Response",
+                    "inputs": {
+                      "statusCode": 403,
+                      "headers": "@variables('CORSHeaders')",
+                      "body": {
+                        "success": false,
+                        "error": "אין הרשאה לעדכון רשומה לאחר אישור חודשי"
+                      }
+                    }
+                  },
+                  "Update_Locked_Terminate": {
+                    "type": "Terminate",
+                    "inputs": {
+                      "runStatus": "Cancelled"
+                    },
+                    "runAfter": {
+                      "Update_Locked_Response_Forbidden": [
+                        "Succeeded"
+                      ]
+                    }
+                  }
+                }
+              },
+              "Update_Check_Authorization": {
+                "type": "If",
+                "runAfter": {
+                  "Update_Block_When_Locked": [
                     "Succeeded"
                   ]
                 },
@@ -795,10 +825,80 @@
                   "path": "/datasets/@{encodeURIComponent(encodeURIComponent('https://think365orgil.sharepoint.com/sites/taasiyeda2026'))}/tables/@{encodeURIComponent(encodeURIComponent('Attendance'))}/items/@{encodeURIComponent(triggerBody()?['recordId'])}"
                 }
               },
+              "Delete_Check_Locked": {
+                "type": "ApiConnection",
+                "runAfter": {
+                  "Get_Attendance_Record": [
+                    "Succeeded"
+                  ]
+                },
+                "inputs": {
+                  "host": {
+                    "connection": {
+                      "name": "@parameters('$connections')['sharepointonline']['connectionId']"
+                    }
+                  },
+                  "method": "get",
+                  "path": "/datasets/@{encodeURIComponent(encodeURIComponent('https://think365orgil.sharepoint.com/sites/taasiyeda2026'))}/tables/@{encodeURIComponent(encodeURIComponent('511f5724-d561-4c60-831b-6b22ef1548d6'))}/items",
+                  "queries": {
+                    "$filter": "employeeId eq '@{body('Get_Attendance_Record')?['employeeId']}' and monthKey eq '@{body('Get_Attendance_Record')?['monthKey']}' and released eq true"
+                  }
+                }
+              },
+              "Delete_Block_When_Locked": {
+                "type": "If",
+                "runAfter": {
+                  "Delete_Check_Locked": [
+                    "Succeeded"
+                  ]
+                },
+                "expression": {
+                  "and": [
+                    {
+                      "greater": [
+                        "@length(body('Delete_Check_Locked')?['value'])",
+                        0
+                      ]
+                    },
+                    {
+                      "not": {
+                        "equals": [
+                          "@toLower(coalesce(triggerBody()?['mode'], ''))",
+                          "system_admin"
+                        ]
+                      }
+                    }
+                  ]
+                },
+                "actions": {
+                  "Delete_Locked_Response_Forbidden": {
+                    "type": "Response",
+                    "inputs": {
+                      "statusCode": 403,
+                      "headers": "@variables('CORSHeaders')",
+                      "body": {
+                        "success": false,
+                        "error": "אין הרשאה למחיקת רשומה לאחר אישור חודשי"
+                      }
+                    }
+                  },
+                  "Delete_Locked_Terminate": {
+                    "type": "Terminate",
+                    "inputs": {
+                      "runStatus": "Cancelled"
+                    },
+                    "runAfter": {
+                      "Delete_Locked_Response_Forbidden": [
+                        "Succeeded"
+                      ]
+                    }
+                  }
+                }
+              },
               "Delete_Check_Authorization": {
                 "type": "If",
                 "runAfter": {
-                  "Get_Attendance_Record": [
+                  "Delete_Block_When_Locked": [
                     "Succeeded"
                   ]
                 },
@@ -807,23 +907,25 @@
                     {
                       "equals": [
                         "@toLower(coalesce(triggerBody()?['mode'], ''))",
-                        "system_admin"
+                        "instructor"
                       ]
                     },
                     {
-                      "or": [
-                        {
-                          "equals": [
-                            "@empty(body('Get_Attendance_Record')?['approvedBy'])",
-                            true
-                          ]
-                        },
-                        {
-                          "equals": [
-                            "@empty(body('Get_Attendance_Record')?['approvedDate'])",
-                            true
-                          ]
-                        }
+                      "equals": [
+                        "@toLower(coalesce(triggerBody()?['mode'], ''))",
+                        "manager"
+                      ]
+                    },
+                    {
+                      "equals": [
+                        "@toLower(coalesce(triggerBody()?['mode'], ''))",
+                        "operations_controller"
+                      ]
+                    },
+                    {
+                      "equals": [
+                        "@toLower(coalesce(triggerBody()?['mode'], ''))",
+                        "system_admin"
                       ]
                     }
                   ]
@@ -1306,7 +1408,7 @@
                   "method": "get",
                   "path": "/datasets/@{encodeURIComponent(encodeURIComponent('https://think365orgil.sharepoint.com/sites/taasiyeda2026'))}/tables/@{encodeURIComponent(encodeURIComponent('511f5724-d561-4c60-831b-6b22ef1548d6'))}/items",
                   "queries": {
-                    "$filter": "team eq '@{triggerBody()?['team']}' and monthKey eq '@{triggerBody()?['monthKey']}'"
+                    "$filter": "monthKey eq '@{triggerBody()?['monthKey']}'"
                   }
                 },
                 "runAfter": {
@@ -1369,6 +1471,12 @@
                       "equals": [
                         "@toLower(coalesce(triggerBody()?['mode'], ''))",
                         "manager"
+                      ]
+                    },
+                    {
+                      "equals": [
+                        "@toLower(coalesce(triggerBody()?['mode'], ''))",
+                        "operations_controller"
                       ]
                     },
                     {
@@ -1565,10 +1673,60 @@
                   }
                 }
               },
-              "Upload_Check_Authorization": {
+              "Upload_Block_When_Locked": {
                 "type": "If",
                 "runAfter": {
                   "Upload_Check_Locked": [
+                    "Succeeded"
+                  ]
+                },
+                "expression": {
+                  "and": [
+                    {
+                      "greater": [
+                        "@length(body('Upload_Check_Locked')?['value'])",
+                        0
+                      ]
+                    },
+                    {
+                      "not": {
+                        "equals": [
+                          "@toLower(coalesce(triggerBody()?['mode'], ''))",
+                          "system_admin"
+                        ]
+                      }
+                    }
+                  ]
+                },
+                "actions": {
+                  "Upload_Locked_Response_Forbidden": {
+                    "type": "Response",
+                    "inputs": {
+                      "statusCode": 403,
+                      "headers": "@variables('CORSHeaders')",
+                      "body": {
+                        "success": false,
+                        "error": "אין הרשאה להעלאת קובץ לאחר אישור חודשי"
+                      }
+                    }
+                  },
+                  "Upload_Locked_Terminate": {
+                    "type": "Terminate",
+                    "inputs": {
+                      "runStatus": "Cancelled"
+                    },
+                    "runAfter": {
+                      "Upload_Locked_Response_Forbidden": [
+                        "Succeeded"
+                      ]
+                    }
+                  }
+                }
+              },
+              "Upload_Check_Authorization": {
+                "type": "If",
+                "runAfter": {
+                  "Upload_Block_When_Locked": [
                     "Succeeded"
                   ]
                 },
