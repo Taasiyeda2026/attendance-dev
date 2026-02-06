@@ -421,6 +421,11 @@
                     }
                   ]
                 },
+                "runAfter": {
+                  "Submit_Block_When_Locked": [
+                    "Succeeded"
+                  ]
+                },
                 "actions": {
                   "Submit_Authorized": {
                     "type": "Compose",
@@ -439,6 +444,71 @@
                           "error": "אין הרשאה ליצירת רשומה"
                         }
                       }
+                    }
+                  }
+                }
+              },
+              "Submit_Check_Locked": {
+                "type": "ApiConnection",
+                "inputs": {
+                  "host": {
+                    "connection": {
+                      "name": "@parameters('$connections')['sharepointonline']['connectionId']"
+                    }
+                  },
+                  "method": "get",
+                  "path": "/datasets/@{encodeURIComponent(encodeURIComponent('https://think365orgil.sharepoint.com/sites/taasiyeda2026'))}/tables/@{encodeURIComponent(encodeURIComponent('511f5724-d561-4c60-831b-6b22ef1548d6'))}/items",
+                  "queries": {
+                    "$filter": "employeeId eq '@{triggerBody()?['employeeId']}' and monthKey eq '@{triggerBody()?['monthKey']}' and released eq true"
+                  }
+                }
+              },
+              "Submit_Block_When_Locked": {
+                "type": "If",
+                "runAfter": {
+                  "Submit_Check_Locked": [
+                    "Succeeded"
+                  ]
+                },
+                "expression": {
+                  "and": [
+                    {
+                      "greater": [
+                        "@length(body('Submit_Check_Locked')?['value'])",
+                        0
+                      ]
+                    },
+                    {
+                      "not": {
+                        "equals": [
+                          "@toLower(coalesce(triggerBody()?['mode'], ''))",
+                          "system_admin"
+                        ]
+                      }
+                    }
+                  ]
+                },
+                "actions": {
+                  "Submit_Locked_Response_Forbidden": {
+                    "type": "Response",
+                    "inputs": {
+                      "statusCode": 403,
+                      "headers": "@variables('CORSHeaders')",
+                      "body": {
+                        "success": false,
+                        "error": "אין הרשאה ליצירת רשומה לאחר אישור חודשי"
+                      }
+                    }
+                  },
+                  "Submit_Locked_Terminate": {
+                    "type": "Terminate",
+                    "inputs": {
+                      "runStatus": "Cancelled"
+                    },
+                    "runAfter": {
+                      "Submit_Locked_Response_Forbidden": [
+                        "Succeeded"
+                      ]
                     }
                   }
                 }
@@ -513,6 +583,7 @@
                   "method": "get",
                   "path": "/datasets/@{encodeURIComponent(encodeURIComponent('https://think365orgil.sharepoint.com/sites/taasiyeda2026'))}/tables/@{encodeURIComponent(encodeURIComponent('Attendance'))}/items",
                   "queries": {
+                    "$filter": "@{if(equals(toLower(coalesce(triggerBody()?['mode'], '')), 'manager'), concat('team eq ''', triggerBody()?['team'], ''''), 'ID gt 0')}",
                     "$orderby": "attendanceDate desc",
                     "$top": 5000
                   }
@@ -1408,13 +1479,83 @@
                   "method": "get",
                   "path": "/datasets/@{encodeURIComponent(encodeURIComponent('https://think365orgil.sharepoint.com/sites/taasiyeda2026'))}/tables/@{encodeURIComponent(encodeURIComponent('511f5724-d561-4c60-831b-6b22ef1548d6'))}/items",
                   "queries": {
-                    "$filter": "monthKey eq '@{triggerBody()?['monthKey']}'"
+                    "$filter": "monthKey eq '@{triggerBody()?['monthKey']}'@{if(equals(toLower(coalesce(triggerBody()?['mode'], '')), 'manager'), concat(' and team eq ''', triggerBody()?['team'], ''''), '')}"
                   }
                 },
+                "runAfter": {
+                  "ManagerApproval_Instructor_Check": [
+                    "Succeeded"
+                  ]
+                }
+              },
+              "ManagerApproval_Instructor_Query": {
+                "type": "ApiConnection",
                 "runAfter": {
                   "ManagerApproval_Check_Role": [
                     "Succeeded"
                   ]
+                },
+                "inputs": {
+                  "host": {
+                    "connection": {
+                      "name": "@parameters('$connections')['sharepointonline']['connectionId']"
+                    }
+                  },
+                  "method": "get",
+                  "path": "/datasets/@{encodeURIComponent(encodeURIComponent('https://think365orgil.sharepoint.com/sites/taasiyeda2026'))}/tables/@{encodeURIComponent(encodeURIComponent('511f5724-d561-4c60-831b-6b22ef1548d6'))}/items",
+                  "queries": {
+                    "$filter": "monthKey eq '@{triggerBody()?['monthKey']}'@{if(equals(toLower(coalesce(triggerBody()?['mode'], '')), 'manager'), concat(' and team eq ''', triggerBody()?['team'], ''''), '')} and instructorApprovalDate eq null"
+                  }
+                }
+              },
+              "ManagerApproval_Instructor_Check": {
+                "type": "If",
+                "runAfter": {
+                  "ManagerApproval_Instructor_Query": [
+                    "Succeeded"
+                  ]
+                },
+                "expression": {
+                  "and": [
+                    {
+                      "greater": [
+                        "@length(body('ManagerApproval_Instructor_Query')?['value'])",
+                        0
+                      ]
+                    },
+                    {
+                      "not": {
+                        "equals": [
+                          "@toLower(coalesce(triggerBody()?['mode'], ''))",
+                          "system_admin"
+                        ]
+                      }
+                    }
+                  ]
+                },
+                "actions": {
+                  "ManagerApproval_Instructor_Response_Forbidden": {
+                    "type": "Response",
+                    "inputs": {
+                      "statusCode": 403,
+                      "headers": "@variables('CORSHeaders')",
+                      "body": {
+                        "success": false,
+                        "error": "לא ניתן לאשר חודש לפני אישור מדריך לכל העובדים"
+                      }
+                    }
+                  },
+                  "ManagerApproval_Instructor_Terminate": {
+                    "type": "Terminate",
+                    "inputs": {
+                      "runStatus": "Cancelled"
+                    },
+                    "runAfter": {
+                      "ManagerApproval_Instructor_Response_Forbidden": [
+                        "Succeeded"
+                      ]
+                    }
+                  }
                 }
               },
               "ForEach_SetReleased": {
@@ -1525,7 +1666,7 @@
                   "method": "get",
                   "path": "/datasets/@{encodeURIComponent(encodeURIComponent('https://think365orgil.sharepoint.com/sites/taasiyeda2026'))}/tables/@{encodeURIComponent(encodeURIComponent('511f5724-d561-4c60-831b-6b22ef1548d6'))}/items",
                   "queries": {
-                    "$filter": "monthKey eq '@{triggerBody()?['monthKey']}'@{if(equals(triggerBody()?['team'], 'all'), '', concat(' and team eq ''', triggerBody()?['team'], ''''))}"
+                    "$filter": "monthKey eq '@{triggerBody()?['monthKey']}'@{if(equals(toLower(coalesce(triggerBody()?['mode'], '')), 'manager'), concat(' and team eq ''', triggerBody()?['team'], ''''), if(equals(triggerBody()?['team'], 'all'), '', concat(' and team eq ''', triggerBody()?['team'], '''')))}"
                   }
                 },
                 "runAfter": {
