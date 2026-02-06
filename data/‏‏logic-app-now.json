@@ -429,24 +429,14 @@
                                     "or": [
                                         {
                                             "equals": [
-                                                "@toLower(coalesce(triggerBody()?['mode'], 'employee'))",
-                                                "admin"
+                                                "@toLower(coalesce(triggerBody()?['mode'], ''))",
+                                                "instructor"
                                             ]
                                         },
                                         {
-                                            "and": [
-                                                {
-                                                    "equals": [
-                                                        "@toLower(coalesce(triggerBody()?['mode'], 'employee'))",
-                                                        "employee"
-                                                    ]
-                                                },
-                                                {
-                                                    "equals": [
-                                                        "@length(body('Submit_Check_Locked')?['value'])",
-                                                        0
-                                                    ]
-                                                }
+                                            "equals": [
+                                                "@toLower(coalesce(triggerBody()?['mode'], ''))",
+                                                "system_admin"
                                             ]
                                         }
                                     ]
@@ -466,7 +456,7 @@
                                                 "headers": "@variables('CORSHeaders')",
                                                 "body": {
                                                     "success": false,
-                                                    "error": "החודש נעול לעדכון או שההרשאה אינה מספיקה"
+                                                    "error": "אין הרשאה ליצירת רשומה"
                                                 }
                                             }
                                         }
@@ -592,14 +582,26 @@
                                     "or": [
                                         {
                                             "equals": [
-                                                "@toLower(coalesce(triggerBody()?['mode'], 'employee'))",
-                                                "admin"
+                                                "@toLower(coalesce(triggerBody()?['mode'], ''))",
+                                                "manager"
                                             ]
                                         },
                                         {
                                             "equals": [
-                                                "@toLower(coalesce(triggerBody()?['mode'], 'employee'))",
-                                                "manager"
+                                                "@toLower(coalesce(triggerBody()?['mode'], ''))",
+                                                "operations_controller"
+                                            ]
+                                        },
+                                        {
+                                            "equals": [
+                                                "@toLower(coalesce(triggerBody()?['mode'], ''))",
+                                                "payroll_officer"
+                                            ]
+                                        },
+                                        {
+                                            "equals": [
+                                                "@toLower(coalesce(triggerBody()?['mode'], ''))",
+                                                "system_admin"
                                             ]
                                         }
                                     ]
@@ -730,24 +732,26 @@
                                     "or": [
                                         {
                                             "equals": [
-                                                "@toLower(coalesce(triggerBody()?['mode'], 'employee'))",
-                                                "admin"
+                                                "@toLower(coalesce(triggerBody()?['mode'], ''))",
+                                                "instructor"
                                             ]
                                         },
                                         {
-                                            "and": [
-                                                {
-                                                    "equals": [
-                                                        "@toLower(coalesce(triggerBody()?['mode'], 'employee'))",
-                                                        "employee"
-                                                    ]
-                                                },
-                                                {
-                                                    "equals": [
-                                                        "@length(body('Update_Check_Locked')?['value'])",
-                                                        0
-                                                    ]
-                                                }
+                                            "equals": [
+                                                "@toLower(coalesce(triggerBody()?['mode'], ''))",
+                                                "manager"
+                                            ]
+                                        },
+                                        {
+                                            "equals": [
+                                                "@toLower(coalesce(triggerBody()?['mode'], ''))",
+                                                "operations_controller"
+                                            ]
+                                        },
+                                        {
+                                            "equals": [
+                                                "@toLower(coalesce(triggerBody()?['mode'], ''))",
+                                                "system_admin"
                                             ]
                                         }
                                     ]
@@ -767,7 +771,7 @@
                                                 "headers": "@variables('CORSHeaders')",
                                                 "body": {
                                                     "success": false,
-                                                    "error": "החודש נעול לעדכון או שההרשאה אינה מספיקה"
+                                                    "error": "אין הרשאה לעדכון רשומה"
                                                 }
                                             }
                                         }
@@ -855,22 +859,44 @@
                                     "or": [
                                         {
                                             "equals": [
-                                                "@toLower(coalesce(triggerBody()?['mode'], 'employee'))",
-                                                "admin"
+                                                "@toLower(coalesce(triggerBody()?['mode'], ''))",
+                                                "system_admin"
                                             ]
                                         },
                                         {
                                             "and": [
                                                 {
                                                     "equals": [
-                                                        "@toLower(coalesce(triggerBody()?['mode'], 'employee'))",
-                                                        "employee"
+                                                        "@length(body('Delete_Check_Locked')?['value'])",
+                                                        0
                                                     ]
                                                 },
                                                 {
-                                                    "equals": [
-                                                        "@length(body('Delete_Check_Locked')?['value'])",
-                                                        0
+                                                    "or": [
+                                                        {
+                                                            "equals": [
+                                                                "@toLower(coalesce(triggerBody()?['mode'], ''))",
+                                                                "instructor"
+                                                            ]
+                                                        },
+                                                        {
+                                                            "equals": [
+                                                                "@toLower(coalesce(triggerBody()?['mode'], ''))",
+                                                                "manager"
+                                                            ]
+                                                        },
+                                                        {
+                                                            "equals": [
+                                                                "@toLower(coalesce(triggerBody()?['mode'], ''))",
+                                                                "payroll_officer"
+                                                            ]
+                                                        },
+                                                        {
+                                                            "equals": [
+                                                                "@toLower(coalesce(triggerBody()?['mode'], ''))",
+                                                                "operations_controller"
+                                                            ]
+                                                        }
                                                     ]
                                                 }
                                             ]
@@ -892,7 +918,7 @@
                                                 "headers": "@variables('CORSHeaders')",
                                                 "body": {
                                                     "success": false,
-                                                    "error": "החודש נעול לעדכון או שההרשאה אינה מספיקה"
+                                                    "error": "אין הרשאה למחיקת רשומה"
                                                 }
                                             }
                                         }
@@ -960,9 +986,19 @@
                             "Export_Check_Role": {
                                 "type": "If",
                                 "expression": {
-                                    "equals": [
-                                        "@toLower(coalesce(triggerBody()?['mode'], 'employee'))",
-                                        "admin"
+                                    "or": [
+                                        {
+                                            "equals": [
+                                                "@toLower(coalesce(triggerBody()?['mode'], ''))",
+                                                "payroll_officer"
+                                            ]
+                                        },
+                                        {
+                                            "equals": [
+                                                "@toLower(coalesce(triggerBody()?['mode'], ''))",
+                                                "system_admin"
+                                            ]
+                                        }
                                     ]
                                 },
                                 "actions": {
@@ -1015,8 +1051,8 @@
                                 "type": "If",
                                 "expression": {
                                     "equals": [
-                                        "@toLower(coalesce(triggerBody()?['mode'], 'employee'))",
-                                        "admin"
+                                        "@toLower(coalesce(triggerBody()?['mode'], ''))",
+                                        "system_admin"
                                     ]
                                 },
                                 "actions": {
@@ -1150,9 +1186,19 @@
                             "InstructorApproval_Check_Role": {
                                 "type": "If",
                                 "expression": {
-                                    "equals": [
-                                        "@toLower(coalesce(triggerBody()?['mode'], 'employee'))",
-                                        "employee"
+                                    "or": [
+                                        {
+                                            "equals": [
+                                                "@toLower(coalesce(triggerBody()?['mode'], ''))",
+                                                "instructor"
+                                            ]
+                                        },
+                                        {
+                                            "equals": [
+                                                "@toLower(coalesce(triggerBody()?['mode'], ''))",
+                                                "system_admin"
+                                            ]
+                                        }
                                     ]
                                 },
                                 "actions": {
@@ -1335,14 +1381,14 @@
                                     "or": [
                                         {
                                             "equals": [
-                                                "@toLower(coalesce(triggerBody()?['mode'], 'employee'))",
+                                                "@toLower(coalesce(triggerBody()?['mode'], ''))",
                                                 "manager"
                                             ]
                                         },
                                         {
                                             "equals": [
-                                                "@toLower(coalesce(triggerBody()?['mode'], 'employee'))",
-                                                "admin"
+                                                "@toLower(coalesce(triggerBody()?['mode'], ''))",
+                                                "system_admin"
                                             ]
                                         }
                                     ]
@@ -1416,14 +1462,20 @@
                                     "or": [
                                         {
                                             "equals": [
-                                                "@toLower(coalesce(triggerBody()?['mode'], 'employee'))",
+                                                "@toLower(coalesce(triggerBody()?['mode'], ''))",
                                                 "manager"
                                             ]
                                         },
                                         {
                                             "equals": [
-                                                "@toLower(coalesce(triggerBody()?['mode'], 'employee'))",
-                                                "admin"
+                                                "@toLower(coalesce(triggerBody()?['mode'], ''))",
+                                                "operations_controller"
+                                            ]
+                                        },
+                                        {
+                                            "equals": [
+                                                "@toLower(coalesce(triggerBody()?['mode'], ''))",
+                                                "system_admin"
                                             ]
                                         }
                                     ]
@@ -1538,24 +1590,14 @@
                                     "or": [
                                         {
                                             "equals": [
-                                                "@toLower(coalesce(triggerBody()?['mode'], 'employee'))",
-                                                "admin"
+                                                "@toLower(coalesce(triggerBody()?['mode'], ''))",
+                                                "instructor"
                                             ]
                                         },
                                         {
-                                            "and": [
-                                                {
-                                                    "equals": [
-                                                        "@toLower(coalesce(triggerBody()?['mode'], 'employee'))",
-                                                        "employee"
-                                                    ]
-                                                },
-                                                {
-                                                    "equals": [
-                                                        "@length(body('Upload_Check_Locked')?['value'])",
-                                                        0
-                                                    ]
-                                                }
+                                            "equals": [
+                                                "@toLower(coalesce(triggerBody()?['mode'], ''))",
+                                                "system_admin"
                                             ]
                                         }
                                     ]
@@ -1575,7 +1617,7 @@
                                                 "headers": "@variables('CORSHeaders')",
                                                 "body": {
                                                     "success": false,
-                                                    "error": "החודש נעול לעדכון או שההרשאה אינה מספיקה"
+                                                    "error": "אין הרשאה להעלאת קובץ"
                                                 }
                                             }
                                         }
