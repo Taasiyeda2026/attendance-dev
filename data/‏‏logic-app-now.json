@@ -783,6 +783,73 @@
                     "deleterecord": {
                         "case": "deleterecord",
                         "actions": {
+                            "Get_Attendance_Record": {
+                                "type": "ApiConnection",
+                                "inputs": {
+                                    "host": {
+                                        "connection": {
+                                            "name": "@parameters('$connections')['sharepointonline']['connectionId']"
+                                        }
+                                    },
+                                    "method": "get",
+                                    "path": "/datasets/@{encodeURIComponent(encodeURIComponent('https://think365orgil.sharepoint.com/sites/taasiyeda2026'))}/tables/@{encodeURIComponent(encodeURIComponent('Attendance'))}/items/@{encodeURIComponent(triggerBody()?['recordId'])}"
+                                }
+                            },
+                            "Delete_Check_Authorization": {
+                                "type": "If",
+                                "runAfter": {
+                                    "Get_Attendance_Record": [
+                                        "Succeeded"
+                                    ]
+                                },
+                                "expression": {
+                                    "or": [
+                                        {
+                                            "equals": [
+                                                "@toLower(coalesce(triggerBody()?['mode'], ''))",
+                                                "system_admin"
+                                            ]
+                                        },
+                                        {
+                                            "or": [
+                                                {
+                                                    "equals": [
+                                                        "@empty(body('Get_Attendance_Record')?['approvedBy'])",
+                                                        true
+                                                    ]
+                                                },
+                                                {
+                                                    "equals": [
+                                                        "@empty(body('Get_Attendance_Record')?['approvedDate'])",
+                                                        true
+                                                    ]
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                },
+                                "actions": {
+                                    "Delete_Authorized": {
+                                        "type": "Compose",
+                                        "inputs": "authorized"
+                                    }
+                                },
+                                "else": {
+                                    "actions": {
+                                        "Delete_Response_Forbidden": {
+                                            "type": "Response",
+                                            "inputs": {
+                                                "statusCode": 403,
+                                                "headers": "@variables('CORSHeaders')",
+                                                "body": {
+                                                    "success": false,
+                                                    "error": "אין הרשאה למחיקת רשומה"
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            },
                             "Delete_Record": {
                                 "type": "ApiConnection",
                                 "inputs": {
@@ -830,98 +897,6 @@
                                     "body": {
                                         "success": false,
                                         "error": "שגיאה במחיקת רשומה"
-                                    }
-                                }
-                            },
-                            "Delete_Check_Locked": {
-                                "type": "ApiConnection",
-                                "inputs": {
-                                    "host": {
-                                        "connection": {
-                                            "name": "@parameters('$connections')['sharepointonline']['connectionId']"
-                                        }
-                                    },
-                                    "method": "get",
-                                    "path": "/datasets/@{encodeURIComponent(encodeURIComponent('https://think365orgil.sharepoint.com/sites/taasiyeda2026'))}/tables/@{encodeURIComponent(encodeURIComponent('511f5724-d561-4c60-831b-6b22ef1548d6'))}/items",
-                                    "queries": {
-                                        "$filter": "employeeId eq '@{triggerBody()?['employeeId']}' and monthKey eq '@{triggerBody()?['monthKey']}' and released eq true"
-                                    }
-                                }
-                            },
-                            "Delete_Check_Authorization": {
-                                "type": "If",
-                                "runAfter": {
-                                    "Delete_Check_Locked": [
-                                        "Succeeded"
-                                    ]
-                                },
-                                "expression": {
-                                    "or": [
-                                        {
-                                            "equals": [
-                                                "@toLower(coalesce(triggerBody()?['mode'], ''))",
-                                                "system_admin"
-                                            ]
-                                        },
-                                        {
-                                            "and": [
-                                                {
-                                                    "equals": [
-                                                        "@length(body('Delete_Check_Locked')?['value'])",
-                                                        0
-                                                    ]
-                                                },
-                                                {
-                                                    "or": [
-                                                        {
-                                                            "equals": [
-                                                                "@toLower(coalesce(triggerBody()?['mode'], ''))",
-                                                                "instructor"
-                                                            ]
-                                                        },
-                                                        {
-                                                            "equals": [
-                                                                "@toLower(coalesce(triggerBody()?['mode'], ''))",
-                                                                "manager"
-                                                            ]
-                                                        },
-                                                        {
-                                                            "equals": [
-                                                                "@toLower(coalesce(triggerBody()?['mode'], ''))",
-                                                                "payroll_officer"
-                                                            ]
-                                                        },
-                                                        {
-                                                            "equals": [
-                                                                "@toLower(coalesce(triggerBody()?['mode'], ''))",
-                                                                "operations_controller"
-                                                            ]
-                                                        }
-                                                    ]
-                                                }
-                                            ]
-                                        }
-                                    ]
-                                },
-                                "actions": {
-                                    "Delete_Authorized": {
-                                        "type": "Compose",
-                                        "inputs": "authorized"
-                                    }
-                                },
-                                "else": {
-                                    "actions": {
-                                        "Delete_Response_Forbidden": {
-                                            "type": "Response",
-                                            "inputs": {
-                                                "statusCode": 403,
-                                                "headers": "@variables('CORSHeaders')",
-                                                "body": {
-                                                    "success": false,
-                                                    "error": "אין הרשאה למחיקת רשומה"
-                                                }
-                                            }
-                                        }
                                     }
                                 }
                             }
