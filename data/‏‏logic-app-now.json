@@ -104,7 +104,6 @@
         },
         "actions": {
             "Parse_Request_Body": {
-                "runAfter": {},
                 "type": "ParseJson",
                 "inputs": {
                     "content": "@triggerBody()",
