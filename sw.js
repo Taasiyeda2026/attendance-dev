@@ -1,4 +1,4 @@
-const CACHE_NAME = 'attendance-v86';
+const CACHE_NAME = 'attendance-v94';
 const urlsToCache = [
   './index.html',
   './manifest.json',
@@ -18,7 +18,7 @@ const urlsToCache = [
 
 // Install event - cache essential files
 self.addEventListener('install', (event) => {
-  console.log('[SW] Installing Service Worker v68...');
+  console.log('[SW] Installing Service Worker v92...');
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then((cache) => {
@@ -99,7 +99,7 @@ self.addEventListener('fetch', (event) => {
 
 // Activate event - clean old caches
 self.addEventListener('activate', (event) => {
-  console.log('[SW] Activating Service Worker v68...');
+  console.log('[SW] Activating Service Worker v92...');
   const cacheWhitelist = [CACHE_NAME];
   event.waitUntil(
     caches.keys().then((cacheNames) => {
@@ -124,4 +124,4 @@ self.addEventListener('message', (event) => {
   }
 });
 
-console.log('[SW] Service Worker v68 loaded');
+console.log('[SW] Service Worker v92 loaded');
