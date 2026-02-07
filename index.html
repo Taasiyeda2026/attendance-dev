@@ -4499,7 +4499,7 @@ function canDeleteRecord(record) {
   }
   
   // Check if record has double approval (instructor + manager)
-  const hasDoubleApproval = record && record.status === 'approved' && record.managerApproved;
+  const hasDoubleApproval = record && (record.status === 'approved' || record.status === 'מאושר') && record.managerApproved;
   
   // After double approval, only admin can delete
   if (hasDoubleApproval) {
@@ -6170,7 +6170,7 @@ function renderTeamTable(recordsList) {
     employeeSummary[empId].totalRecords += Number.isNaN(recordCount) ? 0 : recordCount;
     // Count approved records
     const statusRaw = String(rec.status || 'pending').toLowerCase();
-    if (statusRaw === 'approved') {
+    if (statusRaw === 'approved' || statusRaw === 'מאושר') {
       employeeSummary[empId].approvedRecords += Number.isNaN(recordCount) ? 0 : recordCount;
     }
     employeeSummary[empId].totalHours += hours;
@@ -9262,9 +9262,9 @@ function toggleMobileWeekDetails(empId, startDay, endDay) {
         const date = formatDateHebrew(rec.attendanceDate || rec.date);
         const recId = rec.ID || rec.id || '';
         const statusRaw = String(rec.status || 'pending').toLowerCase();
-        const status = statusRaw === 'approved' ? 'מאושר' : (statusRaw === 'rejected' ? 'נדחה' : 'ממתין');
-        const statusColor = statusRaw === 'approved' ? '#22c55e' : (statusRaw === 'rejected' ? '#ef4444' : '#f59e0b');
-        const isApproved = statusRaw === 'approved';
+        const isApproved = (statusRaw === 'approved' || statusRaw === 'מאושר');
+        const status = isApproved ? 'מאושר' : (statusRaw === 'rejected' || statusRaw === 'נדחה' ? 'נדחה' : 'ממתין');
+        const statusColor = isApproved ? '#22c55e' : (statusRaw === 'rejected' || statusRaw === 'נדחה' ? '#ef4444' : '#f59e0b');
         const hours = parseFloat(rec.workHours || rec.hours || 0).toFixed(1);
         const km = parseFloat(rec.kilometers || rec.km || 0).toFixed(0);
         
@@ -9439,10 +9439,6 @@ async function approveRecordFromAdmin(recordId) {
     return;
   }
   
-  if (!confirm('האם לאשר רשומה זו?')) {
-    return;
-  }
-  
   // Find the record in caches
   let record = null;
   let recordIndex = -1;
@@ -9483,7 +9479,7 @@ async function approveRecordFromAdmin(recordId) {
   
   // OPTIMISTIC UPDATE: Update cache immediately
   const approvalData = {
-    status: 'approved',
+    status: 'מאושר',
     approvedBy: user.empName || user.empNum,
     approvedDate: new Date().toISOString()
   };
@@ -9523,9 +9519,9 @@ async function approveRecordFromAdmin(recordId) {
       employeeName: String(record.employeeName || record.empName || ''),
       team: String(record.team || ''),
       employmentType: normalizeEmploymentType(record, ''),
-      attendanceDate: record.attendanceDate || record.date,
-      startTime: record.startTime || record.start,
-      endTime: record.endTime || record.end,
+      attendanceDate: record.attendanceDate || record.date || '',
+      startTime: record.startTime || record.start || '',
+      endTime: record.endTime || record.end || '',
       workHours: Number(record.workHours || record.hours) || 0,
       activityType: String(record.activityType || record.activity || ''),
       schoolName: String(record.schoolName || record.school || ''),
@@ -9540,14 +9536,17 @@ async function approveRecordFromAdmin(recordId) {
       ...approvalData
     };
     
+    console.log('=== APPROVE RECORD PAYLOAD ===');
+    console.log('recordId:', payload.recordId, 'status:', payload.status, 'approvedBy:', payload.approvedBy);
+    
     const data = await apiRequest('updaterecord', payload);
     
+    console.log('=== APPROVE RECORD RESPONSE ===', JSON.stringify(data));
+    
     if (!data.success) {
-      throw new Error(data.message || 'Failed to approve record');
+      throw new Error(data.message || data.error || 'Failed to approve record');
     }
     hideLoadingBar();
-    showAlert('הרשומה אושרה!', 'success');
-    console.log('Record approved successfully on server');
   } catch (error) {
     hideLoadingBar();
     console.error('Error approving record on server:', error);
@@ -9714,9 +9713,9 @@ function toggleAdminEmployeeDetails(empId) {
               ${records.map(rec => {
                 const recId = rec.ID || rec.id || '';
                 const statusRaw = String(rec.status || 'pending').toLowerCase();
-                const status = statusRaw === 'approved' ? 'מאושר' : (statusRaw === 'rejected' ? 'נדחה' : 'ממתין');
-                const statusColor = statusRaw === 'approved' ? '#22c55e' : (statusRaw === 'rejected' ? '#ef4444' : '#f59e0b');
-                const isApproved = statusRaw === 'approved';
+                const isApproved = (statusRaw === 'approved' || statusRaw === 'מאושר');
+                const status = isApproved ? 'מאושר' : (statusRaw === 'rejected' || statusRaw === 'נדחה' ? 'נדחה' : 'ממתין');
+                const statusColor = isApproved ? '#22c55e' : (statusRaw === 'rejected' || statusRaw === 'נדחה' ? '#ef4444' : '#f59e0b');
                 return `
                 <tr style="border-bottom: 1px solid #e2e8f0;">
                   <td style="padding: 8px; text-align: right; white-space: nowrap;">${rec.attendanceDate || ''}</td>
