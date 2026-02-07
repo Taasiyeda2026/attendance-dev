@@ -5682,6 +5682,9 @@ async function loadApprovalsStatusPage() {
   });
 
   if (instructorsOnly.length === 0) {
+    hideLoadingBar();
+    setSilentLoading(container.id, false);
+    if (dashboardContainer && dashboardContainer !== container) setSilentLoading(dashboardContainer.id, false);
     container.innerHTML = '<p style="text-align: center; color: #94a3b8; padding: 30px;">אין מדריכים להצגה</p>';
     if (dashboardContainer && dashboardContainer !== container) dashboardContainer.innerHTML = container.innerHTML;
     return;
