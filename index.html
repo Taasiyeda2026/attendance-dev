@@ -3706,7 +3706,6 @@ function normalizeEmploymentType(source, defaultValue = '') {
       const value = extractFromFieldObject(field) || extractLookupValue(field, '');
       if (value && typeof value === 'string' && value.trim()) {
         extractedValue = value;
-        console.log('Found employmentType value:', value);
         break;
       }
     }
@@ -3812,6 +3811,11 @@ function normalizePayload(action, data) {
         monthKey: data.monthKey || data.month || ''
       };
       
+    case 'getallemployees':
+      return {
+        action: 'getallemployees'
+      };
+      
     case 'updaterecord':
       return cleanPayload({
         action: 'updaterecord',
@@ -3911,39 +3915,13 @@ function normalizePayload(action, data) {
 function normalizeEmployeeFromServer(emp) {
   if (!emp) return null;
   
-  // Log all employee fields to find employmentType
-  console.log('=== Employee data from server ===');
-  console.log('All fields:', Object.keys(emp));
-  console.log('Full employee object:', JSON.stringify(emp, null, 2));
-  
-  // Check ALL fields that might contain employment type
-  console.log('=== Checking ALL possible EmploymentType fields ===');
-  const allFields = Object.keys(emp);
-  const empTypeFields = allFields.filter(k => 
-    k.toLowerCase().includes('employ') || 
-    k.toLowerCase().includes('type') ||
-    k.toLowerCase().includes('haasaka') ||
-    k.toLowerCase().includes('העסקה')
-  );
-  console.log('Potential employmentType fields found:', empTypeFields);
-  empTypeFields.forEach(f => console.log(`  ${f}:`, emp[f]));
-  
-  // Direct check for EmploymentType
-  console.log('=== Direct field check ===');
-  console.log('emp.EmploymentType =', emp.EmploymentType);
-  console.log('emp.employmentType =', emp.employmentType);
-  console.log('typeof emp.EmploymentType =', typeof emp.EmploymentType);
-  
-  const empType = normalizeEmploymentType(emp, 'תעשיידע');
-  console.log('Normalized employmentType result:', empType);
+  const empType = normalizeEmploymentType(emp, '');
   
   // Extract employee name - try all possible field names from SharePoint
   const empName = emp.EmployeeName || emp.employeeName || emp.Title || emp.title || '';
-  console.log('Extracted empName:', empName);
   
   // Extract employee ID - try all possible field names
   const empId = emp.employeeId || emp.EmployeeId || emp.ID || emp.Id || emp.id || '';
-  console.log('Extracted empId:', empId);
   
   return {
     employeeId: empId,
@@ -9035,6 +9013,27 @@ async function updateAdminDashboard() {
   
   let employeesMap = {};
   
+  // Fetch employees list for employmentType data
+  try {
+    const empData = await apiRequest('getallemployees', {});
+    if (empData.success && Array.isArray(empData.employees)) {
+      empData.employees.forEach(emp => {
+        const empId = emp.employeeId || emp.EmployeeId || '';
+        if (empId) {
+          employeesMap[empId] = {
+            name: emp.employeeName || emp.EmployeeName || emp.Title || '',
+            team: extractLookupValue(emp.Team || emp.team || '', ''),
+            employmentType: normalizeEmploymentType(emp, ''),
+            role: emp.role || ''
+          };
+        }
+      });
+      console.log('Loaded employeesMap with', Object.keys(employeesMap).length, 'employees');
+    }
+  } catch (e) {
+    console.warn('Could not load employees list:', e.message);
+  }
+  
   // Fetch all records from server
   try {
     const data = await apiRequest('getsummary', {});
@@ -9087,16 +9086,6 @@ async function updateAdminDashboard() {
     
     // Group by employee
     const employeeData = {};
-    
-    if (currentMonthRecords.length > 0) {
-      const sampleRec = currentMonthRecords[0];
-      console.log('=== RAW employmentType debug (first record) ===');
-      console.log('employmentType:', sampleRec.employmentType, typeof sampleRec.employmentType);
-      console.log('EmploymentType:', sampleRec.EmploymentType, typeof sampleRec.EmploymentType);
-      console.log('EmployeeType:', sampleRec.EmployeeType);
-      console.log('SogHaasaka:', sampleRec.SogHaasaka);
-      console.log('All keys:', Object.keys(sampleRec).filter(k => k.toLowerCase().includes('employ') || k.toLowerCase().includes('type') || k.toLowerCase().includes('sog')));
-    }
     
     currentMonthRecords.forEach(rec => {
       const empId = rec.employeeId || 'unknown';
