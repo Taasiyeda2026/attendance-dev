@@ -3896,6 +3896,13 @@ function normalizePayload(action, data) {
         monthKey: data.monthKey || data.month
       };
       
+    case 'cancelinstructorapproval':
+      return {
+        action: 'cancelinstructorapproval',
+        employeeId: data.employeeId,
+        monthKey: data.monthKey || data.month
+      };
+      
     default:
       throw new Error(`Unsupported action: ${normalizedAction}`);
   }
@@ -5753,6 +5760,12 @@ async function loadApprovalsStatusPage() {
                   <i class="fas ${approvalDate ? 'fa-check-circle' : 'fa-clock'}"></i>
                   ${approvalDate ? formattedApprovalDate : 'ממתין'}
                 </div>
+                ${(approvalDate && user.role === 'system_admin') ? `
+                <button onclick="cancelInstructorApproval('${emp.employeeId}', '${emp.name || emp.employeeName || ''}', '${monthKey}')"
+                  style="background: #ef4444; color: white; border: none; padding: 4px 10px; border-radius: 6px; cursor: pointer; font-size: 11px; font-weight: 600; margin-top: 5px;"
+                  data-testid="btn-cancel-approval-mobile-${emp.employeeId}">
+                  <i class="fas fa-undo"></i> ביטול אישור
+                </button>` : ''}
               </div>
               ${secondColumnHtml}
             </div>
@@ -5806,10 +5819,19 @@ async function loadApprovalsStatusPage() {
             <td>${emp.name || emp.employeeName || '—'}</td>
             <td>${emp.employeeId || '—'}</td>
             <td style="text-align: center;">
-              <span style="display: inline-flex; align-items: center; gap: 5px; padding: 4px 10px; border-radius: 20px; font-size: 13px; font-weight: 600; background: ${approvalDate ? '#dcfce7' : '#fef3c7'}; color: ${approvalDate ? '#166534' : '#92400e'};">
-                <i class="fas ${approvalDate ? 'fa-check-circle' : 'fa-clock'}"></i>
-                ${approvalDate ? formattedApprovalDate : 'ממתין'}
-              </span>
+              <div style="display: flex; align-items: center; justify-content: center; gap: 6px; flex-wrap: wrap;">
+                <span style="display: inline-flex; align-items: center; gap: 5px; padding: 4px 10px; border-radius: 20px; font-size: 13px; font-weight: 600; background: ${approvalDate ? '#dcfce7' : '#fef3c7'}; color: ${approvalDate ? '#166534' : '#92400e'};">
+                  <i class="fas ${approvalDate ? 'fa-check-circle' : 'fa-clock'}"></i>
+                  ${approvalDate ? formattedApprovalDate : 'ממתין'}
+                </span>
+                ${(approvalDate && user.role === 'system_admin') ? `
+                <button onclick="cancelInstructorApproval('${emp.employeeId}', '${emp.name || emp.employeeName || ''}', '${monthKey}')"
+                  style="background: #ef4444; color: white; border: none; padding: 3px 8px; border-radius: 6px; cursor: pointer; font-size: 11px; font-weight: 600;"
+                  title="ביטול אישור מדריך"
+                  data-testid="btn-cancel-approval-${emp.employeeId}">
+                  <i class="fas fa-undo"></i> ביטול
+                </button>` : ''}
+              </div>
             </td>
             <td style="text-align: center;">
               ${secondColumnHtml}
@@ -5887,6 +5909,37 @@ async function approveMonthForEmployee(employeeId, monthKey, teamName) {
     hideLoadingBar();
     console.error('Error approving month:', error);
     showAlert('שגיאה: ' + (error.message || 'לא ניתן לאשר חודש'), 'error');
+  }
+}
+
+async function cancelInstructorApproval(employeeId, employeeName, monthKey) {
+  const user = getCurrentUserData();
+  if (!user || user.role !== 'system_admin') {
+    showAlert('רק מנהל מערכת יכול לבטל אישור מדריך', 'error');
+    return;
+  }
+  
+  if (!confirm(`האם לבטל את אישור המדריך של ${employeeName || employeeId} לחודש ${monthKey}?\n\nהמדריך יצטרך לאשר מחדש.`)) {
+    return;
+  }
+  
+  showLoadingBar();
+  try {
+    const data = await apiRequest('cancelinstructorapproval', {
+      employeeId: String(employeeId),
+      monthKey: monthKey
+    });
+    hideLoadingBar();
+    if (data.success) {
+      showAlert(`אישור המדריך של ${employeeName || employeeId} בוטל בהצלחה`, 'success');
+      loadApprovalsStatusPage();
+    } else {
+      showAlert(data.message || data.error || 'שגיאה בביטול אישור', 'error');
+    }
+  } catch (error) {
+    hideLoadingBar();
+    console.error('Error canceling instructor approval:', error);
+    showAlert('שגיאה: ' + (error.message || 'לא ניתן לבטל אישור'), 'error');
   }
 }
 
