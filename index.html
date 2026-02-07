@@ -3607,6 +3607,20 @@ function formatHoursDisplay(decimalHours) {
   return `${hours}:${minutes.toString().padStart(2, '0')}`;
 }
 
+// =============== Helper: Extract Status Value (handles string, object, and Choice fields) ===============
+function extractStatusValue(statusField, defaultValue = 'ממתין') {
+  if (!statusField) return defaultValue;
+  if (typeof statusField === 'object' && statusField.Value) return statusField.Value;
+  if (typeof statusField === 'string') return statusField;
+  return defaultValue;
+}
+
+// =============== Helper: Check if status indicates approved ===============
+function isStatusApproved(statusField) {
+  const val = extractStatusValue(statusField, '').toLowerCase();
+  return val === 'מאושר' || val === 'approved';
+}
+
 // =============== Helper: Extract SharePoint Lookup Value ===============
 function extractLookupValue(field, defaultValue = '') {
   if (!field) return defaultValue;
@@ -3937,7 +3951,7 @@ function normalizeRecordFromServer(rec) {
     team: rec.team || rec.Team || '',
     employmentType: normalizeEmploymentType(rec, ''),
     attachmentsNames: rec.attachmentsNames || rec.AttachmentsNames || '',
-    status: rec.status || rec.Status || '',
+    status: extractStatusValue(rec.status || rec.Status, ''),
     approvedBy: rec.approvedBy || rec.ApprovedBy || '',
     approvedDate: rec.approvedDate || rec.ApprovedDate || '',
     rejectReason: rec.rejectReason || rec.RejectReason || '',
@@ -4499,7 +4513,7 @@ function canDeleteRecord(record) {
   }
   
   // Check if record has double approval (instructor + manager)
-  const hasDoubleApproval = record && (record.status === 'approved' || record.status === 'מאושר') && record.managerApproved;
+  const hasDoubleApproval = record && isStatusApproved(record.status) && record.managerApproved;
   
   // After double approval, only admin can delete
   if (hasDoubleApproval) {
@@ -6059,6 +6073,17 @@ async function loadTeamRecords(resetFilters = false) {
     if (data.success && Array.isArray(data.records)) {
       teamRecordsCache = data.records;
       
+      // DEBUG: Log first record to see raw SharePoint field formats
+      if (data.records.length > 0) {
+        const sample = data.records[0];
+        console.log('=== RAW SharePoint record sample ===');
+        console.log('status:', sample.status, '(type:', typeof sample.status, ')');
+        console.log('team:', sample.team, '(type:', typeof sample.team, ')');
+        console.log('activityType:', sample.activityType, '(type:', typeof sample.activityType, ')');
+        console.log('employeeId:', sample.employeeId);
+        console.log('ID:', sample.ID);
+      }
+      
       // Load manager approval status for month locking
       try {
         const teamFilter = user.role === 'manager' ? (user.team || 'all') : 'all';
@@ -6169,8 +6194,7 @@ function renderTeamTable(recordsList) {
 
     employeeSummary[empId].totalRecords += Number.isNaN(recordCount) ? 0 : recordCount;
     // Count approved records
-    const statusRaw = String(rec.status || 'pending').toLowerCase();
-    if (statusRaw === 'approved' || statusRaw === 'מאושר') {
+    if (isStatusApproved(rec.status)) {
       employeeSummary[empId].approvedRecords += Number.isNaN(recordCount) ? 0 : recordCount;
     }
     employeeSummary[empId].totalHours += hours;
@@ -6584,7 +6608,7 @@ async function submitAll() {
     return;
   }
   
-  const pending = records.filter(r => r.status !== 'נשלח');
+  const pending = records.filter(r => extractStatusValue(r.status, '') !== 'נשלח');
   
   if (pending.length === 0) {
     showAlert('אין ימי עבודה חדשים לשליחה', 'info');
@@ -9261,10 +9285,11 @@ function toggleMobileWeekDetails(empId, startDay, endDay) {
       recordsDiv.innerHTML = weekRecords.map(rec => {
         const date = formatDateHebrew(rec.attendanceDate || rec.date);
         const recId = rec.ID || rec.id || '';
-        const statusRaw = String(rec.status || 'pending').toLowerCase();
-        const isApproved = (statusRaw === 'approved' || statusRaw === 'מאושר');
-        const status = isApproved ? 'מאושר' : (statusRaw === 'rejected' || statusRaw === 'נדחה' ? 'נדחה' : 'ממתין');
-        const statusColor = isApproved ? '#22c55e' : (statusRaw === 'rejected' || statusRaw === 'נדחה' ? '#ef4444' : '#f59e0b');
+        const statusVal = extractStatusValue(rec.status, 'ממתין').toLowerCase();
+        const isApproved = (statusVal === 'approved' || statusVal === 'מאושר');
+        const isRejected = (statusVal === 'rejected' || statusVal === 'נדחה');
+        const status = isApproved ? 'מאושר' : (isRejected ? 'נדחה' : 'ממתין');
+        const statusColor = isApproved ? '#22c55e' : (isRejected ? '#ef4444' : '#f59e0b');
         const hours = parseFloat(rec.workHours || rec.hours || 0).toFixed(1);
         const km = parseFloat(rec.kilometers || rec.km || 0).toFixed(0);
         
@@ -9472,6 +9497,14 @@ async function approveRecordFromAdmin(recordId) {
     return;
   }
   
+  // Log the raw record for debugging
+  console.log('=== RAW RECORD FROM CACHE ===');
+  console.log('record.status:', record.status, '(type:', typeof record.status, ')');
+  console.log('record.team:', record.team, '(type:', typeof record.team, ')');
+  console.log('record.employeeId:', record.employeeId, 'record.empNum:', record.empNum);
+  console.log('record.ID:', record.ID, 'record.id:', record.id);
+  console.log('All record keys:', Object.keys(record));
+  
   // Save original status for rollback
   const originalStatus = record.status;
   const originalApprovedBy = record.approvedBy;
@@ -9512,40 +9545,68 @@ async function approveRecordFromAdmin(recordId) {
   
   // Send to API in background
   try {
+    const empId = String(record.employeeId || record.empNum || '');
     const payload = {
       action: 'updaterecord',
       recordId: String(recordId),
-      employeeId: String(record.employeeId || record.empNum || ''),
-      employeeName: String(record.employeeName || record.empName || ''),
-      team: String(record.team || ''),
+      employeeId: empId,
+      employeeName: extractLookupValue(record.employeeName || record.empName, ''),
+      team: extractLookupValue(record.team, ''),
       employmentType: normalizeEmploymentType(record, ''),
-      attendanceDate: record.attendanceDate || record.date || '',
-      startTime: record.startTime || record.start || '',
-      endTime: record.endTime || record.end || '',
+      attendanceDate: extractLookupValue(record.attendanceDate || record.date, ''),
+      startTime: extractLookupValue(record.startTime || record.start, ''),
+      endTime: extractLookupValue(record.endTime || record.end, ''),
       workHours: Number(record.workHours || record.hours) || 0,
-      activityType: String(record.activityType || record.activity || ''),
-      schoolName: String(record.schoolName || record.school || ''),
-      municipality: String(record.municipality || ''),
-      programName: String(record.programName || record.program || ''),
+      activityType: extractLookupValue(record.activityType || record.activity, ''),
+      schoolName: extractLookupValue(record.schoolName || record.school, ''),
+      municipality: extractLookupValue(record.municipality, ''),
+      programName: extractLookupValue(record.programName || record.program, ''),
       sessionNumber: Number(record.sessionNumber || record.session) || 0,
       kilometers: Number(record.kilometers || record.km) || 0,
       totalExpenses: Number(record.totalExpenses) || 0,
-      expensesDetails: String(record.expensesDetails || record.expensesDetail || ''),
-      notes: String(record.notes || ''),
-      attachmentsNames: String(record.attachmentsNames || ''),
+      expensesDetails: extractLookupValue(record.expensesDetails || record.expensesDetail, ''),
+      notes: extractLookupValue(record.notes, ''),
+      attachmentsNames: extractLookupValue(record.attachmentsNames, ''),
       ...approvalData
     };
     
-    console.log('=== APPROVE RECORD PAYLOAD ===');
-    console.log('recordId:', payload.recordId, 'status:', payload.status, 'approvedBy:', payload.approvedBy);
+    console.log('=== APPROVE RECORD - FULL PAYLOAD ===');
+    console.log(JSON.stringify(payload, null, 2));
     
     const data = await apiRequest('updaterecord', payload);
     
-    console.log('=== APPROVE RECORD RESPONSE ===', JSON.stringify(data));
+    console.log('=== APPROVE RECORD - API RESPONSE ===');
+    console.log(JSON.stringify(data, null, 2));
     
     if (!data.success) {
-      throw new Error(data.message || data.error || 'Failed to approve record');
+      throw new Error(data.message || data.error || 'שגיאה בעדכון הרשומה');
     }
+    
+    // VERIFICATION: Re-fetch the record from SharePoint to confirm persistence
+    console.log('=== APPROVE RECORD - VERIFYING PERSISTENCE ===');
+    try {
+      const verifyData = await apiRequest('getemployeerecords', { employeeId: empId });
+      if (verifyData.success && Array.isArray(verifyData.records)) {
+        const updatedRecord = verifyData.records.find(r => String(r.ID || r.id) === String(recordId));
+        if (updatedRecord) {
+          const savedStatus = String(updatedRecord.status || '').toLowerCase();
+          console.log('=== VERIFICATION RESULT ===');
+          console.log('Record', recordId, '- status in SharePoint:', updatedRecord.status);
+          console.log('approvedBy in SharePoint:', updatedRecord.approvedBy);
+          if (savedStatus !== 'מאושר' && savedStatus !== 'approved') {
+            console.error('STATUS NOT PERSISTED! SharePoint still has:', updatedRecord.status);
+            showAlert('שגיאה: הסטטוס לא נשמר בשרת. ערך נוכחי: ' + (updatedRecord.status || 'ריק'), 'error');
+          } else {
+            console.log('STATUS VERIFIED - approval persisted successfully');
+          }
+        } else {
+          console.warn('Could not find record', recordId, 'in verification response');
+        }
+      }
+    } catch (verifyError) {
+      console.warn('Verification fetch failed (non-critical):', verifyError.message);
+    }
+    
     hideLoadingBar();
   } catch (error) {
     hideLoadingBar();
@@ -9712,10 +9773,11 @@ function toggleAdminEmployeeDetails(empId) {
             <tbody>
               ${records.map(rec => {
                 const recId = rec.ID || rec.id || '';
-                const statusRaw = String(rec.status || 'pending').toLowerCase();
-                const isApproved = (statusRaw === 'approved' || statusRaw === 'מאושר');
-                const status = isApproved ? 'מאושר' : (statusRaw === 'rejected' || statusRaw === 'נדחה' ? 'נדחה' : 'ממתין');
-                const statusColor = isApproved ? '#22c55e' : (statusRaw === 'rejected' || statusRaw === 'נדחה' ? '#ef4444' : '#f59e0b');
+                const statusVal = extractStatusValue(rec.status, 'ממתין').toLowerCase();
+                const isApproved = (statusVal === 'approved' || statusVal === 'מאושר');
+                const isRejected = (statusVal === 'rejected' || statusVal === 'נדחה');
+                const status = isApproved ? 'מאושר' : (isRejected ? 'נדחה' : 'ממתין');
+                const statusColor = isApproved ? '#22c55e' : (isRejected ? '#ef4444' : '#f59e0b');
                 return `
                 <tr style="border-bottom: 1px solid #e2e8f0;">
                   <td style="padding: 8px; text-align: right; white-space: nowrap;">${rec.attendanceDate || ''}</td>

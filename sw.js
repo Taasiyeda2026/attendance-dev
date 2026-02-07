@@ -1,4 +1,4 @@
-const CACHE_NAME = 'attendance-v95';
+const CACHE_NAME = 'attendance-v96';
 const urlsToCache = [
   './index.html',
   './manifest.json',
@@ -18,7 +18,7 @@ const urlsToCache = [
 
 // Install event - cache essential files
 self.addEventListener('install', (event) => {
-  console.log('[SW] Installing Service Worker v92...');
+  console.log('[SW] Installing Service Worker v96...');
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then((cache) => {
@@ -52,6 +52,30 @@ self.addEventListener('fetch', (event) => {
     return;
   }
   
+  const isHTMLRequest = event.request.mode === 'navigate' || 
+    requestUrl.pathname.endsWith('.html') || 
+    requestUrl.pathname === '/' || 
+    requestUrl.pathname === '';
+
+  if (isHTMLRequest) {
+    event.respondWith(
+      fetch(event.request)
+        .then((response) => {
+          if (response && response.status === 200) {
+            const responseToCache = response.clone();
+            caches.open(CACHE_NAME).then((cache) => {
+              cache.put(event.request, responseToCache).catch(() => {});
+            });
+          }
+          return response;
+        })
+        .catch(() => {
+          return caches.match(event.request).then(r => r || caches.match('./index.html'));
+        })
+    );
+    return;
+  }
+
   event.respondWith(
     caches.match(event.request)
       .then((response) => {
@@ -87,7 +111,6 @@ self.addEventListener('fetch', (event) => {
           return response;
         }).catch((error) => {
           console.error('[SW] Fetch failed:', error);
-          // Return cached index.html for navigation requests
           if (event.request.mode === 'navigate') {
             return caches.match('./index.html');
           }
@@ -99,7 +122,7 @@ self.addEventListener('fetch', (event) => {
 
 // Activate event - clean old caches
 self.addEventListener('activate', (event) => {
-  console.log('[SW] Activating Service Worker v92...');
+  console.log('[SW] Activating Service Worker v96...');
   const cacheWhitelist = [CACHE_NAME];
   event.waitUntil(
     caches.keys().then((cacheNames) => {
@@ -124,4 +147,4 @@ self.addEventListener('message', (event) => {
   }
 });
 
-console.log('[SW] Service Worker v92 loaded');
+console.log('[SW] Service Worker v96 loaded');
