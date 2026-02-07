@@ -3892,7 +3892,7 @@ function normalizePayload(action, data) {
     case 'setmanagerapproval':
       return {
         action: 'setmanagerapproval',
-        team: data.team,
+        employeeId: data.employeeId,
         monthKey: data.monthKey || data.month
       };
       
@@ -4050,17 +4050,25 @@ async function apiRequest(action, data, retryCount = 0) {
 // =============== Schools Data ===============
 const schoolsData = [
   {"רשות":"בנימינה","בית ספר":"מתנ\"ס"},
+  {"רשות":"בנימינה","בית ספר":"בראשית"},
+  {"רשות":"בנימינה","בית ספר":"אשכולות"},
+  {"רשות":"בנימינה","בית ספר":"אמירים"},
+  {"רשות":"בנימינה","בית ספר":"גבע"},
   {"רשות":"ג'דיידה מכר","בית ספר":"ג'דיידה יסודי"},
   {"רשות":"הרצליה","בית ספר":"ויצו פנינים אילנות"},
   {"רשות":"חיפה","בית ספר":"לאובק"},
   {"רשות":"ירושלים","בית ספר":"ביכורים"},
   {"רשות":"כיסרא סמיה","בית ספר":"כיסרא סמיה"},
+  {"רשות":"כסרא סמיע","בית ספר":"כסרא סמיע"},
   {"רשות":"ירכא","בית ספר":"ירכא אל-רואי"},
   {"רשות":"ירכא","בית ספר":"ירכא אל-אמין"},
+  {"רשות":"ירכא","בית ספר":"אלרואיא"},
   {"רשות":"ג'וליס","בית ספר":"דרכא"},
+  {"רשות":"ג'וליס","בית ספר":"ג'וליס"},
   {"רשות":"עין קיניה","בית ספר":"עין קיניה"},
   {"רשות":"בוקעתא","בית ספר":"בוקעתא"},
   {"רשות":"מג'דל שמס","בית ספר":"מג'דל שמס"},
+  {"רשות":"דלית אל-כרמל","בית ספר":"אלאשראק"},
   {"רשות":"יהוד","בית ספר":"הרצל"},
   {"רשות":"יהוד","בית ספר":"יהודה הלוי"},
   {"רשות":"יהוד","בית ספר":"היובל"},
@@ -4099,10 +4107,14 @@ const schoolsData = [
   {"רשות":"קריית טבעון","בית ספר":"כפר הנוער רמת הדסה"},
   {"רשות":"קריית שמונה","בית ספר":"מתנ\"ס קריית שמונה"},
   {"רשות":"קריית שמונה","בית ספר":"עוזיאל"},
+  {"רשות":"קריית שמונה","בית ספר":"המגינים"},
+  {"רשות":"קריית שמונה","בית ספר":"רמב\"ם"},
+  {"רשות":"קריית שמונה","בית ספר":"תל-חי"},
   {"רשות":"ראשון לציון","בית ספר":"גימנסיה"},
   {"רשות":"ראשון לציון","בית ספר":"תיכון המעיין"},
   {"רשות":"רחובות","בית ספר":"בכור לוי"},
   {"רשות":"רחובות","בית ספר":"נבון רחובות"},
+  {"רשות":"רחובות","בית ספר":"קציר"},
   {"רשות":"בוסתן הגליל","בית ספר":"מיטר"},
   {"רשות":"אופקים","בית ספר":"בן גוריון"},
   {"רשות":"אשדוד","בית ספר":"חווה חקלאית - אשכול"},
@@ -4147,6 +4159,7 @@ const schoolsData = [
   {"רשות":"רמלה","בית ספר":"חטיבת עידנים"},
   {"רשות":"רמלה","בית ספר":"מקיף יגאל אלון"},
   {"רשות":"רמלה","בית ספר":"תיכון פרופ נגר"},
+  {"רשות":"רמלה","בית ספר":"שמיר"},
   {"רשות":"שדרות","בית ספר":"חניתה ב'"},
   {"רשות":"אבן שמואל","בית ספר":"שפיר"},
   {"רשות":"שפיר","בית ספר":"תתמ\"ד"},
@@ -5571,6 +5584,8 @@ async function loadApprovalsStatusPage() {
     return;
   }
 
+  try {
+
   // Build employment type lookup from teamRecordsCache (which has the data)
   const employmentTypeLookup = {};
   if (typeof teamRecordsCache !== 'undefined' && Array.isArray(teamRecordsCache)) {
@@ -5723,7 +5738,7 @@ async function loadApprovalsStatusPage() {
             secondColumnHtml = `
               <div style="flex: 1; min-width: 120px; background: #f1f5f9; padding: 8px 12px; border-radius: 8px; text-align: center;">
                 <div style="font-size: 11px; color: #64748b; margin-bottom: 3px;">אישור חודש</div>
-                <button onclick="approveMonthForEmployee('${emp.employeeId}', '${monthKey}', '${teamName}')" 
+                <button onclick="approveMonthForEmployee('${emp.employeeId}', '${monthKey}', '${teamName}', '${(emp.employeeName || '').replace(/'/g, "\\'")}')" 
                   style="background: #3b82f6; color: white; border: none; padding: 6px 14px; border-radius: 8px; cursor: pointer; font-size: 12px; font-weight: 600; width: auto;"
                   data-testid="btn-approve-month-mobile-${emp.employeeId}">
                   <i class="fas fa-check-double"></i> אישור חודש
@@ -5792,7 +5807,7 @@ async function loadApprovalsStatusPage() {
               </span>`;
           } else if (approvalDate) {
             secondColumnHtml = `
-              <button onclick="approveMonthForEmployee('${emp.employeeId}', '${monthKey}', '${teamName}')" 
+              <button onclick="approveMonthForEmployee('${emp.employeeId}', '${monthKey}', '${teamName}', '${(emp.employeeName || '').replace(/'/g, "\\'")}')" 
                 style="background: #3b82f6; color: white; border: none; padding: 6px 16px; border-radius: 8px; cursor: pointer; font-size: 13px; font-weight: 600; width: auto;"
                 data-testid="btn-approve-month-${emp.employeeId}">
                 <i class="fas fa-check-double"></i> אישור חודש
@@ -5868,23 +5883,30 @@ async function loadApprovalsStatusPage() {
     setSilentLoading(dashboardContainer.id, false);
     dashboardContainer.innerHTML = html;
   }
+
+  } catch (renderError) {
+    console.error('Error rendering approvals:', renderError);
+    hideLoadingBar();
+    setSilentLoading(container.id, false);
+    if (dashboardContainer && dashboardContainer !== container) setSilentLoading(dashboardContainer.id, false);
+  }
 }
 
 // Toggle manager approval for an employee's monthly report
-async function approveMonthForEmployee(employeeId, monthKey, teamName) {
+async function approveMonthForEmployee(employeeId, monthKey, teamName, employeeName) {
   const user = getCurrentUserData();
   if (!user || !['manager', 'operations_controller', 'system_admin'].includes(user.role)) {
     showAlert('אין הרשאה לאשר חודש', 'error');
     return;
   }
   
-  const team = teamName || user.team || '';
-  if (!team) {
-    showAlert('לא נמצא צוות לאישור', 'error');
+  if (!employeeId) {
+    showAlert('לא נמצא מדריך לאישור', 'error');
     return;
   }
   
-  if (!confirm(`האם לאשר את החודש ${monthKey} לצוות ${team}?`)) {
+  const displayName = employeeName || employeeId;
+  if (!confirm(`האם לאשר את החודש ${monthKey} עבור ${displayName}?`)) {
     return;
   }
   
@@ -5892,7 +5914,7 @@ async function approveMonthForEmployee(employeeId, monthKey, teamName) {
   try {
     const payload = {
       action: 'setmanagerapproval',
-      team: team,
+      employeeId: String(employeeId),
       monthKey: monthKey
     };
     
@@ -5900,7 +5922,7 @@ async function approveMonthForEmployee(employeeId, monthKey, teamName) {
     
     if (data.success) {
       hideLoadingBar();
-      showAlert('החודש אושר בהצלחה!', 'success');
+      showAlert(`החודש אושר בהצלחה עבור ${displayName}!`, 'success');
       loadApprovalsStatusPage();
     } else {
       throw new Error(data.message || 'שגיאה באישור');
@@ -6573,6 +6595,7 @@ function exportAllToExcel() {
 // =============== Alert ===============
 let loadingBarEl = null;
 let loadingBarCount = 0;
+let loadingBarTimeout = null;
 function showLoadingBar() {
   loadingBarCount++;
   if (!loadingBarEl) {
@@ -6580,12 +6603,22 @@ function showLoadingBar() {
     loadingBarEl.className = 'loading-bar';
     document.body.appendChild(loadingBarEl);
   }
+  if (loadingBarTimeout) clearTimeout(loadingBarTimeout);
+  loadingBarTimeout = setTimeout(() => {
+    if (loadingBarEl && loadingBarEl.parentNode) {
+      console.warn('[LoadingBar] Auto-hide after 15s timeout, count was:', loadingBarCount);
+      loadingBarCount = 0;
+      loadingBarEl.parentNode.removeChild(loadingBarEl);
+      loadingBarEl = null;
+    }
+  }, 15000);
 }
 function hideLoadingBar() {
   loadingBarCount = Math.max(0, loadingBarCount - 1);
   if (loadingBarCount === 0 && loadingBarEl && loadingBarEl.parentNode) {
     loadingBarEl.parentNode.removeChild(loadingBarEl);
     loadingBarEl = null;
+    if (loadingBarTimeout) { clearTimeout(loadingBarTimeout); loadingBarTimeout = null; }
   }
 }
 function setSilentLoading(elementId, loading) {
@@ -7535,9 +7568,11 @@ async function _addRecordInternal() {
       
       hideLoadingBar();
       setSilentLoading('addRecordPage', false);
-      await syncFromSharePoint(empNum);
       showAlert(isEditing ? '✅ הרשומה עודכנה בהצלחה!' : '✅ הדיווח נשלח בהצלחה!', 'success');
-      showPage(null, 'dashboard');
+      if (isEditing) {
+        showPage(null, 'dashboard');
+      }
+      syncFromSharePoint(empNum).catch(err => console.warn('Background sync error:', err));
     } else {
       hideLoadingBar();
       setSilentLoading('addRecordPage', false);
