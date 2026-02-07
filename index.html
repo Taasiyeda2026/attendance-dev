@@ -9587,20 +9587,27 @@ async function approveRecordFromAdmin(recordId) {
     try {
       const verifyData = await apiRequest('getemployeerecords', { employeeId: empId });
       if (verifyData.success && Array.isArray(verifyData.records)) {
-        const updatedRecord = verifyData.records.find(r => String(r.ID || r.id) === String(recordId));
+        const updatedRecord = verifyData.records.find(r => String(r.ID || r.Id || r.id) === String(recordId));
         if (updatedRecord) {
-          const savedStatus = String(updatedRecord.status || '').toLowerCase();
+          console.log('=== VERIFICATION - RAW RECORD KEYS ===');
+          console.log('All keys:', Object.keys(updatedRecord).join(', '));
+          const statusKeys = Object.keys(updatedRecord).filter(k => k.toLowerCase().includes('status'));
+          console.log('Status-related keys:', statusKeys.map(k => k + '=' + JSON.stringify(updatedRecord[k])).join(', '));
+          
+          const rawStatus = updatedRecord.status || updatedRecord.Status || updatedRecord.OData__x0073_tatus;
+          const savedStatus = extractStatusValue(rawStatus, '');
           console.log('=== VERIFICATION RESULT ===');
-          console.log('Record', recordId, '- status in SharePoint:', updatedRecord.status);
-          console.log('approvedBy in SharePoint:', updatedRecord.approvedBy);
+          console.log('Record', recordId, '- raw status field:', rawStatus, '(type:', typeof rawStatus, ')');
+          console.log('Record', recordId, '- extracted status:', savedStatus);
+          console.log('approvedBy in SharePoint:', updatedRecord.approvedBy || updatedRecord.ApprovedBy);
           if (savedStatus !== 'מאושר' && savedStatus !== 'approved') {
-            console.error('STATUS NOT PERSISTED! SharePoint still has:', updatedRecord.status);
-            showAlert('שגיאה: הסטטוס לא נשמר בשרת. ערך נוכחי: ' + (updatedRecord.status || 'ריק'), 'error');
+            console.error('STATUS NOT PERSISTED! Extracted status:', savedStatus, '| Raw:', JSON.stringify(rawStatus));
           } else {
             console.log('STATUS VERIFIED - approval persisted successfully');
           }
         } else {
-          console.warn('Could not find record', recordId, 'in verification response');
+          console.warn('Could not find record', recordId, 'in verification response. Available IDs:', 
+            verifyData.records.slice(0, 5).map(r => r.ID || r.Id || r.id));
         }
       }
     } catch (verifyError) {
