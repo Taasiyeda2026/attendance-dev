@@ -3608,11 +3608,18 @@ function formatHoursDisplay(decimalHours) {
 }
 
 // =============== Helper: Extract Status Value (handles string, object, and Choice fields) ===============
-function extractStatusValue(statusField, defaultValue = 'ממתין') {
+function extractStatusValue(statusField, defaultValue = 'pending') {
   if (!statusField) return defaultValue;
   if (typeof statusField === 'object' && statusField.Value) return statusField.Value;
   if (typeof statusField === 'string') return statusField;
   return defaultValue;
+}
+
+function getStatusDisplayText(statusField) {
+  const val = extractStatusValue(statusField, 'pending').toLowerCase();
+  if (val === 'approved' || val === 'מאושר') return 'מאושר';
+  if (val === 'rejected' || val === 'נדחה') return 'נדחה';
+  return 'ממתין';
 }
 
 // =============== Helper: Check if status indicates approved ===============
@@ -3812,7 +3819,7 @@ function normalizePayload(action, data) {
         totalExpenses: Number(data.totalExpenses || 0),
         expensesDetails: String(data.expensesDetails || ''),
         notes: String(data.notes || ''),
-        status: data.status || 'ממתין',
+        status: data.status || 'pending',
         approvedBy: String(data.approvedBy || ''),
         approvedDate: String(data.approvedDate || ''),
         attachmentsNames: String(data.attachmentsNames || '')
@@ -4649,7 +4656,7 @@ async function updateRecordOnServer(updatedRecord, originalDate, originalStartTi
       totalExpenses: Number(updatedRecord.totalExpenses) || 0,
       expensesDetails: updatedRecord.expensesDetail || updatedRecord.expensesDetails || '',
       notes: updatedRecord.notes || '',
-      status: updatedRecord.status || 'ממתין',
+      status: updatedRecord.status || 'pending',
       attachmentsNames: updatedRecord.attachmentsNames || ''
     };
     
@@ -6608,7 +6615,7 @@ async function submitAll() {
     return;
   }
   
-  const pending = records.filter(r => extractStatusValue(r.status, '') !== 'נשלח');
+  const pending = records.filter(r => !isStatusApproved(r.status));
   
   if (pending.length === 0) {
     showAlert('אין ימי עבודה חדשים לשליחה', 'info');
@@ -8003,7 +8010,7 @@ async function saveEdit() {
     expensesDetails: expensesDetail,
     notes,
     attachments,
-    status: 'ממתין'
+    status: 'pending'
   };
   
   showLoadingBar();
@@ -9285,10 +9292,9 @@ function toggleMobileWeekDetails(empId, startDay, endDay) {
       recordsDiv.innerHTML = weekRecords.map(rec => {
         const date = formatDateHebrew(rec.attendanceDate || rec.date);
         const recId = rec.ID || rec.id || '';
-        const statusVal = extractStatusValue(rec.status, 'ממתין').toLowerCase();
-        const isApproved = (statusVal === 'approved' || statusVal === 'מאושר');
-        const isRejected = (statusVal === 'rejected' || statusVal === 'נדחה');
-        const status = isApproved ? 'מאושר' : (isRejected ? 'נדחה' : 'ממתין');
+        const isApproved = isStatusApproved(rec.status);
+        const isRejected = extractStatusValue(rec.status, 'pending').toLowerCase() === 'rejected';
+        const status = getStatusDisplayText(rec.status);
         const statusColor = isApproved ? '#22c55e' : (isRejected ? '#ef4444' : '#f59e0b');
         const hours = parseFloat(rec.workHours || rec.hours || 0).toFixed(1);
         const km = parseFloat(rec.kilometers || rec.km || 0).toFixed(0);
@@ -9512,7 +9518,7 @@ async function approveRecordFromAdmin(recordId) {
   
   // OPTIMISTIC UPDATE: Update cache immediately
   const approvalData = {
-    status: 'מאושר',
+    status: 'approved',
     approvedBy: user.empName || user.empNum,
     approvedDate: new Date().toISOString()
   };
@@ -9600,7 +9606,7 @@ async function approveRecordFromAdmin(recordId) {
           console.log('Record', recordId, '- raw status field:', rawStatus, '(type:', typeof rawStatus, ')');
           console.log('Record', recordId, '- extracted status:', savedStatus);
           console.log('approvedBy in SharePoint:', updatedRecord.approvedBy || updatedRecord.ApprovedBy);
-          if (savedStatus !== 'מאושר' && savedStatus !== 'approved') {
+          if (!isStatusApproved(rawStatus)) {
             console.error('STATUS NOT PERSISTED! Extracted status:', savedStatus, '| Raw:', JSON.stringify(rawStatus));
           } else {
             console.log('STATUS VERIFIED - approval persisted successfully');
@@ -9780,10 +9786,9 @@ function toggleAdminEmployeeDetails(empId) {
             <tbody>
               ${records.map(rec => {
                 const recId = rec.ID || rec.id || '';
-                const statusVal = extractStatusValue(rec.status, 'ממתין').toLowerCase();
-                const isApproved = (statusVal === 'approved' || statusVal === 'מאושר');
-                const isRejected = (statusVal === 'rejected' || statusVal === 'נדחה');
-                const status = isApproved ? 'מאושר' : (isRejected ? 'נדחה' : 'ממתין');
+                const isApproved = isStatusApproved(rec.status);
+                const isRejected = extractStatusValue(rec.status, 'pending').toLowerCase() === 'rejected';
+                const status = getStatusDisplayText(rec.status);
                 const statusColor = isApproved ? '#22c55e' : (isRejected ? '#ef4444' : '#f59e0b');
                 return `
                 <tr style="border-bottom: 1px solid #e2e8f0;">
