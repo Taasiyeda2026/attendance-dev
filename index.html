@@ -3714,14 +3714,11 @@ function normalizeEmploymentType(source, defaultValue = '') {
     extractedValue = extractLookupValue(source, '');
   }
 
-  // Validate against allowed EMPLOYMENT_TYPES list
-  if (extractedValue && EMPLOYMENT_TYPES.includes(extractedValue)) {
+  if (extractedValue && extractedValue.trim()) {
+    if (!EMPLOYMENT_TYPES.includes(extractedValue)) {
+      console.warn('Employment type not in list:', extractedValue, '- using as-is');
+    }
     return extractedValue;
-  }
-
-  // If extracted value doesn't match, log warning and return default
-  if (extractedValue && !EMPLOYMENT_TYPES.includes(extractedValue)) {
-    console.warn('Invalid employment type value:', extractedValue, '- using default:', defaultValue);
   }
 
   return defaultValue;
@@ -6272,7 +6269,7 @@ function renderTeamTable(recordsList) {
     const empId = rec.employeeId || rec.empNum || rec.EmployeeId;
     const empName = rec.employeeName || rec.empName || rec.EmployeeName || 'לא ידוע';
     const team = rec.team || rec.Team || '-';
-    const empType = normalizeEmploymentType(rec, 'תעשיידע');
+    const empType = normalizeEmploymentType(rec, '');
     const hours = parseFloat(rec.totalHours || rec.workHours || rec.hours || rec.WorkHours || 0);
     const km = parseFloat(rec.totalKm || rec.kilometers || rec.km || rec.Kilometers || 0);
     const expenses = parseFloat(rec.totalExpenses || rec.TotalExpenses || 0);
@@ -9091,6 +9088,16 @@ async function updateAdminDashboard() {
     // Group by employee
     const employeeData = {};
     
+    if (currentMonthRecords.length > 0) {
+      const sampleRec = currentMonthRecords[0];
+      console.log('=== RAW employmentType debug (first record) ===');
+      console.log('employmentType:', sampleRec.employmentType, typeof sampleRec.employmentType);
+      console.log('EmploymentType:', sampleRec.EmploymentType, typeof sampleRec.EmploymentType);
+      console.log('EmployeeType:', sampleRec.EmployeeType);
+      console.log('SogHaasaka:', sampleRec.SogHaasaka);
+      console.log('All keys:', Object.keys(sampleRec).filter(k => k.toLowerCase().includes('employ') || k.toLowerCase().includes('type') || k.toLowerCase().includes('sog')));
+    }
+    
     currentMonthRecords.forEach(rec => {
       const empId = rec.employeeId || 'unknown';
       const empName = extractValue(rec.employeeName) || extractValue(rec.EmployeeName) || 'לא ידוע';
@@ -9098,7 +9105,7 @@ async function updateAdminDashboard() {
       // Try to get employmentType and team from employees list first
       const empFromList = employeesMap[empId];
       const team = (empFromList && empFromList.team) || extractValue(rec.team) || extractValue(rec.Team) || '-';
-      const empType = (empFromList && empFromList.employmentType) || normalizeEmploymentType(rec, 'תעשיידע');
+      const empType = (empFromList && empFromList.employmentType) || normalizeEmploymentType(rec, '');
       
       if (!employeeData[empId]) {
         employeeData[empId] = {
@@ -9114,7 +9121,7 @@ async function updateAdminDashboard() {
         };
       } else {
         // עדכן employmentType רק אם הנוכחי לא ריק והשמור הוא ברירת מחדל
-        if (empType && empType !== 'תעשיידע' && employeeData[empId].employmentType === 'תעשיידע') {
+        if (empType && empType !== '' && (!employeeData[empId].employmentType || employeeData[empId].employmentType === '')) {
           employeeData[empId].employmentType = empType;
         }
         // עדכן team רק אם הנוכחי לא ריק והשמור ריק
