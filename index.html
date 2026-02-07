@@ -6187,16 +6187,18 @@ async function loadTeamRecords(resetFilters = false) {
       
       // Manager always sees only their own team
       if (user.role === 'manager' && user.team) {
+        const managerTeam = user.team.trim().toLowerCase();
         filteredRecords = data.records.filter(rec => {
-          const recTeam = (rec.team || rec.Team || '').trim().toLowerCase();
-          return recTeam === (user.team || '').trim().toLowerCase();
+          const recTeam = extractLookupValue(rec.team || rec.Team || '', '').trim().toLowerCase();
+          return recTeam === managerTeam;
         });
       }
       // Admin/operations_controller can filter by selected team
       else if (selectedTeamFilter !== 'all' && (user.role === 'system_admin' || user.role === 'operations_controller')) {
+        const filterTeam = selectedTeamFilter.trim().toLowerCase();
         filteredRecords = data.records.filter(rec => {
-          const recTeam = (rec.team || rec.Team || '').trim().toLowerCase();
-          return recTeam === selectedTeamFilter.trim().toLowerCase();
+          const recTeam = extractLookupValue(rec.team || rec.Team || '', '').trim().toLowerCase();
+          return recTeam === filterTeam;
         });
       }
       
@@ -7156,7 +7158,7 @@ async function updatePayrollSummaryTable() {
     
     // Update team if empty
     if (!instructorData[name].team && rec.team) {
-      instructorData[name].team = rec.team;
+      instructorData[name].team = extractLookupValue(rec.team, '');
     }
   });
   
@@ -9146,7 +9148,10 @@ async function updateAdminDashboard() {
     }
     
     if (filterTeam !== 'all') {
-      filteredEmployees = filteredEmployees.filter(emp => emp.team === filterTeam);
+      filteredEmployees = filteredEmployees.filter(emp => {
+        const empTeam = (emp.team || '').trim().toLowerCase();
+        return empTeam === filterTeam.trim().toLowerCase();
+      });
     }
     
     // Sort by name
@@ -10048,18 +10053,27 @@ async function loadReportData() {
     
     // Manager can only see their own team
     if (user.role === 'manager') {
-      const managerTeam = user.team || localStorage.getItem('team') || '';
+      const managerTeam = (user.team || localStorage.getItem('team') || '').trim().toLowerCase();
       if (managerTeam) {
-        reportRecords = reportRecords.filter(rec => rec.team === managerTeam);
+        reportRecords = reportRecords.filter(rec => {
+          const recTeam = extractLookupValue(rec.team, '').trim().toLowerCase();
+          return recTeam === managerTeam;
+        });
       }
     }
     
     if (employmentType !== 'all') {
-      reportRecords = reportRecords.filter(rec => rec.employmentType === employmentType);
+      reportRecords = reportRecords.filter(rec => {
+        const recType = extractLookupValue(rec.employmentType, '');
+        return recType === employmentType;
+      });
     }
     
     if (team !== 'all') {
-      reportRecords = reportRecords.filter(rec => rec.team === team);
+      reportRecords = reportRecords.filter(rec => {
+        const recTeam = extractLookupValue(rec.team, '').trim().toLowerCase();
+        return recTeam === team.trim().toLowerCase();
+      });
     }
     
     if (activityType !== 'all') {
