@@ -3615,16 +3615,33 @@ function extractStatusValue(statusField, defaultValue = 'pending') {
   return defaultValue;
 }
 
-function getStatusDisplayText(statusField) {
-  const val = extractStatusValue(statusField, 'pending').toLowerCase();
+function deriveRecordStatus(record) {
+  const statusVal = extractStatusValue(record?.status || record?.Status, '').toLowerCase();
+  if (statusVal === 'approved' || statusVal === 'מאושר') return 'approved';
+  if (statusVal === 'rejected' || statusVal === 'נדחה') return 'rejected';
+  const approvedBy = record?.approvedBy || record?.ApprovedBy || '';
+  if (approvedBy && String(approvedBy).trim() !== '') return 'approved';
+  return 'pending';
+}
+
+function getStatusDisplayText(statusFieldOrRecord) {
+  if (statusFieldOrRecord && typeof statusFieldOrRecord === 'object' && ('approvedBy' in statusFieldOrRecord || 'ApprovedBy' in statusFieldOrRecord || 'employeeId' in statusFieldOrRecord)) {
+    const val = deriveRecordStatus(statusFieldOrRecord);
+    if (val === 'approved') return 'מאושר';
+    if (val === 'rejected') return 'נדחה';
+    return 'ממתין';
+  }
+  const val = extractStatusValue(statusFieldOrRecord, 'pending').toLowerCase();
   if (val === 'approved' || val === 'מאושר') return 'מאושר';
   if (val === 'rejected' || val === 'נדחה') return 'נדחה';
   return 'ממתין';
 }
 
-// =============== Helper: Check if status indicates approved ===============
-function isStatusApproved(statusField) {
-  const val = extractStatusValue(statusField, '').toLowerCase();
+function isStatusApproved(statusFieldOrRecord) {
+  if (statusFieldOrRecord && typeof statusFieldOrRecord === 'object' && ('approvedBy' in statusFieldOrRecord || 'ApprovedBy' in statusFieldOrRecord || 'employeeId' in statusFieldOrRecord)) {
+    return deriveRecordStatus(statusFieldOrRecord) === 'approved';
+  }
+  const val = extractStatusValue(statusFieldOrRecord, '').toLowerCase();
   return val === 'מאושר' || val === 'approved';
 }
 
@@ -3958,7 +3975,7 @@ function normalizeRecordFromServer(rec) {
     team: rec.team || rec.Team || '',
     employmentType: normalizeEmploymentType(rec, ''),
     attachmentsNames: rec.attachmentsNames || rec.AttachmentsNames || '',
-    status: extractStatusValue(rec.status || rec.Status, ''),
+    status: deriveRecordStatus(rec),
     approvedBy: rec.approvedBy || rec.ApprovedBy || '',
     approvedDate: rec.approvedDate || rec.ApprovedDate || '',
     rejectReason: rec.rejectReason || rec.RejectReason || '',
@@ -4520,7 +4537,7 @@ function canDeleteRecord(record) {
   }
   
   // Check if record has double approval (instructor + manager)
-  const hasDoubleApproval = record && isStatusApproved(record.status) && record.managerApproved;
+  const hasDoubleApproval = record && isStatusApproved(record) && record.managerApproved;
   
   // After double approval, only admin can delete
   if (hasDoubleApproval) {
@@ -6201,7 +6218,7 @@ function renderTeamTable(recordsList) {
 
     employeeSummary[empId].totalRecords += Number.isNaN(recordCount) ? 0 : recordCount;
     // Count approved records
-    if (isStatusApproved(rec.status)) {
+    if (isStatusApproved(rec)) {
       employeeSummary[empId].approvedRecords += Number.isNaN(recordCount) ? 0 : recordCount;
     }
     employeeSummary[empId].totalHours += hours;
@@ -6615,7 +6632,7 @@ async function submitAll() {
     return;
   }
   
-  const pending = records.filter(r => !isStatusApproved(r.status));
+  const pending = records.filter(r => !isStatusApproved(r));
   
   if (pending.length === 0) {
     showAlert('אין ימי עבודה חדשים לשליחה', 'info');
@@ -9292,9 +9309,9 @@ function toggleMobileWeekDetails(empId, startDay, endDay) {
       recordsDiv.innerHTML = weekRecords.map(rec => {
         const date = formatDateHebrew(rec.attendanceDate || rec.date);
         const recId = rec.ID || rec.id || '';
-        const isApproved = isStatusApproved(rec.status);
-        const isRejected = extractStatusValue(rec.status, 'pending').toLowerCase() === 'rejected';
-        const status = getStatusDisplayText(rec.status);
+        const isApproved = isStatusApproved(rec);
+        const isRejected = deriveRecordStatus(rec) === 'rejected';
+        const status = getStatusDisplayText(rec);
         const statusColor = isApproved ? '#22c55e' : (isRejected ? '#ef4444' : '#f59e0b');
         const hours = parseFloat(rec.workHours || rec.hours || 0).toFixed(1);
         const km = parseFloat(rec.kilometers || rec.km || 0).toFixed(0);
@@ -9600,16 +9617,15 @@ async function approveRecordFromAdmin(recordId) {
           const statusKeys = Object.keys(updatedRecord).filter(k => k.toLowerCase().includes('status'));
           console.log('Status-related keys:', statusKeys.map(k => k + '=' + JSON.stringify(updatedRecord[k])).join(', '));
           
-          const rawStatus = updatedRecord.status || updatedRecord.Status || updatedRecord.OData__x0073_tatus;
-          const savedStatus = extractStatusValue(rawStatus, '');
+          const derivedStatus = deriveRecordStatus(updatedRecord);
+          const approvedByVal = updatedRecord.approvedBy || updatedRecord.ApprovedBy || '';
           console.log('=== VERIFICATION RESULT ===');
-          console.log('Record', recordId, '- raw status field:', rawStatus, '(type:', typeof rawStatus, ')');
-          console.log('Record', recordId, '- extracted status:', savedStatus);
-          console.log('approvedBy in SharePoint:', updatedRecord.approvedBy || updatedRecord.ApprovedBy);
-          if (!isStatusApproved(rawStatus)) {
-            console.error('STATUS NOT PERSISTED! Extracted status:', savedStatus, '| Raw:', JSON.stringify(rawStatus));
+          console.log('Record', recordId, '- derived status:', derivedStatus);
+          console.log('Record', recordId, '- approvedBy:', approvedByVal);
+          if (derivedStatus !== 'approved') {
+            console.error('APPROVAL NOT PERSISTED! approvedBy is empty. Derived status:', derivedStatus);
           } else {
-            console.log('STATUS VERIFIED - approval persisted successfully');
+            console.log('APPROVAL VERIFIED - approvedBy persisted successfully:', approvedByVal);
           }
         } else {
           console.warn('Could not find record', recordId, 'in verification response. Available IDs:', 
@@ -9786,9 +9802,9 @@ function toggleAdminEmployeeDetails(empId) {
             <tbody>
               ${records.map(rec => {
                 const recId = rec.ID || rec.id || '';
-                const isApproved = isStatusApproved(rec.status);
-                const isRejected = extractStatusValue(rec.status, 'pending').toLowerCase() === 'rejected';
-                const status = getStatusDisplayText(rec.status);
+                const isApproved = isStatusApproved(rec);
+                const isRejected = deriveRecordStatus(rec) === 'rejected';
+                const status = getStatusDisplayText(rec);
                 const statusColor = isApproved ? '#22c55e' : (isRejected ? '#ef4444' : '#f59e0b');
                 return `
                 <tr style="border-bottom: 1px solid #e2e8f0;">
