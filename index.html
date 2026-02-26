@@ -2836,6 +2836,7 @@
                   <option value="מייקרים טכנו-כיף">מייקרים טכנו-כיף</option>
                   <option value="מנהיגות ירוקה">מנהיגות ירוקה</option>
                   <option value="מקורות">מקורות</option>
+                  <option value="פרימיום">פרימיום</option>
                   <option value="משחקי קופסה">משחקי קופסה</option>
                   <option value="פורצות דרך">פורצות דרך</option>
                   <option value="רוקחים עולם">רוקחים עולם</option>
@@ -3363,6 +3364,7 @@
               <option value="מייקרים טכנו-כיף">מייקרים טכנו-כיף</option>
               <option value="מנהיגות ירוקה">מנהיגות ירוקה</option>
               <option value="מקורות">מקורות</option>
+              <option value="פרימיום">פרימיום</option>
               <option value="משחקי קופסה">משחקי קופסה</option>
               <option value="פורצות דרך">פורצות דרך</option>
               <option value="רוקחים עולם">רוקחים עולם</option>
@@ -3583,6 +3585,7 @@ const PROGRAMS_LIST = [
   'מנהיגות ירוקה',
   'מקורות',
   'משחקי קופסה',
+  'פרימיום',
   'פורצות דרך',
   'רוקחים עולם',
   'טכנולוגיות החלל',
@@ -3898,6 +3901,15 @@ function normalizePayload(action, data) {
         employeeId: data.employeeId,
         monthKey: data.monthKey || data.month
       };
+
+    case 'uploadfile':
+      return {
+        action: 'uploadfile',
+        employeeId: data.employeeId,
+        attendanceDate: data.attendanceDate,
+        fileName: data.fileName,
+        fileContent: data.fileContent
+      };
       
     default:
       throw new Error(`Unsupported action: ${normalizedAction}`);
@@ -4063,8 +4075,8 @@ const schoolsData = [
   {"רשות":"נתניה","בית ספר":"אלדד"},
   {"רשות":"נתניה","בית ספר":"ריגלר"},
   {"רשות":"נתניה","בית ספר":"אלתרמן"},
+  {"רשות":"נתניה","בית ספר":"שחפים"},
   {"רשות":"נתניה","בית ספר":"אורט גוטמן"},
-  {"רשות":"נתניה","בית ספר":"שחפים חנ\"מ (אלומות לשעבר)"},
   {"רשות":"עין אלאסד","בית ספר":"עין אלאסד"},
   {"רשות":"עכו","בית ספר":"גורדון"},
   {"רשות":"עכו","בית ספר":"העליה השניה"},
@@ -4085,6 +4097,8 @@ const schoolsData = [
   {"רשות":"רחובות","בית ספר":"בכור לוי"},
   {"רשות":"רחובות","בית ספר":"נבון רחובות"},
   {"רשות":"רחובות","בית ספר":"קציר"},
+  {"רשות":"רחובות","בית ספר":"סמילנסקי"},
+  {"רשות":"רחובות","בית ספר":"דהשליט"},
   {"רשות":"בוסתן הגליל","בית ספר":"מיטר"},
   {"רשות":"אופקים","בית ספר":"בן גוריון"},
   {"רשות":"אשדוד","בית ספר":"חווה חקלאית - אשכול"},
@@ -4130,7 +4144,9 @@ const schoolsData = [
   {"רשות":"רמלה","בית ספר":"מקיף יגאל אלון"},
   {"רשות":"רמלה","בית ספר":"תיכון פרופ נגר"},
   {"רשות":"רמלה","בית ספר":"שמיר"},
-  {"רשות":"שדרות","בית ספר":"חניתה ב'"},
+  {"רשות":"שדרות","בית ספר":"חניתה ב"},
+  {"רשות":"שדרות","בית ספר":"שקמים מעוז"},
+  {"רשות":"שדרות","בית ספר":"אמית שדרות"},
   {"רשות":"אבן שמואל","בית ספר":"שפיר"},
   {"רשות":"שפיר","בית ספר":"תתמ\"ד"},
   {"רשות":"שער הנגב","בית ספר":"שדות רוחמה"}
@@ -5696,7 +5712,8 @@ async function loadApprovalsStatusPage() {
         const formattedManagerDate = emp.managerApprovalDate ? new Date(emp.managerApprovalDate).toLocaleDateString('he-IL') : '';
         
         let secondColumnHtml = '';
-        if (user.role === 'manager') {
+        const canApproveMonth = (user.role === 'manager' || user.role === 'operations_controller');
+        if (canApproveMonth) {
           if (managerApproved) {
             secondColumnHtml = `
               <div style="flex: 1; min-width: 120px; background: #dcfce7; padding: 8px 12px; border-radius: 8px; text-align: center;">
@@ -5762,7 +5779,8 @@ async function loadApprovalsStatusPage() {
       html += `<div>${cards}</div>`;
     } else {
       // Desktop: Table view
-      const secondColumnHeader = user.role === 'manager' ? 'אישור חודש' : 'אישור מנהל';
+      const canApproveMonthDesktop = (user.role === 'manager' || user.role === 'operations_controller');
+      const secondColumnHeader = canApproveMonthDesktop ? 'אישור חודש' : 'אישור מנהל';
       const rows = teamEmps.map(emp => {
         const approvalDate = emp.instructorApprovalDate || emp.approvalDate || null;
         const managerApproved = emp.managerApprovalDate || emp.released || false;
@@ -5770,7 +5788,7 @@ async function loadApprovalsStatusPage() {
         const formattedManagerDate = emp.managerApprovalDate ? new Date(emp.managerApprovalDate).toLocaleDateString('he-IL') : '';
         
         let secondColumnHtml = '';
-        if (user.role === 'manager') {
+        if (canApproveMonthDesktop) {
           if (managerApproved) {
             secondColumnHtml = `
               <span style="display: inline-flex; align-items: center; gap: 5px; padding: 4px 10px; border-radius: 20px; font-size: 13px; font-weight: 600; background: #dcfce7; color: #166534;">
@@ -7532,21 +7550,35 @@ async function _addRecordInternal() {
     const data = await apiRequest(actionType, payload);
     
     if (data.success) {
-      // Upload files if any selected
-      if (selectedFiles.length > 0) {
-        const uploadResult = await uploadFilesToSharePoint(finalEmployeeId, date);
-        if (uploadResult.urls.length > 0 && (data.recordId || editingId)) {
-          const attachmentsNames = uploadResult.urls.join(', ');
-          await apiRequest('updaterecord', {
-            action: 'updaterecord',
-            recordId: String(data.recordId || editingId),
-            employeeId: String(finalEmployeeId),
-            employeeName: String(finalEmployeeName),
-            team: String(localStorage.getItem("team") || ''),
-            employmentType: String(localStorage.getItem("employmentType") || 'תעשיידע'),
-            attachmentsNames: attachmentsNames
-          });
+      let submitSuccessMessage = isEditing ? '✅ הרשומה עודכנה בהצלחה!' : '✅ הדיווח נשלח בהצלחה!';
+
+      if (!isEditing && selectedFiles.length > 0) {
+        let uploadSucceeded = true;
+
+        for (const file of selectedFiles) {
+          try {
+            const base64Content = await fileToBase64(file);
+            const uploadPayload = {
+              action: 'uploadfile',
+              employeeId: String(finalEmployeeId),
+              attendanceDate: String(date),
+              fileName: String(file.name),
+              fileContent: String(base64Content)
+            };
+
+            const uploadResponse = await apiRequest('uploadfile', uploadPayload);
+            if (!uploadResponse.success) {
+              uploadSucceeded = false;
+            }
+          } catch (uploadError) {
+            uploadSucceeded = false;
+            console.error('Error uploading file after submit:', file.name, uploadError);
+          }
         }
+
+        submitSuccessMessage = uploadSucceeded
+          ? 'הדיווח נשמר והקובץ הועלה'
+          : 'הדיווח נשמר, אבל הקובץ לא הועלה';
       }
       
       clearAddForm();
@@ -7560,7 +7592,7 @@ async function _addRecordInternal() {
       
       hideLoadingBar();
       setSilentLoading('addRecordPage', false);
-      showAlert(isEditing ? '✅ הרשומה עודכנה בהצלחה!' : '✅ הדיווח נשלח בהצלחה!', 'success');
+      showAlert(submitSuccessMessage, 'success');
       if (isEditing) {
         showPage(null, 'dashboard');
       }
