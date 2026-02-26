@@ -3919,22 +3919,34 @@ function normalizePayload(action, data) {
 /**
  * Convert Employee table response (PascalCase) to frontend format
  */
+function sanitizeEmployeeData(raw) {
+  if (!raw) return null;
+  const allowed = ['employeeId', 'EmployeeId', 'ID', 'Id', 'id',
+    'EmployeeName', 'employeeName', 'Title', 'title',
+    'role', 'Team', 'team', 'EmploymentType', 'employmentType'];
+  const clean = {};
+  for (const key of allowed) {
+    if (raw[key] !== undefined) clean[key] = raw[key];
+  }
+  return clean;
+}
+
 function normalizeEmployeeFromServer(emp) {
   if (!emp) return null;
   
-  const empType = normalizeEmploymentType(emp, '');
+  const safe = sanitizeEmployeeData(emp);
   
-  // Extract employee name - try all possible field names from SharePoint
-  const empName = emp.EmployeeName || emp.employeeName || emp.Title || emp.title || '';
+  const empType = normalizeEmploymentType(safe, '');
   
-  // Extract employee ID - try all possible field names
-  const empId = emp.employeeId || emp.EmployeeId || emp.ID || emp.Id || emp.id || '';
+  const empName = safe.EmployeeName || safe.employeeName || safe.Title || safe.title || '';
+  
+  const empId = safe.employeeId || safe.EmployeeId || safe.ID || safe.Id || safe.id || '';
   
   return {
     employeeId: empId,
     empName: empName,
-    role: emp.role || 'instructor',
-    team: extractLookupValue(emp.Team || emp.team || '', ''),
+    role: safe.role || 'instructor',
+    team: extractLookupValue(safe.Team || safe.team || '', ''),
     employmentType: empType
   };
 }
@@ -4250,8 +4262,6 @@ function getCurrentUserData() {
 function updateMenuByRole(role) {
   // Normalize the role (in case it wasn't normalized earlier)
   const normalizedRole = normalizeRole(role);
-  console.log('updateMenuByRole called with:', role, '-> normalized to:', normalizedRole);
-  
   // Handle sidebar nav items via data-roles
   const navItems = document.querySelectorAll('#sidebarNav .nav-item');
   navItems.forEach(item => {
@@ -4261,7 +4271,6 @@ function updateMenuByRole(role) {
     } else {
       const roles = allowedRoles.split(',').map(r => r.trim());
       const isAllowed = roles.includes(normalizedRole);
-      console.log('Menu item:', item.querySelector('span')?.textContent, 'roles:', roles, 'allowed:', isAllowed);
       item.style.display = isAllowed ? 'flex' : 'none';
     }
   });
@@ -4440,7 +4449,7 @@ function canEditRecord(record) {
   // instructor can edit only their own records, unless month is approved
   if (role === 'instructor') {
     const recordEmpNum = record.empNum || record.employeeId;
-    const userEmpNum = user.empNum || localStorage.getItem('employeeId');
+    const userEmpNum = user.empNum || '';
 
     // Must be own record
     if (String(recordEmpNum) !== String(userEmpNum)) {
@@ -4497,7 +4506,7 @@ function getEditBlockReason(record) {
 
   if (role === 'instructor') {
     const recordEmpNum = record.empNum || record.employeeId;
-    const userEmpNum = user.empNum || localStorage.getItem('employeeId');
+    const userEmpNum = user.empNum || '';
 
     if (String(recordEmpNum) !== String(userEmpNum)) {
       return 'ניתן לערוך רק רשומות שלך';
@@ -4555,7 +4564,7 @@ function canDeleteRecord(record) {
     // Instructor can only delete own records
     if (role === 'instructor') {
       const recordEmpNum = record.empNum || record.employeeId;
-      const userEmpNum = user.empNum || localStorage.getItem('employeeId');
+      const userEmpNum = user.empNum || '';
       return String(recordEmpNum) === String(userEmpNum);
     }
     // Manager can delete team records
@@ -4771,8 +4780,6 @@ async function doLogin(event) {
       personalCode: personalCode
     });
     
-    console.log('Login response:', JSON.stringify(data));
-    
     if (data.success) {
       // Support both formats:
       // 1. New format: {success: true, employee: {...}}
@@ -4780,16 +4787,9 @@ async function doLogin(event) {
       
       let employeeFromServer;
       
-      console.log('=== RAW AUTH RESPONSE ===');
-      console.log('Full data object:', JSON.stringify(data, null, 2));
-      
       if (data.employee) {
-        // New format - already has employee object
-        employeeFromServer = data.employee;
-        console.log('Using new format (employee object)');
-        console.log('data.employee keys:', Object.keys(data.employee));
+        employeeFromServer = sanitizeEmployeeData(data.employee);
       } else {
-        // Old format - create employee object from flat response
         employeeFromServer = {
           employeeId: employeeId,
           EmployeeName: data.employeeName,
@@ -4797,15 +4797,10 @@ async function doLogin(event) {
           Team: data.team,
           EmploymentType: data.employmentType
         };
-        console.log('Using old format (flat structure)');
       }
-      
-      console.log('employeeFromServer:', JSON.stringify(employeeFromServer, null, 2));
       
       // Normalize employee data from server (PascalCase → frontend format)
       const emp = normalizeEmployeeFromServer(employeeFromServer);
-      
-      console.log('After normalize, emp:', emp);
       
       if (!emp || !emp.empName) {
         errorEl.textContent = 'שגיאה בעיבוד נתוני משתמש';
@@ -4830,9 +4825,6 @@ async function doLogin(event) {
         rawRole = rawRole.Value;
       }
       
-      console.log('Raw role from server:', rawRole);
-      console.log('Normalized employee:', emp);
-      
       const empData = {
         empNum: employeeId,
         empName: emp.empName,
@@ -4841,15 +4833,8 @@ async function doLogin(event) {
         employmentType: emp.employmentType
       };
       
-      console.log('Final empData:', empData);
-      
-      // Save to localStorage (as cache only)
       localStorage.setItem('currentUser', JSON.stringify(empData));
       localStorage.setItem('employeeName', emp.empName);
-      localStorage.setItem('employeeId', employeeId);
-      localStorage.setItem('role', empData.role);
-      localStorage.setItem('employmentType', emp.employmentType || 'תעשיידע');
-      console.log('Saved employmentType to localStorage:', emp.employmentType || 'תעשיידע');
       localStorage.setItem('team', emp.team);
       
       // Update UI
@@ -4946,9 +4931,9 @@ function initInactivityTimer() {
 // Start inactivity timer when user is logged in and auto-load records
 document.addEventListener('DOMContentLoaded', async () => {
   const savedUser = localStorage.getItem('currentUser');
-  const employeeId = localStorage.getItem('employeeId');
+  const parsedUser = savedUser ? JSON.parse(savedUser) : null;
   
-  if (savedUser && employeeId) {
+  if (parsedUser && parsedUser.empNum) {
     initInactivityTimer();
     // Auto-load records from server on page load
     await loadMyRecordsFromServer();
@@ -5226,7 +5211,7 @@ async function loadInstructorMonthlyApprovalStatus() {
   const currentMonth = now.getMonth() + 1;
   const currentYear = now.getFullYear();
   const monthKey = getApprovalMonthKey(currentMonth, currentYear);
-  const employeeId = String(user.empNum || localStorage.getItem('employeeId') || '');
+  const employeeId = String(user.empNum || '');
 
   monthLabel.textContent = getApprovalMonthLabel(currentMonth, currentYear);
 
@@ -5317,7 +5302,7 @@ async function approveMonthlyReport(whichMonth = 'current') {
     yearValue = String(now.getFullYear());
   }
 
-  const status = await fetchMonthStatus(String(user.empNum || localStorage.getItem('employeeId') || ''), monthKey, user.team || '');
+  const status = await fetchMonthStatus(String(user.empNum || '' || ''), monthKey, user.team || '');
   if (status.released) {
     showAlert('הנוכחות החודשית אושרה ונעולה לקריאה בלבד', 'error');
     return;
@@ -5331,7 +5316,7 @@ async function approveMonthlyReport(whichMonth = 'current') {
     buttonEl.disabled = true;
   }
 
-  const employeeId = String(user.empNum || localStorage.getItem('employeeId') || '');
+  const employeeId = String(user.empNum || '');
   showLoadingBar();
   try {
     const data = await apiRequest('setinstructorapproval', {
@@ -5399,8 +5384,6 @@ async function loadMonthlyApprovalsTable() {
     seenIds.add(id);
     return true;
   });
-  console.log('loadMonthlyApprovalsTable: After duplicate removal:', approvalsData.length, 'employees');
-
   // For managers - filter to their team first (client-side fallback)
   let teamFilteredData = approvalsData;
   if (user.role === 'manager' && user.team) {
@@ -5409,7 +5392,6 @@ async function loadMonthlyApprovalsTable() {
       const empTeam = (emp.team || '').trim().toLowerCase();
       return empTeam === managerTeam;
     });
-    console.log('Manager team filter applied:', user.team, '- Found:', teamFilteredData.length, 'employees');
   }
   
   // Filter only instructors (if role info available)
@@ -5636,8 +5618,6 @@ async function loadApprovalsStatusPage() {
     }
   });
   approvalsData = Array.from(employeeMap.values());
-  console.log('loadApprovalsStatusPage: After duplicate removal:', approvalsData.length, 'unique employees');
-
   // Populate manager approval cache for month locking
   approvalsData.forEach(emp => {
     const empId = String(emp.employeeId || '').trim();
@@ -5654,7 +5634,6 @@ async function loadApprovalsStatusPage() {
       const empTeam = (emp.team || '').trim().toLowerCase();
       return empTeam === managerTeam;
     });
-    console.log('Manager team filter applied:', user.team, '- Found:', approvalsData.length, 'employees');
   }
 
   // Filter only instructors
@@ -5970,19 +5949,12 @@ async function approveMonthToPayroll() {
   
   showLoadingBar();
   try {
-    const response = await fetch(LOGIC_APP_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        action: 'setmanagerapproval',
-        monthKey: monthKey,
-        team: team,
-        approvedBy: user.empName || user.empNum,
-        approvedByRole: user.role
-      })
+    const data = await apiRequest('setmanagerapproval', {
+      monthKey: monthKey,
+      team: team,
+      approvedBy: user.empName || user.empNum,
+      approvedByRole: user.role
     });
-    
-    const data = await response.json();
     hideLoadingBar();
     if (data.success) {
       showAlert('הנוכחות החודשית אושרה בהצלחה!', 'success');
@@ -6020,7 +5992,7 @@ async function resetTeamMonth() {
       month: monthKey,
       year: String(year),
       mode: 'release',
-      employeeId: user.empNum || localStorage.getItem('employeeId')
+      employeeId: user.empNum || ''
     });
     if (data.success) {
       showAlert('החודש אופס בהצלחה', 'success');
@@ -6059,7 +6031,7 @@ async function unlockTeamMonth() {
       month: monthKey,
       year: String(year),
       mode: 'unlock',
-      employeeId: user.empNum || localStorage.getItem('employeeId')
+      employeeId: user.empNum || ''
     });
     if (data.success) {
       showAlert('החודש נפתח מחדש בהצלחה', 'success');
@@ -6160,16 +6132,6 @@ async function loadTeamRecords(resetFilters = false) {
       teamRecordsCache = data.records;
       
       // DEBUG: Log first record to see raw SharePoint field formats
-      if (data.records.length > 0) {
-        const sample = data.records[0];
-        console.log('=== RAW SharePoint record sample ===');
-        console.log('status:', sample.status, '(type:', typeof sample.status, ')');
-        console.log('team:', sample.team, '(type:', typeof sample.team, ')');
-        console.log('activityType:', sample.activityType, '(type:', typeof sample.activityType, ')');
-        console.log('employeeId:', sample.employeeId);
-        console.log('ID:', sample.ID);
-      }
-      
       // Load manager approval status for month locking
       try {
         const teamFilter = user.role === 'manager' ? (user.team || 'all') : 'all';
@@ -6404,9 +6366,7 @@ function renderTeamTable(recordsList) {
 
 
 async function showEmployeeDetails(employeeId) {
-  console.log('showEmployeeDetails called with:', employeeId);
   if (isMobileView()) {
-    console.log('Mobile view - returning');
     return;
   }
 
@@ -6775,8 +6735,6 @@ async function submitAll() {
       try {
         const data = await apiRequest('submit', payload);
         
-        console.log('Response:', data);
-        
         if (data.success) {
           rec.synced = true;
           success++;
@@ -7017,12 +6975,11 @@ async function loadInstructorMonthData() {
     recYearEl.value = instrYearEl.value;
   }
   
-  const role = localStorage.getItem('role') || '';
-  console.log('loadInstructorMonthData - role:', role, 'month:', instrMonthEl?.value, 'year:', instrYearEl?.value);
+  const currentUserData = getCurrentUserData();
+  const role = (currentUserData && currentUserData.role) || '';
   
   // For managers, ops controllers, admin, payroll - update admin dashboard first (priority)
   if (['manager', 'operations_controller', 'system_admin', 'payroll_officer'].includes(role)) {
-    console.log('loadInstructorMonthData - calling updateAdminDashboard for manager/admin');
     updateAdminDashboard(); // Don't await - run in parallel
   }
   
@@ -7076,7 +7033,7 @@ async function loadRecordsForMonth() {
     const selectedMonth = recMonthEl ? parseInt(recMonthEl.value) : (new Date().getMonth() + 1);
     const selectedYear = recYearEl ? parseInt(recYearEl.value) : new Date().getFullYear();
     const monthKey = getApprovalMonthKey(selectedMonth, selectedYear);
-    const employeeId = String(user.empNum || localStorage.getItem('employeeId') || '');
+    const employeeId = String(user.empNum || '');
     
     try {
       const approvalStatus = await fetchMonthStatus(employeeId, monthKey, user.team || '');
@@ -7409,11 +7366,6 @@ async function _addRecordInternal() {
   const empNum = userData.empNum || '';
   const empName = userData.empName || '';
   
-  console.log('=== DEBUG addRecord ===');
-  console.log('userData:', userData);
-  console.log('empNum:', empNum);
-  console.log('empName:', empName);
-  
   const date = document.getElementById('recDate').value;
   const startTime = document.getElementById('startTime').value;
   const endTime = document.getElementById('endTime').value;
@@ -7470,7 +7422,7 @@ async function _addRecordInternal() {
   }
 
   const canSubmit = await ensureMonthEditable(
-    String(localStorage.getItem("employeeId") || empNum),
+    String(empNum),
     date
   );
   if (!canSubmit) return;
@@ -7497,20 +7449,8 @@ async function _addRecordInternal() {
     }
   }
 
-  const storedEmployeeId = localStorage.getItem("employeeId");
-  const storedEmployeeName = localStorage.getItem("employeeName");
-  
-  console.log('=== DEBUG payload creation ===');
-  console.log('localStorage employeeId:', storedEmployeeId);
-  console.log('localStorage employeeName:', storedEmployeeName);
-  console.log('userData empNum:', empNum);
-  console.log('userData empName:', empName);
-  
-  const finalEmployeeId = storedEmployeeId || empNum || '';
-  const finalEmployeeName = storedEmployeeName || empName || '';
-  
-  console.log('Final employeeId:', finalEmployeeId);
-  console.log('Final employeeName:', finalEmployeeName);
+  const finalEmployeeId = empNum || '';
+  const finalEmployeeName = empName || '';
   
   if (!finalEmployeeId || !finalEmployeeName) {
     showAlert('שגיאה: חסרים פרטי עובד. נסה להתנתק ולהתחבר מחדש.', 'error');
@@ -9179,16 +9119,12 @@ async function updateAdminDashboard() {
     ? document.getElementById('instructorYear') 
     : (document.getElementById('dashboardYear') || document.getElementById('instructorYear'));
   
-  console.log('updateAdminDashboard - role:', user?.role, 'monthEl:', dashboardMonthEl?.id, 'value:', dashboardMonthEl?.value);
-  console.log('updateAdminDashboard - yearEl:', dashboardYearEl?.id, 'value:', dashboardYearEl?.value);
-  
   const currentMonth = dashboardMonthEl ? parseInt(dashboardMonthEl.value) - 1 : now.getMonth();
   const currentYear = dashboardYearEl ? parseInt(dashboardYearEl.value) : now.getFullYear();
   
-  console.log('updateAdminDashboard - filtering for month:', currentMonth, 'year:', currentYear);
-  
   // Get user role to check permissions
-  const userRole = localStorage.getItem('role') || '';
+  const currentUserForRole = getCurrentUserData();
+  const userRole = (currentUserForRole && currentUserForRole.role) || '';
   
   let employeesMap = {};
   
@@ -9207,7 +9143,6 @@ async function updateAdminDashboard() {
           };
         }
       });
-      console.log('Loaded employeesMap with', Object.keys(employeesMap).length, 'employees');
     }
   } catch (e) {
     console.warn('Could not load employees list:', e.message);
@@ -9319,12 +9254,10 @@ async function updateAdminDashboard() {
     const currentUser = getCurrentUserData();
     if (currentUser && currentUser.role === 'manager' && currentUser.team) {
       const managerTeam = currentUser.team.trim().toLowerCase();
-      console.log('Dashboard manager team filter:', currentUser.team, '- Total employees before filter:', filteredEmployees.length);
       filteredEmployees = filteredEmployees.filter(emp => {
         const empTeam = (emp.team || '').trim().toLowerCase();
         return empTeam === managerTeam;
       });
-      console.log('After team filter:', filteredEmployees.length, 'employees');
     }
     
     if (filterEmploymentType !== 'all') {
@@ -9812,13 +9745,6 @@ async function approveRecordFromAdmin(recordId) {
   }
   
   // Log the raw record for debugging
-  console.log('=== RAW RECORD FROM CACHE ===');
-  console.log('record.status:', record.status, '(type:', typeof record.status, ')');
-  console.log('record.team:', record.team, '(type:', typeof record.team, ')');
-  console.log('record.employeeId:', record.employeeId, 'record.empNum:', record.empNum);
-  console.log('record.ID:', record.ID, 'record.id:', record.id);
-  console.log('All record keys:', Object.keys(record));
-  
   // Save original status for rollback
   const originalStatus = record.status;
   const originalApprovedBy = record.approvedBy;
@@ -9884,13 +9810,7 @@ async function approveRecordFromAdmin(recordId) {
       ...approvalData
     };
     
-    console.log('=== APPROVE RECORD - FULL PAYLOAD ===');
-    console.log(JSON.stringify(payload, null, 2));
-    
     const data = await apiRequest('updaterecord', payload);
-    
-    console.log('=== APPROVE RECORD - API RESPONSE ===');
-    console.log(JSON.stringify(data, null, 2));
     
     if (!data.success) {
       throw new Error(data.message || data.error || 'שגיאה בעדכון הרשומה');
@@ -10700,7 +10620,7 @@ window.addEventListener('DOMContentLoaded', function() {
       showPage(null, 'dashboard');
 
       // Load fresh records from server to ensure data is not stale
-      if (localStorage.getItem('employeeId')) {
+      if (empData.empNum) {
         loadMyRecordsFromServer();
       }
     } catch(e) {
@@ -10714,10 +10634,7 @@ window.addEventListener('DOMContentLoaded', function() {
 // Helper to clear user session on invalid data
 function clearUserSession() {
   localStorage.removeItem('currentUser');
-  localStorage.removeItem('employeeId');
   localStorage.removeItem('employeeName');
-  localStorage.removeItem('role');
-  localStorage.removeItem('employmentType');
   localStorage.removeItem('team');
   localStorage.removeItem('attendanceRecords');
   records = [];
