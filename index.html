@@ -4788,7 +4788,9 @@ async function doLogin(event) {
       let employeeFromServer;
       
       if (data.employee) {
+        console.log('DEBUG employee keys:', Object.keys(data.employee));
         employeeFromServer = sanitizeEmployeeData(data.employee);
+        console.log('DEBUG sanitized keys:', Object.keys(employeeFromServer));
       } else {
         employeeFromServer = {
           employeeId: employeeId,
