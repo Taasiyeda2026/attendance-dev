@@ -3921,12 +3921,16 @@ function normalizePayload(action, data) {
  */
 function sanitizeEmployeeData(raw) {
   if (!raw) return null;
-  const allowed = ['employeeId', 'EmployeeId', 'ID', 'Id', 'id',
-    'EmployeeName', 'employeeName', 'Title', 'title',
-    'role', 'Team', 'team', 'EmploymentType', 'employmentType'];
+  const blocked = ['personalCode', 'Author', 'Editor', 'Email',
+    'AuthorId', 'EditorId', '__metadata', 'ServerRedirectedEmbedUri',
+    'ServerRedirectedEmbedUrl', 'ContentTypeId', 'FileSystemObjectType',
+    'GUID', 'Attachments', 'OData__UIVersionString', 'ComplianceAssetId'];
   const clean = {};
-  for (const key of allowed) {
-    if (raw[key] !== undefined) clean[key] = raw[key];
+  for (const [key, value] of Object.entries(raw)) {
+    if (blocked.includes(key)) continue;
+    if (key.startsWith('@odata') || key.startsWith('OData_')) continue;
+    if (key.startsWith('_') || key.endsWith('StringId')) continue;
+    clean[key] = value;
   }
   return clean;
 }
@@ -4788,9 +4792,7 @@ async function doLogin(event) {
       let employeeFromServer;
       
       if (data.employee) {
-        console.log('DEBUG employee keys:', Object.keys(data.employee));
         employeeFromServer = sanitizeEmployeeData(data.employee);
-        console.log('DEBUG sanitized keys:', Object.keys(employeeFromServer));
       } else {
         employeeFromServer = {
           employeeId: employeeId,
