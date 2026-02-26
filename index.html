@@ -4792,8 +4792,10 @@ async function doLogin(event) {
       let employeeFromServer;
       
       if (data.employee) {
+        alert('DEBUG keys: ' + Object.keys(data.employee).join(', '));
         employeeFromServer = sanitizeEmployeeData(data.employee);
       } else {
+        alert('DEBUG no employee object. data keys: ' + Object.keys(data).join(', '));
         employeeFromServer = {
           employeeId: employeeId,
           EmployeeName: data.employeeName,
