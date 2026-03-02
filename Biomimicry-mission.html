@@ -21,6 +21,7 @@ body{
   background:linear-gradient(180deg,#f8fbff 0%,#f3f7fc 50%,#edf3f9 100%);
   line-height:1.7;
   color:#0f172a;
+  overflow:hidden;
 }
 section{padding:2rem 8%}
 .hidden{display:none !important}
@@ -57,12 +58,51 @@ button{border:none;border-radius:12px;background:var(--accent);color:#fff;cursor
 }
 .hero button{margin-top:1rem;padding:.8rem 1.8rem;font-size:1rem;border-radius:30px}
 
-.main-shell{max-width:1100px;margin:0 auto 6rem}
-.step{display:none}
-.step.active{display:block;animation:stepIn .35s ease}
-@keyframes stepIn{
-  from{opacity:0;transform:translateY(12px)}
-  to{opacity:1;transform:translateY(0)}
+main{
+  position:relative;
+  height:100vh;
+}
+
+.main-shell{max-width:1100px;margin:0 auto}
+
+.stage{
+  position:absolute;
+  inset:0;
+  opacity:0;
+  transform:translateX(40px);
+  transition:
+    opacity 0.6s ease,
+    transform 0.6s ease;
+  pointer-events:none;
+}
+
+.stage.active{
+  opacity:1;
+  transform:translateX(0);
+  pointer-events:auto;
+  z-index:2;
+}
+
+.stage.exit-left{
+  opacity:0;
+  transform:translateX(-40px);
+}
+
+.overlay-ar{display:inline-block}
+
+.stage.active .overlay-ar{
+  animation:fadeInUp 1s ease forwards;
+}
+
+@keyframes fadeInUp{
+  from{
+    opacity:0;
+    transform:translateY(12px);
+  }
+  to{
+    opacity:1;
+    transform:translateY(0);
+  }
 }
 
 .card{
@@ -145,17 +185,17 @@ button{border:none;border-radius:12px;background:var(--accent);color:#fff;cursor
 
 <section class="hero" id="heroSection">
   <h1 data-coach="he">🕵️‍♂️ משימת חילוץ סודית</h1>
-  <p data-student="ar" class="lang-ar">مهمة إنقاذ سرّية – درس محاكاة حيوية</p>
-  <button onclick="startLesson()" data-student="ar" class="lang-ar">ابدأوا المهمة</button>
+  <p data-student="ar" class="lang-ar overlay-ar">مهمة إنقاذ سرّية – درس محاكاة حيوية</p>
+  <button onclick="startLesson()" data-student="ar" class="lang-ar overlay-ar">ابدأوا المهمة</button>
 </section>
 
 <div id="lessonApp" class="hidden">
   <main class="main-shell" id="mainContent">
-    <section class="step active" data-step="0">
+    <section class="stage active" data-step="0">
       <div class="card">
-        <h2 data-student="ar" class="lang-ar">📖 المرحلة 0 – قصة البداية</h2>
+        <h2 data-student="ar" class="lang-ar overlay-ar">📖 المرحلة 0 – قصة البداية</h2>
         <img src="images/mud-with-bag.png" alt="Bag in muddy puddle">
-        <div data-student="ar" class="lang-ar">
+        <div data-student="ar" class="lang-ar overlay-ar">
           <p>تخيلوا أن ولدًا اسمه عيدو خرج في رحلة في الطبيعة.</p>
           <p>أثناء المشي سقطت حقيبته داخل بركة طين عميقة.</p>
           <p>الأرض رخوة، وكل من يقترب يغوص في الطين.</p>
@@ -188,10 +228,10 @@ button{border:none;border-radius:12px;background:var(--accent);color:#fff;cursor
       </div>
     </section>
 
-    <section class="step" data-step="1">
+    <section class="stage" data-step="1">
       <div class="card">
-        <h2 data-student="ar" class="lang-ar">💡 المرحلة 1 – أفكار سريعة</h2>
-        <div data-student="ar" class="lang-ar">
+        <h2 data-student="ar" class="lang-ar overlay-ar">💡 المرحلة 1 – أفكار سريعة</h2>
+        <div data-student="ar" class="lang-ar overlay-ar">
           <div class="zoom-box">ننتقل الآن إلى مرحلة البحث: كيف يحلّ الطبيعة مشاكل مشابهة؟</div>
         </div>
         <div data-coach="he">
@@ -208,11 +248,11 @@ button{border:none;border-radius:12px;background:var(--accent);color:#fff;cursor
       </div>
     </section>
 
-    <section class="step organism" data-step="2">
+    <section class="stage organism" data-step="2">
       <div class="card">
-        <h2 data-student="ar" class="lang-ar">🦆 المرحلة 2 – البطة</h2>
+        <h2 data-student="ar" class="lang-ar overlay-ar">🦆 المرحلة 2 – البطة</h2>
         <img src="images/duck-real.png" alt="Duck webbed feet on soft ground">
-        <div data-student="ar" class="lang-ar">
+        <div data-student="ar" class="lang-ar overlay-ar">
           <div class="stage-box">❓ ماذا تتوقعون؟ ما المميّز في قدم البطة؟ اكتبوا في دردشة Zoom.</div>
           <div class="zoom-box">⏳ لديكم 3 دقائق للتفكير والإجابة في الدردشة.</div>
           <div class="reveal-content">مبدأ التصميم: مساحة ملامسة واسعة تقلّل الضغط على الأرض الرخوة.</div>
@@ -238,11 +278,11 @@ button{border:none;border-radius:12px;background:var(--accent);color:#fff;cursor
       </div>
     </section>
 
-    <section class="step organism" data-step="3">
+    <section class="stage organism" data-step="3">
       <div class="card">
-        <h2 data-student="ar" class="lang-ar">🕷️ المرحلة 3 – بقّ الماء</h2>
+        <h2 data-student="ar" class="lang-ar overlay-ar">🕷️ المرحلة 3 – بقّ الماء</h2>
         <img src="images/water-strider-real.png" alt="Water strider on water surface">
-        <div data-student="ar" class="lang-ar">
+        <div data-student="ar" class="lang-ar overlay-ar">
           <div class="stage-box">❓ كيف يساعد شكل الأرجل على الثبات؟ اكتبوا في دردشة Zoom.</div>
           <div class="zoom-box">⏳ 3 دقائق للإجابة في الدردشة.</div>
           <div class="reveal-content">مبدأ التصميم: توزيع الحمل على نقاط ملامسة متعددة يزيد الاستقرار.</div>
@@ -264,11 +304,11 @@ button{border:none;border-radius:12px;background:var(--accent);color:#fff;cursor
       </div>
     </section>
 
-    <section class="step organism" data-step="4">
+    <section class="stage organism" data-step="4">
       <div class="card">
-        <h2 data-student="ar" class="lang-ar">🐘 المرحلة 4 – الفيل</h2>
+        <h2 data-student="ar" class="lang-ar overlay-ar">🐘 المرحلة 4 – الفيل</h2>
         <img src="images/elephant-foot-real.png" alt="Elephant foot on soft ground">
-        <div data-student="ar" class="lang-ar">
+        <div data-student="ar" class="lang-ar overlay-ar">
           <div class="stage-box">❓ لماذا لا يغوص الفيل بسهولة رغم وزنه؟ اكتبوا في دردشة Zoom.</div>
           <div class="zoom-box">⏳ 3 دقائق للإجابة في الدردشة.</div>
           <div class="reveal-content">مبدأ التصميم: قدم عريضة ومرنة توزع القوة على مساحة أكبر.</div>
@@ -292,10 +332,10 @@ button{border:none;border-radius:12px;background:var(--accent);color:#fff;cursor
       </div>
     </section>
 
-    <section class="step" data-step="5">
+    <section class="stage" data-step="5">
       <div class="card">
-        <h2 data-student="ar" class="lang-ar">🔧 المرحلة 5 – الاختراع</h2>
-        <div data-student="ar" class="lang-ar">
+        <h2 data-student="ar" class="lang-ar overlay-ar">🔧 المرحلة 5 – الاختراع</h2>
+        <div data-student="ar" class="lang-ar overlay-ar">
           <p>اختاروا مبدأً واحدًا من الكائنات وصمّموا أداة إنقاذ قابلة للتطبيق.</p>
           <div class="zoom-box">⏳ لديكم 10 دقائق للعمل في الغرف الصغيرة.</div>
         </div>
@@ -325,10 +365,10 @@ button{border:none;border-radius:12px;background:var(--accent);color:#fff;cursor
       </div>
     </section>
 
-    <section class="step" data-step="6">
+    <section class="stage" data-step="6">
       <div class="card">
-        <h2 data-student="ar" class="lang-ar">✅ المرحلة 6 – الخلاصة</h2>
-        <div data-student="ar" class="lang-ar">
+        <h2 data-student="ar" class="lang-ar overlay-ar">✅ المرحلة 6 – الخلاصة</h2>
+        <div data-student="ar" class="lang-ar overlay-ar">
           <p>١️⃣ مشكلة حقيقية → ٢️⃣ إلهام من الطبيعة → ٣️⃣ مبدأ هندسي → ٤️⃣ حل مبتكر.</p>
           <div class="zoom-box">سؤال ختامي: أي مبدأ من الطبيعة ساعدكم أكثر على التفكير كمخترعين؟</div>
         </div>
@@ -368,7 +408,8 @@ button{border:none;border-radius:12px;background:var(--accent);color:#fff;cursor
 </div>
 
 <script>
-const TOTAL_STEPS = 7;
+const stages = Array.from(document.querySelectorAll('.stage'));
+const TOTAL_STEPS = stages.length;
 
 const STEP_TIMES = {
   0: 120,
@@ -384,13 +425,24 @@ let currentStep = 0;
 let countdown;
 let remainingTime = STEP_TIMES[0];
 
-function goToStep(step){
-  if(step < 0 || step >= TOTAL_STEPS) return;
+function goToStep(newStep){
+  if(newStep < 0 || newStep >= stages.length) return;
+
+  const current = stages[currentStep];
+  const next = stages[newStep];
+
   clearInterval(countdown);
-  currentStep = step;
-  document.querySelectorAll('.step').forEach(section => {
-    section.classList.toggle('active', Number(section.dataset.step) === currentStep);
-  });
+
+  current.classList.remove('active');
+  current.classList.add('exit-left');
+
+  setTimeout(()=>{
+    current.classList.remove('exit-left');
+  },600);
+
+  next.classList.add('active');
+
+  currentStep = newStep;
   remainingTime = STEP_TIMES[currentStep] || 120;
   updateDisplay();
   setTimerNote(`זמן מומלץ לשלב: ${Math.floor(remainingTime/60)}:${String(remainingTime%60).padStart(2,'0')}`);
