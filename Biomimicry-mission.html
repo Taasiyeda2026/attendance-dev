@@ -23,6 +23,7 @@ body{
   color:#0f172a;
   overflow:hidden;
 }
+body.allow-scroll{overflow:auto}
 section{padding:2rem 8%}
 .hidden{display:none !important}
 h1,h2,h3{margin-bottom:1rem;line-height:1.3}
@@ -178,6 +179,10 @@ main{
 
 @media (max-width:960px){
   section{padding:1.3rem 5%}
+  .hero-stage{height:100dvh}
+  .overlay-ar{width:90%;padding:1.25rem;font-size:1.05rem}
+  .question-box{font-size:1.2rem}
+  .coach-below{padding:.85rem 1rem;font-size:.82rem;line-height:1.45}
 }
 </style>
 </head>
@@ -199,12 +204,12 @@ main{
           <p>تخيلوا أن ولدًا اسمه عيدو خرج في رحلة في الطبيعة.</p>
           <p>أثناء المشي سقطت حقيبته داخل بركة طين عميقة.</p>
           <p>الأرض رخوة، وكل من يقترب يغوص في الطين.</p>
-          <p>لا يمكن الدخول إلى الداخل.</p>
-          <p>ولا يمكن الوصول إليها باليد – فهي بعيدة جدًا.</p>
-          <div class="stage-box">❓ السؤال: كيف نُخرج الحقيبة دون أن نغوص في الطين؟</div>
-          <div class="zoom-box">⏳ لديكم دقيقتان لكتابة أفكاركم في دردشة Zoom.</div>
+          <p>لا يمكن الدخول.</p>
+          <p>ولا يمكن الوصول إليها باليد.</p>
+          <div class="question-box">❓ كيف نُخرج الحقيبة دون أن نغوص؟</div>
         </div>
-        <div data-coach="he">
+      </div>
+      <div class="coach-below" data-coach="he">
 עכשיו אני רוצה שתדמיינו רגע סיטואציה אמיתית.
 ילד בשם עידו יצא לטיול בטבע.
 במהלך ההליכה – התיק שלו נפל לתוך שלולית בוץ עמוקה.
@@ -224,7 +229,6 @@ main{
 עכשיו יש לכם שתי דקות לכתוב רעיונות בצ'אט.
 אני מפעילה עכשיו את הטיימר.
 כשתשמעו שהזמן הסתיים – נחזור יחד לדיון.
-        </div>
       </div>
     </section>
 
