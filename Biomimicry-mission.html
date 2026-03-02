@@ -251,31 +251,36 @@ main{position:relative;height:100vh}
 
 /* Solution Option Boxes (Stage 5) */
 .solution-options-container {
-  display: flex;
-  flex-direction: column;
-  gap: 0.6rem;
-  margin: 0.6rem 0;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.4rem;
+  margin: 0.5rem 0;
+  max-width: 100%;
 }
 
 .solution-option-box {
   background: linear-gradient(135deg, var(--stage-light, #fef3c7), #ffffff);
   border: 2px solid var(--stage-color, #f59e0b);
-  border-radius: 10px;
-  padding: 0.7rem 0.95rem;
+  border-radius: 8px;
+  padding: 0.4rem 0.5rem;
   cursor: pointer;
   transition: all 0.3s ease;
+  font-size: 0.75rem;
 }
 
 .solution-option-box:hover {
   background: linear-gradient(135deg, #ffffff, var(--stage-light, #fef3c7));
-  box-shadow: 0 4px 12px rgba(var(--stage-color, 245), var(--stage-color, 158), var(--stage-color, 11), 0.2);
-  transform: translateX(-4px);
+  box-shadow: 0 3px 8px rgba(var(--stage-color, 245), var(--stage-color, 158), var(--stage-color, 11), 0.2);
+  transform: translateY(-2px);
 }
 
 .solution-option-title {
   font-weight: 600;
-  font-size: 0.9rem;
+  font-size: 0.75rem;
   cursor: pointer;
+  display: block;
+  margin-bottom: 0.2rem;
+  line-height: 1.2;
 }
 
 .solution-option-box .reveal-content {
@@ -658,7 +663,7 @@ main{position:relative;height:100vh}
 </div>
 
 <!-- ─ Status bar ─ -->
-<div id="studentStatus" class="student-status" data-student="ar">⏳ انتظروا تعليمات المعلمة</div>
+<div id="studentStatus" class="student-status" style="display: none;">⏳ انتظروا تعليمات المعلمة</div>
 
 <!-- ─ Timer ─ -->
 <div class="timer-box hidden" id="timerBox">
@@ -700,7 +705,6 @@ function goToStep(newStep){
   updateDisplay();
   setTimerNote(`זמן מומלץ לשלב: ${fmt(remainingTime)}`);
   if(typeof updateCoachSidebar === 'function') updateCoachSidebar(newStep);
-  startStepTimer();
 }
 
 function fmt(s){ return `${Math.floor(s/60).toString().padStart(2,'0')}:${(s%60).toString().padStart(2,'0')}`; }
