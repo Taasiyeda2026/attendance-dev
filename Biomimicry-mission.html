@@ -134,12 +134,13 @@ main{position:relative;height:100vh}
   align-items:flex-start;
 }
 .stage-row img{
-  width:36%;
+  width:40%;
   max-height:100%;
   object-fit:cover;
-  border-radius:10px;
-  border:1px solid var(--border);
+  border-radius:12px;
+  border:2px solid var(--stage-color, var(--border));
   flex-shrink:0;
+  box-shadow:0 6px 16px rgba(var(--stage-color, 31), var(--stage-color, 111), var(--stage-color, 139), 0.2);
 }
 
 /* ─ Content column (inside row, or direct card child) ─ */
@@ -332,8 +333,9 @@ main{position:relative;height:100vh}
 }
 
 .coach-sidebar.hidden {
-  transform: translateX(100%);
+  transform: translateX(120%);
   transition: transform 0.3s ease;
+  pointer-events: none;
 }
 
 /* ─ Fixed UI ─ */
@@ -437,8 +439,11 @@ main{position:relative;height:100vh}
     <section class="stage" data-step="1">
       <div class="card">
         <h2>🌿 עכשיו מתחיל החקר</h2>
-        <div class="stage-col lang-ar overlay-ar">
-          <div class="zoom-box">אנחנו הולכים לבדוק איך הטבע פותר בעיות דומות.</div>
+        <div class="stage-row">
+          <img src="images/eye.png" alt="Search and observation">
+          <div class="stage-col lang-ar overlay-ar">
+            <div class="zoom-box">אנחנו הולכים לבדוק איך הטבע פותר בעיות דומות.</div>
+          </div>
         </div>
         <div data-coach="he">עכשיו אנחנו הולכים לבדוק איך הטבע פותר בעיות דומות.
 נחקור שלושה אורגניזמים ונראה את התכונות שלהם.</div>
