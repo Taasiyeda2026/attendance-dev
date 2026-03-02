@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>משימת חילוץ סודית – שיעור ביומימיקרי</title>
+
+<style>
+:root{
+  --dark:#0b1c2d;
+  --accent:#1f6f8b;
+  --light:#f4f7fa;
+  --border:#e2e8f0;
+  --stage:#eef6fb;
+}
+
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Heebo,system-ui,sans-serif;background:var(--light);line-height:1.7;color:#0f172a}
+section{padding:4rem 8%}
+.hidden{display:none}
+h1,h2,h3{margin-bottom:1.2rem}
+
+button{
+  padding:.7rem 1.6rem;
+  border:none;
+  border-radius:30px;
+  background:var(--accent);
+  color:white;
+  cursor:pointer;
+  margin-top:1rem;
+}
+
+.hero{
+  min-height:100vh;
+  background:linear-gradient(135deg,#0b1c2d,#12324a);
+  color:white;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  align-items:center;
+  text-align:center;
+}
+
+.card{
+  background:white;
+  border-radius:16px;
+  padding:2rem;
+  margin-bottom:2rem;
+  box-shadow:0 10px 30px rgba(0,0,0,.08);
+  border:1px solid var(--border);
+}
+
+.stage-box{
+  background:var(--stage);
+  padding:1rem;
+  border-radius:10px;
+  margin-top:1rem;
+}
+
+.organism img{
+  width:100%;
+  max-height:360px;
+  object-fit:cover;
+  border-radius:12px;
+  margin-bottom:1rem;
+}
+
+/* TIMER */
+.timer-box{
+  position:fixed;
+  top:15px;
+  left:15px;
+  background:var(--dark);
+  color:white;
+  padding:1rem;
+  border-radius:12px;
+  z-index:9999;
+  width:200px;
+  text-align:center;
+}
+.timer-display{
+  font-size:1.8rem;
+  margin-bottom:.5rem;
+}
+select{
+  width:100%;
+  padding:.3rem;
+  margin-bottom:.5rem;
+  border-radius:6px;
+}
+.timer-box button{
+  width:100%;
+  margin:3px 0;
+  font-size:.8rem;
+  padding:.4rem;
+}
+
+</style>
+</head>
+<body>
+
+<!-- TIMER CONTROL FOR INSTRUCTOR -->
+<div class="timer-box">
+  <div class="timer-display" id="timerDisplay">03:00</div>
+  <select id="timeSelect">
+    <option value="180" selected>3 דקות – פתיחה</option>
+    <option value="120">2 דקות – צ'אט</option>
+    <option value="300">5 דקות – חקר</option>
+    <option value="600">10 דקות – פיתוח</option>
+  </select>
+  <button onclick="startTimer()">Start</button>
+  <button onclick="pauseTimer()">Pause</button>
+  <button onclick="resetTimer()">Reset</button>
+</div>
+
+<!-- HERO -->
+<section class="hero">
+  <h1>🕵️‍♂️ משימת חילוץ סודית</h1>
+  <p>שיעור ביומימיקרי – כיתה ט'</p>
+  <button onclick="startLesson()">התחל שיעור</button>
+</section>
+
+<div id="mainContent" class="hidden">
+
+<!-- STAGE 1 -->
+<section>
+  <div class="card">
+    <h2>שלב 1 – פתיחה דרמטית (3 דקות)</h2>
+    <p><strong>נוסח למדריכה להקראה:</strong></p>
+    <p>
+    דמיינו שאתם צוות פיתוח טכנולוגי. במהלך טיול שטח תלמיד בשם עידו איבד את התיק שלו. 
+    התיק נפל לתוך שלולית בוץ עמוקה. הקרקע רכה מאוד. כל מי שמנסה להתקרב – שוקע.
+    אי אפשר להיכנס. אי אפשר להגיע ביד. אין ציוד הנדסי זמין.
+    אתם מקבלים משימה: לפתח פתרון שיחלץ את התיק – בלי לשקוע.
+    </p>
+    <div class="stage-box">
+      ❓ שאלה לצ'אט (2 דקות): איך מחלצים את התיק בלי לשקוע? 
+      כולם כותבים רעיון חופשי בצ'אט.
+    </div>
+  </div>
+</section>
+
+<!-- STAGE 2 -->
+<section>
+  <div class="card">
+    <h2>שלב 2 – מעבר לחשיבה הנדסית (5 דקות)</h2>
+    <p><strong>נוסח למדריכה:</strong></p>
+    <p>
+    במקום לשאול "מה נבנה", נשאל: מי בטבע כבר מתמודד עם קרקע רכה?
+    אנחנו מחפשים עיקרון, לא חיה.
+    </p>
+  </div>
+</section>
+
+<!-- DUCK -->
+<section class="organism">
+  <div class="card">
+    <h2>🦆 ברווז</h2>
+    <img src="duck.png" alt="Duck">
+    <div class="stage-box">
+      ❓ שאלה לזום: מה מיוחד בכפות הרגליים שלו?
+      <br>
+      💡 הובלה: האם המשקל קטן? או שהשטח גדול יותר?
+    </div>
+    <p><strong>מסקנה:</strong> הגדלת שטח מגע → הפחתת לחץ (לחץ = כוח / שטח)</p>
+  </div>
+</section>
+
+<!-- WATER STRIDER -->
+<section class="organism">
+  <div class="card">
+    <h2>🕷 עכביש מים</h2>
+    <img src="water-strider.png" alt="Water Strider">
+    <div class="stage-box">
+      ❓ שאלה לזום: כיצד מבנה הרגליים משפיע על היציבות?
+    </div>
+    <p><strong>מסקנה:</strong> מבנה חכם מפזר עומס ומייצר יציבות.</p>
+  </div>
+</section>
+
+<!-- ELEPHANT -->
+<section class="organism">
+  <div class="card">
+    <h2>🐘 פיל</h2>
+    <img src="elephant.png" alt="Elephant">
+    <div class="stage-box">
+      ❓ שאלה לזום: למה פיל לא שוקע למרות שהוא כבד?
+    </div>
+    <p><strong>מסקנה:</strong> כף רגל רחבה + התאמה לקרקע.</p>
+  </div>
+</section>
+
+<!-- INVENTION -->
+<section>
+  <div class="card">
+    <h2>שלב 3 – פיתוח פתרון (10 דקות)</h2>
+    <p><strong>נוסח למדריכה:</strong></p>
+    <p>
+    בחרו עיקרון אחד שלמדנו. תכננו כלי חילוץ בהשראתו.
+    הגדירו: איך הוא מפחית לחץ? איך הוא פועל בפועל?
+    </p>
+    <div class="stage-box">
+      עבודה בחדרים קטנים בזום – 10 דקות.
+    </div>
+  </div>
+</section>
+
+<!-- SUMMARY -->
+<section>
+  <div class="card">
+    <h2>סיכום – חקר מקרה ביומימטי</h2>
+    <p>
+    1️⃣ זיהינו בעיה<br>
+    2️⃣ חיפשנו בטבע מערכת דומה<br>
+    3️⃣ ניתחנו תכונות ביולוגיות<br>
+    4️⃣ הפקנו עיקרון הנדסי<br>
+    5️⃣ פיתחנו פתרון טכנולוגי
+    </p>
+  </div>
+</section>
+
+</div>
+
+<script>
+let countdown;
+let remainingTime = 180;
+
+function updateDisplay(){
+  let m = Math.floor(remainingTime/60).toString().padStart(2,'0');
+  let s = (remainingTime%60).toString().padStart(2,'0');
+  document.getElementById('timerDisplay').textContent = m+":"+s;
+  if(remainingTime<=30){document.getElementById('timerDisplay').style.color='red';}
+}
+
+function startTimer(){
+  remainingTime = parseInt(document.getElementById('timeSelect').value);
+  updateDisplay();
+  clearInterval(countdown);
+  countdown = setInterval(()=>{
+    if(remainingTime>0){remainingTime--;updateDisplay();}
+    else{clearInterval(countdown);alert('הזמן הסתיים');}
+  },1000);
+}
+
+function pauseTimer(){clearInterval(countdown);} 
+
+function resetTimer(){
+  clearInterval(countdown);
+  remainingTime = parseInt(document.getElementById('timeSelect').value);
+  document.getElementById('timerDisplay').style.color='white';
+  updateDisplay();
+}
+
+function startLesson(){
+  document.querySelector('.hero').style.display='none';
+  document.getElementById('mainContent').classList.remove('hidden');
+}
+</script>
+
+</body>
+</html>
