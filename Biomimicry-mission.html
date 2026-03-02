@@ -489,9 +489,6 @@ main{position:relative;height:100vh}
 }
 
 .sidebar-toggle {
-  position: fixed;
-  left: 16px;
-  top: 72px;
   width: 40px;
   height: 40px;
   background: linear-gradient(135deg, #1e293b, #0f172a);
@@ -500,7 +497,6 @@ main{position:relative;height:100vh}
   color: white;
   font-size: 1.1rem;
   cursor: pointer;
-  z-index: 999 !important;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -586,7 +582,6 @@ main{position:relative;height:100vh}
   <aside class="coach-sidebar" id="coachSidebar"></aside>
 
   <!-- Toggle button for sidebar -->
-  <button class="sidebar-toggle" id="sidebarToggle" title="הצג/הסתר הערות המדריכה" onclick="toggleSidebar(event)">👁️</button>
 
   <main class="main-shell" id="mainContent">
 
@@ -808,6 +803,7 @@ main{position:relative;height:100vh}
 <!-- ─ Navigation ─ -->
 <div class="nav-bar hidden" id="navBar">
   <button onclick="goToStep(currentStep-1)" aria-label="Previous step">➡️</button>
+  <button class="sidebar-toggle" id="sidebarToggle" title="הצג/הסתר הערות המדריכה" onclick="toggleSidebar(event)">👁️</button>
   <button onclick="goToStep(currentStep+1)" aria-label="Next step">⬅️</button>
 </div>
 
