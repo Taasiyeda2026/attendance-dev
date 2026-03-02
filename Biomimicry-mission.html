@@ -211,6 +211,73 @@ main{position:relative;height:100vh}
 }
 .lang-ar{direction:rtl;font-family:Tajawal,"Noto Sans Arabic",sans-serif}
 
+/* Organism Cards Layout (Stages 2-4) */
+.organism .stage-row {
+  flex-direction: column;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.organism .stage-row img {
+  width: 50%;
+  max-width: 280px;
+  height: auto;
+}
+
+.organism .stage-col {
+  width: 100%;
+  text-align: center;
+  align-items: center;
+}
+
+.organism .stage-box {
+  text-align: center;
+  width: 100%;
+  margin: 0 auto;
+}
+
+.organism .zoom-box {
+  display: none;
+}
+
+.organism .reveal-button {
+  background: linear-gradient(135deg, var(--stage-color, #3b82f6), rgba(var(--stage-color, 59), var(--stage-color, 130), var(--stage-color, 246), 0.8));
+  color: white;
+  border: 2px solid var(--stage-color, #3b82f6);
+  border-radius: 50%;
+  width: 50px;
+  height: 50px;
+  font-size: 1.5rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0.5rem auto;
+  transition: all 0.3s ease;
+  font-weight: bold;
+}
+
+.organism .reveal-button:hover {
+  transform: scale(1.1);
+  box-shadow: 0 6px 16px rgba(var(--stage-color, 59), var(--stage-color, 130), var(--stage-color, 246), 0.3);
+}
+
+.organism .reveal-button.showing .icon-hidden {
+  display: none;
+}
+
+.organism .reveal-button.showing .icon-showing {
+  display: inline;
+}
+
+.organism .reveal-button .icon-hidden {
+  display: inline;
+}
+
+.organism .reveal-button .icon-showing {
+  display: none;
+}
+
 /* Solution Options (Stage 5) */
 .solution-options{
   display: flex;
@@ -251,31 +318,36 @@ main{position:relative;height:100vh}
 
 /* Solution Option Boxes (Stage 5) */
 .solution-options-container {
-  display: flex;
-  flex-direction: column;
-  gap: 0.6rem;
-  margin: 0.6rem 0;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.4rem;
+  margin: 0.5rem 0;
+  max-width: 100%;
 }
 
 .solution-option-box {
   background: linear-gradient(135deg, var(--stage-light, #fef3c7), #ffffff);
   border: 2px solid var(--stage-color, #f59e0b);
-  border-radius: 10px;
-  padding: 0.7rem 0.95rem;
+  border-radius: 8px;
+  padding: 0.4rem 0.5rem;
   cursor: pointer;
   transition: all 0.3s ease;
+  font-size: 0.75rem;
 }
 
 .solution-option-box:hover {
   background: linear-gradient(135deg, #ffffff, var(--stage-light, #fef3c7));
-  box-shadow: 0 4px 12px rgba(var(--stage-color, 245), var(--stage-color, 158), var(--stage-color, 11), 0.2);
-  transform: translateX(-4px);
+  box-shadow: 0 3px 8px rgba(var(--stage-color, 245), var(--stage-color, 158), var(--stage-color, 11), 0.2);
+  transform: translateY(-2px);
 }
 
 .solution-option-title {
   font-weight: 600;
-  font-size: 0.9rem;
+  font-size: 0.75rem;
   cursor: pointer;
+  display: block;
+  margin-bottom: 0.2rem;
+  line-height: 1.2;
 }
 
 .solution-option-box .reveal-content {
@@ -367,19 +439,20 @@ main{position:relative;height:100vh}
   position: fixed;
   right: 16px;
   top: 72px;
-  width: 38px;
-  height: 38px;
-  background: #334155;
-  border: 1px solid #64748b;
-  border-radius: 8px;
+  width: 40px;
+  height: 40px;
+  background: linear-gradient(135deg, #1e293b, #0f172a);
+  border: 2px solid #475569;
+  border-radius: 10px;
   color: white;
-  font-size: 1rem;
+  font-size: 1.1rem;
   cursor: pointer;
-  z-index: 160;
+  z-index: 999 !important;
   display: flex;
   align-items: center;
   justify-content: center;
   transition: all 0.2s ease;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
 }
 
 .sidebar-toggle:hover {
@@ -388,9 +461,8 @@ main{position:relative;height:100vh}
 }
 
 .coach-sidebar.hidden {
-  transform: translateX(120%);
-  transition: transform 0.3s ease;
-  pointer-events: none;
+  display: none !important;
+  visibility: hidden;
 }
 
 /* ─ Fixed UI ─ */
@@ -468,24 +540,26 @@ main{position:relative;height:100vh}
     <!-- ─────────  שלב 0 / المرحلة 0 – הפתיחה הדרמטית  ───────── -->
     <section class="stage active" data-step="0">
       <div class="card">
-        <h2 class="lang-ar overlay-ar">🕵️ המרקם 0 – הפתיחה הדרמטית</h2>
+        <h2 class="lang-ar overlay-ar">🕵️ פתיחה</h2>
         <div class="stage-row">
           <img src="images/mud-with-bag.png" alt="Bag in muddy puddle">
           <div class="stage-col lang-ar overlay-ar">
-            <p>תדמיינו שקבוצת חברים טיילו בטבע, אחד החברים, ילד בשם עידו איבד את התיק שלו בטיול בטבע.</p>
-            <p>התיק נפל לתוך שלולית בוץ עמוקה.</p>
-            <p>אי אפשר להיכנס כי שוקעים בבוץ.</p>
+            <p>תדמיינו שקבוצת חברים יצאה לטיול בטבע.</p>
+            <p>במהלך ההליכה, אחד החברים – ילד בשם עידו – איבד את התיק שלו.</p>
+            <p>התיק התגלגל ונפל לתוך שלולית בוץ עמוקה.</p>
+            <p>אי אפשר להיכנס פנימה – כי שוקעים בבוץ.</p>
             <p>אי אפשר להגיע עם היד – זה רחוק מדי.</p>
+            <p style="font-weight: 600; margin-top: 0.6rem;">ועכשיו נשאלת השאלה:</p>
             <div class="question-box">❓ איך מחלצים את התיק בלי לשקוע?</div>
             <div class="zoom-box">⏳ כתבו בצ'אט פתרונות חופשיים — 3 דקות.</div>
           </div>
         </div>
-        <div data-coach="he">תדמיינו שקבוצת חברים טיילו בטבע.
-אחד החברים, ילד בשם עידו, איבד את התיק שלו בטיול בטבע.
-התיק נפל לתוך שלולית בוץ עמוקה.
-אי אפשר להיכנס כי שוקעים בבוץ.
+        <div data-coach="he">תדמיינו שקבוצת חברים יצאה לטיול בטבע.
+במהלך ההליכה, אחד החברים – ילד בשם עידו – איבד את התיק שלו.
+התיק התגלגל ונפל לתוך שלולית בוץ עמוקה.
+אי אפשר להיכנס פנימה – כי שוקעים בבוץ.
 אי אפשר להגיע עם היד – זה רחוק מדי.
-❓ איך מחלצים את התיק בלי לשקוע?
+ועכשיו נשאלת השאלה: איך מחלצים את התיק בלי לשקוע?
 שלוש דקות — כתבו בצ'אט פתרונות חופשיים (בלי טבע עדיין).</div>
       </div>
     </section>
@@ -513,9 +587,11 @@ main{position:relative;height:100vh}
           <img src="images/duck-real.png" alt="Duck webbed feet on soft ground">
           <div class="stage-col">
             <div class="stage-box">❓ מה מיוחד בכפות הרגליים שלו?</div>
-            <div class="zoom-box">⏳ כתבו בצ'אט — 3 דקות.</div>
-            <div class="reveal-content">→ קרומי שחייה שמפזרים משקל.
-מסקנה: פיזור משקל עוזר לא לשקוע.</div>
+            <button class="reveal-button" data-step="2" onclick="toggleOrganismAnswer(event, 'duck')">
+              <span class="icon-hidden">👁️</span>
+              <span class="icon-showing">✓</span>
+            </button>
+            <div class="reveal-content" style="margin: 0.4rem auto; max-width: 90%;">קרומי שחייה שמפזרים משקל. פיזור משקל עוזר לא לשקוע.</div>
           </div>
         </div>
         <div data-coach="he">בואו נסתכל על הברווז.
@@ -536,9 +612,11 @@ main{position:relative;height:100vh}
           <img src="images/water-strider-real.png" alt="Water strider on water surface">
           <div class="stage-col">
             <div class="stage-box">❓ איך הוא הולך על מים ולא שוקע?</div>
-            <div class="zoom-box">⏳ כתבו בצ'אט — 3 דקות.</div>
-            <div class="reveal-content">→ רגליים ארוכות ודקות שמפזרות משקל + מבנה מיוחד.
-מסקנה: מבנה נכון מונע שקיעה.</div>
+            <button class="reveal-button" data-step="3" onclick="toggleOrganismAnswer(event, 'strider')">
+              <span class="icon-hidden">👁️</span>
+              <span class="icon-showing">✓</span>
+            </button>
+            <div class="reveal-content" style="margin: 0.4rem auto; max-width: 90%;">רגליים ארוכות ודקות שמפזרות משקל. מבנה נכון מונע שקיעה.</div>
           </div>
         </div>
         <div data-coach="he">עכשיו בואו נראה עכביש מים.
@@ -559,9 +637,11 @@ main{position:relative;height:100vh}
           <img src="images/elephant-foot-real.png" alt="Elephant foot on soft ground">
           <div class="stage-col">
             <div class="stage-box">❓ למה פיל לא שוקע למרות שהוא כבד?</div>
-            <div class="zoom-box">⏳ כתבו בצ'אט — 3 דקות.</div>
-            <div class="reveal-content">→ כף רגל רחבה שמפזרת משקל.
-מסקנה: שטח מגע גדול = פחות שקיעה.</div>
+            <button class="reveal-button" data-step="4" onclick="toggleOrganismAnswer(event, 'elephant')">
+              <span class="icon-hidden">👁️</span>
+              <span class="icon-showing">✓</span>
+            </button>
+            <div class="reveal-content" style="margin: 0.4rem auto; max-width: 90%;">כף רגל רחבה שמפזרת משקל. שטח מגע גדול = פחות שקיעה.</div>
           </div>
         </div>
         <div data-coach="he">בואו נחשוב על פיל.
@@ -658,7 +738,7 @@ main{position:relative;height:100vh}
 </div>
 
 <!-- ─ Status bar ─ -->
-<div id="studentStatus" class="student-status" data-student="ar">⏳ انتظروا تعليمات المعلمة</div>
+<div id="studentStatus" class="student-status" style="display: none;">⏳ انتظروا تعليمات المعلمة</div>
 
 <!-- ─ Timer ─ -->
 <div class="timer-box hidden" id="timerBox">
@@ -700,7 +780,6 @@ function goToStep(newStep){
   updateDisplay();
   setTimerNote(`זמן מומלץ לשלב: ${fmt(remainingTime)}`);
   if(typeof updateCoachSidebar === 'function') updateCoachSidebar(newStep);
-  startStepTimer();
 }
 
 function fmt(s){ return `${Math.floor(s/60).toString().padStart(2,'0')}:${(s%60).toString().padStart(2,'0')}`; }
@@ -786,14 +865,10 @@ function setupCoachSidebar() {
 
 /* ──── Reveal-on-Click Answers ──── */
 function setupRevealContent() {
-  const revealElements = document.querySelectorAll(
-    '[data-step="2"] .reveal-content, ' +
-    '[data-step="3"] .reveal-content, ' +
-    '[data-step="4"] .reveal-content, ' +
-    '[data-step="5"] .reveal-content'
-  );
+  // Stage 5 solution option reveal-on-click
+  const stage5Reveals = document.querySelectorAll('[data-step="5"] .reveal-content');
 
-  revealElements.forEach(el => {
+  stage5Reveals.forEach(el => {
     el.addEventListener('click', (e) => {
       e.stopPropagation();
       el.classList.toggle('visible');
@@ -827,16 +902,40 @@ function setupSolutionOptions() {
   stageEl.querySelector('.stage-col').insertBefore(container, stageBoxEl.nextSibling);
 }
 
+/* ──── Organism Answer Toggle ──── */
+function toggleOrganismAnswer(event, organism) {
+  event.preventDefault();
+  event.stopPropagation();
+
+  const button = event.currentTarget;
+  const card = button.closest('.card');
+  const revealContent = card.querySelector('.reveal-content');
+
+  if (!revealContent) return;
+
+  button.classList.toggle('showing');
+  revealContent.classList.toggle('visible');
+}
+
 /* ──── Sidebar Toggle ──── */
 function setupSidebarToggle() {
   const toggle = document.getElementById('sidebarToggle');
   const sidebar = document.getElementById('coachSidebar');
 
+  if (!toggle || !sidebar) {
+    console.error('Sidebar toggle setup failed: elements not found');
+    return;
+  }
+
   toggle.addEventListener('click', (e) => {
+    e.preventDefault();
     e.stopPropagation();
     sidebar.classList.toggle('hidden');
     toggle.textContent = sidebar.classList.contains('hidden') ? '📖' : '👁️';
   });
+
+  // Ensure button is clickable
+  toggle.style.pointerEvents = 'auto';
 }
 
 /* ──── Update Coach Sidebar on Stage Change ──── */
