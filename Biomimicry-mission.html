@@ -586,7 +586,7 @@ main{position:relative;height:100vh}
   <aside class="coach-sidebar" id="coachSidebar"></aside>
 
   <!-- Toggle button for sidebar -->
-  <button class="sidebar-toggle" id="sidebarToggle" title="הצג/הסתר הערות המדריכה">👁️</button>
+  <button class="sidebar-toggle" id="sidebarToggle" title="הצג/הסתר הערות המדריכה" onclick="toggleSidebar(event)">👁️</button>
 
   <main class="main-shell" id="mainContent">
 
@@ -970,24 +970,52 @@ function toggleOrganismAnswer(event, organism) {
   revealContent.classList.toggle('visible');
 }
 
+/* ──── Toggle Sidebar Function ──── */
+function toggleSidebar(event) {
+  event.preventDefault();
+  event.stopPropagation();
+  const sidebar = document.getElementById('coachSidebar');
+  const toggle = document.getElementById('sidebarToggle');
+
+  if (!sidebar || !toggle) return;
+
+  const isHidden = sidebar.classList.contains('hidden');
+  if (isHidden) {
+    sidebar.classList.remove('hidden');
+    toggle.textContent = '👁️';
+  } else {
+    sidebar.classList.add('hidden');
+    toggle.textContent = '📖';
+  }
+}
+
 /* ──── Sidebar Toggle ──── */
 function setupSidebarToggle() {
   const toggle = document.getElementById('sidebarToggle');
   const sidebar = document.getElementById('coachSidebar');
 
   if (!toggle || !sidebar) {
-    console.error('Sidebar toggle setup failed: elements not found');
+    console.error('Sidebar toggle setup failed');
     return;
   }
 
-  toggle.addEventListener('click', (e) => {
-    e.preventDefault();
-    e.stopPropagation();
+  // Use a direct click handler
+  toggle.onclick = function(e) {
+    if (e) e.preventDefault();
     sidebar.classList.toggle('hidden');
     toggle.textContent = sidebar.classList.contains('hidden') ? '📖' : '👁️';
-  });
+    return false;
+  };
 
-  // Ensure button is clickable
+  // Also add event listener for redundancy
+  toggle.addEventListener('click', function(e) {
+    if (e) e.preventDefault();
+    sidebar.classList.toggle('hidden');
+    toggle.textContent = sidebar.classList.contains('hidden') ? '📖' : '👁️';
+  }, false);
+
+  // Make sure it's clickable
+  toggle.style.cursor = 'pointer';
   toggle.style.pointerEvents = 'auto';
 }
 
