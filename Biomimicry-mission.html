@@ -41,7 +41,7 @@ button{border:none;border-radius:12px;background:var(--accent);color:#fff;cursor
 
 /* ─ Coach text ─ */
 [data-coach="he"]{
-  display:block;
+  display:none;
   font-size:.78rem;
   color:#475569;
   padding:.45rem .65rem;
@@ -121,7 +121,7 @@ main{position:relative;height:100vh}
   flex-direction: column;
   gap: .45rem;
   overflow: hidden;
-  margin-right: 28%;
+  margin-right: 30%;
 }
 
 /* ─ Side-by-side: image + text column ─ */
@@ -134,12 +134,13 @@ main{position:relative;height:100vh}
   align-items:flex-start;
 }
 .stage-row img{
-  width:36%;
+  width:40%;
   max-height:100%;
   object-fit:cover;
-  border-radius:10px;
-  border:1px solid var(--border);
+  border-radius:12px;
+  border:2px solid var(--stage-color, var(--border));
   flex-shrink:0;
+  box-shadow:0 6px 16px rgba(var(--stage-color, 31), var(--stage-color, 111), var(--stage-color, 139), 0.2);
 }
 
 /* ─ Content column (inside row, or direct card child) ─ */
@@ -188,6 +189,11 @@ main{position:relative;height:100vh}
 }
 .reveal-content.visible{
   display: block;
+  padding: 1rem 1.2rem;
+  font-size: 0.95rem;
+  font-weight: 500;
+  text-align: center;
+  box-shadow: 0 8px 20px rgba(var(--stage-color, 59), var(--stage-color, 130), var(--stage-color, 246), 0.3);
 }
 @keyframes slideDown{
   from { opacity: 0; transform: translateY(-8px); }
@@ -241,6 +247,56 @@ main{position:relative;height:100vh}
   content: "✓ ";
   font-weight: 700;
   margin-right: 0.3rem;
+}
+
+/* Solution Option Boxes (Stage 5) */
+.solution-options-container {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  margin: 0.6rem 0;
+}
+
+.solution-option-box {
+  background: linear-gradient(135deg, var(--stage-light, #fef3c7), #ffffff);
+  border: 2px solid var(--stage-color, #f59e0b);
+  border-radius: 10px;
+  padding: 0.7rem 0.95rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.solution-option-box:hover {
+  background: linear-gradient(135deg, #ffffff, var(--stage-light, #fef3c7));
+  box-shadow: 0 4px 12px rgba(var(--stage-color, 245), var(--stage-color, 158), var(--stage-color, 11), 0.2);
+  transform: translateX(-4px);
+}
+
+.solution-option-title {
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+.solution-option-box .reveal-content {
+  display: none;
+  padding: 0.6rem 0.9rem;
+  border-radius: 8px;
+  background: linear-gradient(135deg, rgba(var(--stage-color, 59), var(--stage-color, 130), var(--stage-color, 246), 0.1), rgba(var(--stage-color, 59), var(--stage-color, 130), var(--stage-color, 246), 0.05));
+  border-left: 3px solid var(--stage-color, #fed7aa);
+  font-size: 0.85rem;
+  cursor: pointer;
+  margin-top: 0.4rem;
+  transition: all 0.4s ease;
+  animation: slideDown 0.3s ease;
+}
+
+.solution-option-box .reveal-content.visible {
+  display: block;
+  padding: 0.75rem 0.95rem;
+  font-size: 0.9rem;
+  font-weight: 500;
+  box-shadow: 0 6px 16px rgba(var(--stage-color, 59), var(--stage-color, 130), var(--stage-color, 246), 0.2);
 }
 
 /* ─ Sidebar ─ */
@@ -332,8 +388,9 @@ main{position:relative;height:100vh}
 }
 
 .coach-sidebar.hidden {
-  transform: translateX(100%);
+  transform: translateX(120%);
   transition: transform 0.3s ease;
+  pointer-events: none;
 }
 
 /* ─ Fixed UI ─ */
@@ -437,8 +494,11 @@ main{position:relative;height:100vh}
     <section class="stage" data-step="1">
       <div class="card">
         <h2>🌿 עכשיו מתחיל החקר</h2>
-        <div class="stage-col lang-ar overlay-ar">
-          <div class="zoom-box">אנחנו הולכים לבדוק איך הטבע פותר בעיות דומות.</div>
+        <div class="stage-row">
+          <img src="images/eye.png" alt="Search and observation">
+          <div class="stage-col lang-ar overlay-ar">
+            <div class="zoom-box">אנחנו הולכים לבדוק איך הטבע פותר בעיות דומות.</div>
+          </div>
         </div>
         <div data-coach="he">עכשיו אנחנו הולכים לבדוק איך הטבע פותר בעיות דומות.
 נחקור שלושה אורגניזמים ונראה את התכונות שלהם.</div>
@@ -522,12 +582,32 @@ main{position:relative;height:100vh}
         <div class="stage-col">
           <p>תכננו כלי שיחלץ את התיק מהבוץ בהשראת הטבע.</p>
           <div class="zoom-box">⏳ 10 דקות — בחדרים קטנים או בצ'אט.</div>
-          <div class="stage-box">אפשרויות:
-• נעליים מיוחדות
-• לוח רחב לעמידה
-• מוט ארוך עם מבנה מיוחד
-• רובוט קטן</div>
-          <div class="reveal-content">שאלות: איזה עיקרון לקחתם מהטבע? וכיצד הוא פותר את הבעיה?</div>
+          <div style="font-weight: 600; font-size: .9rem; margin-bottom: .3rem;">👇 בחרו אפשרות:</div>
+          <div class="solution-options-container">
+            <div class="solution-option-box">
+              <div class="solution-option-title">👟 נעליים מיוחדות</div>
+              <div class="reveal-content">→ עקרון מהברווז: קרומי שחייה מפזרים משקל → נעליים עם קרומים מפזרים משקל למניעת שקיעה.</div>
+            </div>
+            <div class="solution-option-box">
+              <div class="solution-option-title">📋 לוח רחב לעמידה</div>
+              <div class="reveal-content">→ עקרון מהפיל: כף רגל רחבה מפזרת משקל → לוח רחב יוצר שטח מגע גדול למניעת שקיעה.</div>
+            </div>
+            <div class="solution-option-box">
+              <div class="solution-option-title">🎣 מוט ארוך עם מבנה מיוחד</div>
+              <div class="reveal-content">→ עקרון מעכביש מים: רגליים ארוכות מפזרות משקל → מוט ארוך מגיע רחוק בלי לשקוע.</div>
+            </div>
+            <div class="solution-option-box">
+              <div class="solution-option-title">🤖 רובוט קטן</div>
+              <div class="reveal-content">→ עקרון משלושת היצורים: מנגנון קטן מתחלק לחלקים המפזרים משקל → רובוט מתקדם בבוץ.</div>
+            </div>
+          </div>
+          <div style="margin-top: .8rem; padding-top: .6rem; border-top: 1px solid var(--stage-light);">
+            <div class="stage-box" style="cursor: default; margin-bottom: .3rem;">💡 שאלות לחשיבה:</div>
+            <ul style="font-size: .85rem; padding-right: 1.2rem; margin: .3rem 0;">
+              <li>איזה עיקרון לקחתם מהטבע?</li>
+              <li>כיצד הוא עוזר לפתור את הבעיה?</li>
+            </ul>
+          </div>
         </div>
         <div data-coach="he">עכשיו אנחנו עוברים לשלב ההמצאה.
 אני מחלקת אתכם לחדרים קטנים בזום (או תעבדו בצ'אט).
@@ -551,12 +631,12 @@ main{position:relative;height:100vh}
       <div class="card">
         <h2>✅ סיכום: תהליך החקר</h2>
         <div class="stage-col">
-          <div class="stage-box" style="font-weight:400; font-size:0.9rem; line-height:1.6;">
-1️⃣ זיהינו בעיה
-2️⃣ שאלנו: מי בטבע מתמודד עם בעיה דומה?
-3️⃣ בדקנו תכונות של האורגניזם
-4️⃣ לקחנו עיקרון
-5️⃣ המצאנו פתרון חדש
+          <div class="stage-box" style="font-weight:400; font-size:0.95rem; line-height:1.8; padding:1rem 1.2rem;">
+            <div style="margin-bottom:0.6rem;">1️⃣ זיהינו בעיה</div>
+            <div style="margin-bottom:0.6rem;">2️⃣ שאלנו: מי בטבע מתמודד עם בעיה דומה?</div>
+            <div style="margin-bottom:0.6rem;">3️⃣ בדקנו תכונות של האורגניזם</div>
+            <div style="margin-bottom:0.6rem;">4️⃣ לקחנו עיקרון</div>
+            <div>5️⃣ המצאנו פתרון חדש</div>
           </div>
           <div class="zoom-box">וזה בדיוק תהליך חקר מקרה!</div>
         </div>
@@ -709,7 +789,8 @@ function setupRevealContent() {
   const revealElements = document.querySelectorAll(
     '[data-step="2"] .reveal-content, ' +
     '[data-step="3"] .reveal-content, ' +
-    '[data-step="4"] .reveal-content'
+    '[data-step="4"] .reveal-content, ' +
+    '[data-step="5"] .reveal-content'
   );
 
   revealElements.forEach(el => {
