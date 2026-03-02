@@ -905,7 +905,7 @@ function setupCoachSidebar() {
       section.className = 'coach-section';
       section.dataset.step = idx;
       section.innerHTML = `
-        <div class="coach-header">👨‍🏫 שלב ${idx}</div>
+        <div class="coach-header">👨‍🏫 ${idx === 0 ? 'פתיחה' : 'שלב ' + idx}</div>
         <div class="coach-content">${coachText.textContent}</div>
       `;
       sidebar.appendChild(section);
