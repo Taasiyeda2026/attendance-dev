@@ -240,6 +240,59 @@ main{position:relative;height:100vh}
   display: none;
 }
 
+/* Stage 0 - Opening with Giant Image and Text Overlay */
+[data-step="0"] .stage-row {
+  position: relative;
+  flex-direction: row;
+  align-items: stretch;
+  gap: 0;
+}
+
+[data-step="0"] .stage-row img {
+  width: 55%;
+  max-height: 100%;
+  object-fit: cover;
+  border-radius: 0;
+}
+
+[data-step="0"] .stage-col {
+  width: 45%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 1rem;
+  background: linear-gradient(135deg, var(--stage-light), #ffffff);
+}
+
+[data-step="0"] .stage-col p {
+  margin: 0.3rem 0;
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+/* Stage 1 - Centered Layout */
+[data-step="1"] .stage-row {
+  flex-direction: column;
+  align-items: center;
+  gap: 0.8rem;
+}
+
+[data-step="1"] .stage-row img {
+  width: 45%;
+  max-width: 200px;
+  height: auto;
+}
+
+[data-step="1"] .stage-col {
+  width: 100%;
+  text-align: center;
+}
+
+[data-step="1"] .zoom-box {
+  display: block;
+}
+
 .organism .reveal-button {
   background: linear-gradient(135deg, var(--stage-color, #3b82f6), rgba(var(--stage-color, 59), var(--stage-color, 130), var(--stage-color, 246), 0.8));
   color: white;
