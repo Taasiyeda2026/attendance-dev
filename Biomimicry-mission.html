@@ -15,6 +15,15 @@
   --success:#10b981;
   --danger:#ef4444;
 }
+
+/* Stage Colors */
+.stage[data-step="0"] { --stage-color: #ef4444; --stage-light: #fee2e2; }
+.stage[data-step="1"] { --stage-color: #10b981; --stage-light: #d1fae5; }
+.stage[data-step="2"] { --stage-color: #3b82f6; --stage-light: #dbeafe; }
+.stage[data-step="3"] { --stage-color: #8b5cf6; --stage-light: #f3e8ff; }
+.stage[data-step="4"] { --stage-color: #ec4899; --stage-light: #fce7f3; }
+.stage[data-step="5"] { --stage-color: #f59e0b; --stage-light: #fef3c7; }
+.stage[data-step="6"] { --stage-color: #06b6d4; --stage-light: #cffafe; }
 *{box-sizing:border-box;margin:0;padding:0}
 body{
   font-family:Heebo,system-ui,sans-serif;
@@ -26,7 +35,7 @@ body{
 .hidden{display:none !important}
 h1,h2,h3{line-height:1.3}
 h1{font-size:clamp(2.1rem,6vw,4rem);text-shadow:0 6px 22px rgba(0,0,0,.25)}
-h2{font-size:clamp(.95rem,2.2vw,1.4rem);color:var(--dark);border-right:4px solid var(--accent-2);padding-right:.6rem}
+h2{font-size:clamp(.95rem,2.2vw,1.4rem);color:var(--stage-color,var(--dark));border-right:5px solid var(--stage-color,var(--accent-2));padding-right:.6rem;margin-bottom:.3rem}
 p,li{font-size:.88rem}
 button{border:none;border-radius:12px;background:var(--accent);color:#fff;cursor:pointer}
 
@@ -97,19 +106,22 @@ main{position:relative;height:100vh}
   to{opacity:1;transform:translateY(0)}
 }
 
-/* ─ Card: fills remaining height ─ */
+/* ─ Card: fills remaining height with color ─ */
 .card{
-  background:linear-gradient(165deg,#ffffff,#f9fcff);
-  border-radius:18px;
-  padding:.75rem 1rem;
-  flex:1;
-  min-height:0;
-  box-shadow:0 12px 24px rgba(10,32,58,.1);
-  border:1px solid var(--border);
-  display:flex;
-  flex-direction:column;
-  gap:.45rem;
-  overflow:hidden;
+  background: linear-gradient(165deg, #ffffff, var(--stage-light, #f9fcff));
+  border-radius: 18px;
+  padding: .75rem 1rem;
+  flex: 1;
+  min-height: 0;
+  box-shadow: 0 12px 24px rgba(10,32,58,.1),
+              0 0 20px rgba(var(--stage-color, 31), var(--stage-color, 111), var(--stage-color, 139), 0.08);
+  border: 1px solid rgba(var(--stage-color, 219), var(--stage-color, 231), var(--stage-color, 243), 0.5);
+  border-left: 5px solid var(--stage-color, #1f6f8b);
+  display: flex;
+  flex-direction: column;
+  gap: .45rem;
+  overflow: hidden;
+  margin-right: 28%;
 }
 
 /* ─ Side-by-side: image + text column ─ */
@@ -142,35 +154,187 @@ main{position:relative;height:100vh}
 
 /* ─ Info boxes ─ */
 .stage-box{
-  background:linear-gradient(135deg,#ecf8ff,#f4efff);
-  padding:.45rem .7rem;
-  border-radius:10px;
-  border-right:4px solid var(--accent);
-  font-weight:600;
-  font-size:.87rem;
+  background: linear-gradient(135deg, var(--stage-light, #ecf8ff), #ffffff);
+  padding: .45rem .7rem;
+  border-radius: 10px;
+  border-left: 4px solid var(--stage-color, var(--accent));
+  font-weight: 600;
+  font-size: .87rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+.stage-box:hover{
+  transform: translateX(-4px);
+  box-shadow: 0 6px 16px rgba(var(--stage-color, 31), var(--stage-color, 111), var(--stage-color, 139), 0.25);
 }
 .zoom-box{
-  background:#f8fafc;
-  border:1px solid #cbd5e1;
-  border-radius:10px;
-  padding:.45rem .7rem;
-  font-size:.87rem;
+  background: #f8fafc;
+  border-left: 2px solid var(--stage-color, #cbd5e1);
+  border-radius: 10px;
+  padding: .45rem .7rem;
+  font-size: .87rem;
 }
 .reveal-content{
-  padding:.45rem .7rem;
-  border-radius:10px;
-  background:#fff7ed;
-  border:1px solid #fed7aa;
-  font-size:.87rem;
+  display: none;
+  padding: .6rem .9rem;
+  border-radius: 8px;
+  background: linear-gradient(135deg, rgba(var(--stage-color, 59), var(--stage-color, 130), var(--stage-color, 246), 0.1), rgba(var(--stage-color, 59), var(--stage-color, 130), var(--stage-color, 246), 0.05));
+  border-left: 3px solid var(--stage-color, #fed7aa);
+  font-size: .87rem;
+  cursor: pointer;
+  margin-top: .4rem;
+  transition: all 0.4s ease;
+  animation: slideDown 0.3s ease;
+}
+.reveal-content.visible{
+  display: block;
+}
+@keyframes slideDown{
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.reveal-content:hover{
+  background: linear-gradient(135deg, rgba(var(--stage-color, 59), var(--stage-color, 130), var(--stage-color, 246), 0.15), rgba(var(--stage-color, 59), var(--stage-color, 130), var(--stage-color, 246), 0.08));
 }
 .question-box{
-  background:#eff6ff;
-  border:1px solid #bfdbfe;
-  padding:.45rem .7rem;
-  border-radius:10px;
-  font-weight:600;
+  background: #eff6ff;
+  border-left: 3px solid var(--stage-color, #3b82f6);
+  padding: .45rem .7rem;
+  border-radius: 10px;
+  font-weight: 600;
 }
 .lang-ar{direction:rtl;font-family:Tajawal,"Noto Sans Arabic",sans-serif}
+
+/* Solution Options (Stage 5) */
+.solution-options{
+  display: flex;
+  flex-direction: column;
+  gap: .5rem;
+  margin-top: .5rem;
+}
+
+.solution-option{
+  background: linear-gradient(135deg, var(--stage-light, #fef3c7), #ffffff);
+  border: 2px solid var(--stage-color, #f59e0b);
+  border-radius: 10px;
+  padding: .8rem 1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-weight: 500;
+  font-size: .9rem;
+}
+
+.solution-option:hover{
+  background: linear-gradient(135deg, #ffffff, var(--stage-light, #fef3c7));
+  box-shadow: 0 4px 12px rgba(var(--stage-color, 245), var(--stage-color, 158), var(--stage-color, 11), 0.2);
+  transform: translateX(-4px);
+}
+
+.solution-option.selected{
+  background: linear-gradient(135deg, var(--stage-color, #f59e0b), rgba(var(--stage-color, 245), var(--stage-color, 158), var(--stage-color, 11), 0.8));
+  color: white;
+  box-shadow: 0 6px 16px rgba(var(--stage-color, 245), var(--stage-color, 158), var(--stage-color, 11), 0.3);
+  border-color: var(--stage-color, #f59e0b);
+}
+
+.solution-option.selected::before{
+  content: "✓ ";
+  font-weight: 700;
+  margin-right: 0.3rem;
+}
+
+/* ─ Sidebar ─ */
+.coach-sidebar {
+  position: fixed;
+  right: 0;
+  top: 0;
+  width: 28%;
+  height: 100vh;
+  background: linear-gradient(180deg, #0b1c2d 0%, #1a2d42 100%);
+  border-left: 4px solid var(--stage-color, #1f6f8b);
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 1.2rem 1rem 100px;
+  z-index: 150;
+  color: #e0e7ff;
+  font-size: 0.85rem;
+  line-height: 1.6;
+  box-shadow: -8px 0 24px rgba(10,32,58,0.3);
+}
+
+.coach-sidebar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.coach-sidebar::-webkit-scrollbar-track {
+  background: rgba(255,255,255,0.1);
+}
+
+.coach-sidebar::-webkit-scrollbar-thumb {
+  background: rgba(255,255,255,0.3);
+  border-radius: 3px;
+}
+
+.coach-section {
+  margin-bottom: 1.5rem;
+  padding-bottom: 1.2rem;
+  border-bottom: 1px solid rgba(255,255,255,0.15);
+  display: none;
+}
+
+.coach-section.active {
+  display: block;
+  animation: fadeIn 0.4s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.coach-header {
+  font-weight: 700;
+  color: #60a5fa;
+  margin-bottom: 0.8rem;
+  font-size: 0.95rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.coach-content {
+  white-space: pre-line;
+  color: #d1d5db;
+}
+
+.sidebar-toggle {
+  position: fixed;
+  right: 16px;
+  top: 72px;
+  width: 38px;
+  height: 38px;
+  background: #334155;
+  border: 1px solid #64748b;
+  border-radius: 8px;
+  color: white;
+  font-size: 1rem;
+  cursor: pointer;
+  z-index: 160;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.sidebar-toggle:hover {
+  background: #0f172a;
+  transform: scale(1.08);
+}
+
+.coach-sidebar.hidden {
+  transform: translateX(100%);
+  transition: transform 0.3s ease;
+}
 
 /* ─ Fixed UI ─ */
 .student-status{
@@ -236,6 +400,12 @@ main{position:relative;height:100vh}
 
 <!-- ════════════════  LESSON  ════════════════ -->
 <div id="lessonApp" class="hidden">
+  <!-- Sidebar for Coach Notes -->
+  <aside class="coach-sidebar" id="coachSidebar"></aside>
+
+  <!-- Toggle button for sidebar -->
+  <button class="sidebar-toggle" id="sidebarToggle" title="הצג/הסתר הערות המדריכה">👁️</button>
+
   <main class="main-shell" id="mainContent">
 
     <!-- ─────────  שלב 0 / المرحلة 0 – הפתיחה הדרמטית  ───────── -->
@@ -245,7 +415,7 @@ main{position:relative;height:100vh}
         <div class="stage-row">
           <img src="images/mud-with-bag.png" alt="Bag in muddy puddle">
           <div class="stage-col lang-ar overlay-ar">
-            <p>תדמיינו שילד בשם עידו איבד את התיק שלו בטיול בטבע.</p>
+            <p>תדמיינו שקבוצת חברים טיילו בטבע, אחד החברים, ילד בשם עידו איבד את התיק שלו בטיול בטבע.</p>
             <p>התיק נפל לתוך שלולית בוץ עמוקה.</p>
             <p>אי אפשר להיכנס כי שוקעים בבוץ.</p>
             <p>אי אפשר להגיע עם היד – זה רחוק מדי.</p>
@@ -253,7 +423,8 @@ main{position:relative;height:100vh}
             <div class="zoom-box">⏳ כתבו בצ'אט פתרונות חופשיים — 3 דקות.</div>
           </div>
         </div>
-        <div data-coach="he">תדמיינו שילד בשם עידו איבד את התיק שלו בטיול בטבע.
+        <div data-coach="he">תדמיינו שקבוצת חברים טיילו בטבע.
+אחד החברים, ילד בשם עידו, איבד את התיק שלו בטיול בטבע.
 התיק נפל לתוך שלולית בוץ עמוקה.
 אי אפשר להיכנס כי שוקעים בבוץ.
 אי אפשר להגיע עם היד – זה רחוק מדי.
@@ -448,6 +619,7 @@ function goToStep(newStep){
   remainingTime = STEP_TIMES[currentStep] || 120;
   updateDisplay();
   setTimerNote(`זמן מומלץ לשלב: ${fmt(remainingTime)}`);
+  if(typeof updateCoachSidebar === 'function') updateCoachSidebar(newStep);
   startStepTimer();
 }
 
@@ -502,7 +674,100 @@ function startLesson(){
   document.getElementById('navBar').classList.remove('hidden');
   document.getElementById('timerBox').classList.remove('hidden');
   document.getElementById('timerBox').classList.add('collapsed');
+  setupCoachSidebar();
+  setupRevealContent();
+  setupSolutionOptions();
+  setupSidebarToggle();
   goToStep(0);
+}
+
+/* ──── Sidebar Setup ──── */
+function setupCoachSidebar() {
+  const sidebar = document.getElementById('coachSidebar');
+  const stages = document.querySelectorAll('.stage');
+
+  stages.forEach((stage, idx) => {
+    const coachText = stage.querySelector('[data-coach="he"]');
+    if (coachText) {
+      const section = document.createElement('div');
+      section.className = 'coach-section';
+      section.dataset.step = idx;
+      section.innerHTML = `
+        <div class="coach-header">👨‍🏫 שלב ${idx}</div>
+        <div class="coach-content">${coachText.textContent}</div>
+      `;
+      sidebar.appendChild(section);
+    }
+  });
+
+  // Show first section
+  document.querySelector('[data-step="0"]').classList.add('active');
+}
+
+/* ──── Reveal-on-Click Answers ──── */
+function setupRevealContent() {
+  const revealElements = document.querySelectorAll(
+    '[data-step="2"] .reveal-content, ' +
+    '[data-step="3"] .reveal-content, ' +
+    '[data-step="4"] .reveal-content'
+  );
+
+  revealElements.forEach(el => {
+    el.addEventListener('click', (e) => {
+      e.stopPropagation();
+      el.classList.toggle('visible');
+    });
+  });
+}
+
+/* ──── Solution Options (Stage 5) ──── */
+function setupSolutionOptions() {
+  const stageEl = document.querySelector('[data-step="5"]');
+  if (!stageEl) return;
+
+  const stageBoxEl = stageEl.querySelector('.stage-box');
+  const options = ['נעליים מיוחדות', 'לוח רחב לעמידה', 'מוט ארוך עם מבנה מיוחד', 'רובוט קטן'];
+
+  const container = document.createElement('div');
+  container.className = 'solution-options';
+
+  options.forEach(opt => {
+    const btn = document.createElement('div');
+    btn.className = 'solution-option';
+    btn.textContent = '🎯 ' + opt;
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      document.querySelectorAll('.solution-option').forEach(b => b.classList.remove('selected'));
+      btn.classList.add('selected');
+    });
+    container.appendChild(btn);
+  });
+
+  stageEl.querySelector('.stage-col').insertBefore(container, stageBoxEl.nextSibling);
+}
+
+/* ──── Sidebar Toggle ──── */
+function setupSidebarToggle() {
+  const toggle = document.getElementById('sidebarToggle');
+  const sidebar = document.getElementById('coachSidebar');
+
+  toggle.addEventListener('click', (e) => {
+    e.stopPropagation();
+    sidebar.classList.toggle('hidden');
+    toggle.textContent = sidebar.classList.contains('hidden') ? '📖' : '👁️';
+  });
+}
+
+/* ──── Update Coach Sidebar on Stage Change ──── */
+function updateCoachSidebar(step) {
+  const sections = document.querySelectorAll('.coach-section');
+  sections.forEach(el => {
+    el.classList.remove('active');
+  });
+  const activeSection = document.querySelector(`.coach-section[data-step="${step}"]`);
+  if (activeSection) {
+    activeSection.classList.add('active');
+  }
 }
 
 document.getElementById('timerBox').addEventListener('click',()=>{
