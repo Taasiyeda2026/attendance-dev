@@ -19,32 +19,34 @@
 body{
   font-family:Heebo,system-ui,sans-serif;
   background:linear-gradient(180deg,#f8fbff 0%,#f3f7fc 50%,#edf3f9 100%);
-  line-height:1.7;
+  line-height:1.6;
   color:#0f172a;
   overflow:hidden;
 }
-body.allow-scroll{overflow:auto}
-section{padding:2rem 8%}
 .hidden{display:none !important}
-h1,h2,h3{margin-bottom:1rem;line-height:1.3}
+h1,h2,h3{line-height:1.3}
 h1{font-size:clamp(2.1rem,6vw,4rem);text-shadow:0 6px 22px rgba(0,0,0,.25)}
-h2{font-size:clamp(1.2rem,3.2vw,1.9rem);color:var(--dark);border-right:5px solid var(--accent-2);padding-right:.75rem}
-p,li{font-size:1.03rem}
+h2{font-size:clamp(.95rem,2.2vw,1.4rem);color:var(--dark);border-right:4px solid var(--accent-2);padding-right:.6rem}
+p,li{font-size:.88rem}
 button{border:none;border-radius:12px;background:var(--accent);color:#fff;cursor:pointer}
 
+/* ─ Coach text ─ */
 [data-coach="he"]{
   display:block;
-  font-size:0.85rem;
+  font-size:.78rem;
   color:#475569;
-  margin-top:1rem;
-  padding:.75rem;
+  padding:.45rem .65rem;
   border-right:3px solid #e2e8f0;
   background:#f8fafc;
-  border-radius:10px;
+  border-radius:8px;
+  line-height:1.55;
+  white-space:pre-line;
+  flex-shrink:0;
 }
 
+/* ─ Hero ─ */
 .hero{
-  min-height:100vh;
+  height:100vh;
   background:
     radial-gradient(circle at 20% 20%,rgba(255,138,0,.2),transparent 35%),
     radial-gradient(circle at 80% 30%,rgba(124,58,237,.18),transparent 32%),
@@ -57,74 +59,120 @@ button{border:none;border-radius:12px;background:var(--accent);color:#fff;cursor
   text-align:center;
   padding:2rem;
 }
+.hero h1{margin-bottom:.75rem}
 .hero button{margin-top:1rem;padding:.8rem 1.8rem;font-size:1rem;border-radius:30px}
 
-main{
-  position:relative;
-  height:100vh;
-}
-
+/* ─ Stage container ─ */
+main{position:relative;height:100vh}
 .main-shell{max-width:1100px;margin:0 auto}
 
+/* ─ Stage: full-height flex column, no overflow ─ */
 .stage{
   position:absolute;
   inset:0;
   opacity:0;
   transform:translateX(40px);
-  transition:
-    opacity 0.6s ease,
-    transform 0.6s ease;
+  transition:opacity .6s ease,transform .6s ease;
   pointer-events:none;
+  display:flex;
+  flex-direction:column;
+  padding:.5rem 4% 72px;   /* 72px = space for nav bar */
+  gap:.5rem;
+  overflow:hidden;
 }
-
 .stage.active{
   opacity:1;
   transform:translateX(0);
   pointer-events:auto;
   z-index:2;
 }
-
 .stage.exit-left{
   opacity:0;
   transform:translateX(-40px);
 }
-
 .overlay-ar{display:inline-block}
-
-.stage.active .overlay-ar{
-  animation:fadeInUp 1s ease forwards;
-}
-
+.stage.active .overlay-ar{animation:fadeInUp .9s ease forwards}
 @keyframes fadeInUp{
-  from{
-    opacity:0;
-    transform:translateY(12px);
-  }
-  to{
-    opacity:1;
-    transform:translateY(0);
-  }
+  from{opacity:0;transform:translateY(10px)}
+  to{opacity:1;transform:translateY(0)}
 }
 
+/* ─ Card: fills remaining height ─ */
 .card{
-  background:linear-gradient(165deg,#ffffff 0%,#f9fcff 100%);
-  border-radius:20px;
-  padding:1.5rem;
-  margin-bottom:1rem;
-  box-shadow:0 15px 28px rgba(10,32,58,.1);
+  background:linear-gradient(165deg,#ffffff,#f9fcff);
+  border-radius:18px;
+  padding:.75rem 1rem;
+  flex:1;
+  min-height:0;
+  box-shadow:0 12px 24px rgba(10,32,58,.1);
   border:1px solid var(--border);
+  display:flex;
+  flex-direction:column;
+  gap:.45rem;
+  overflow:hidden;
 }
-.stage-box{background:linear-gradient(135deg,#ecf8ff,#f4efff);padding:1rem 1.1rem;border-radius:12px;margin-top:.8rem;border-right:5px solid var(--accent);font-weight:600}
-.zoom-box{background:#f8fafc;border:1px solid #cbd5e1;border-radius:12px;padding:.9rem 1rem;margin-top:.8rem}
-.card img{width:100%;max-height:320px;object-fit:cover;border-radius:12px;margin-bottom:1rem;border:1px solid var(--border)}
-.organism img{width:100%;max-height:320px;object-fit:cover;border-radius:12px;margin-bottom:1rem;border:1px solid var(--border)}
-.reveal-content{margin-top:.8rem;padding:.85rem;border-radius:12px;background:#fff7ed;border:1px solid #fed7aa}
+
+/* ─ Side-by-side: image + text column ─ */
+.stage-row{
+  display:flex;
+  gap:.75rem;
+  flex:1;
+  min-height:0;
+  overflow:hidden;
+  align-items:flex-start;
+}
+.stage-row img{
+  width:36%;
+  max-height:100%;
+  object-fit:cover;
+  border-radius:10px;
+  border:1px solid var(--border);
+  flex-shrink:0;
+}
+
+/* ─ Content column (inside row, or direct card child) ─ */
+.stage-col{
+  flex:1;
+  min-width:0;
+  display:flex;
+  flex-direction:column;
+  gap:.4rem;
+  overflow:hidden;
+}
+
+/* ─ Info boxes ─ */
+.stage-box{
+  background:linear-gradient(135deg,#ecf8ff,#f4efff);
+  padding:.45rem .7rem;
+  border-radius:10px;
+  border-right:4px solid var(--accent);
+  font-weight:600;
+  font-size:.87rem;
+}
+.zoom-box{
+  background:#f8fafc;
+  border:1px solid #cbd5e1;
+  border-radius:10px;
+  padding:.45rem .7rem;
+  font-size:.87rem;
+}
+.reveal-content{
+  padding:.45rem .7rem;
+  border-radius:10px;
+  background:#fff7ed;
+  border:1px solid #fed7aa;
+  font-size:.87rem;
+}
+.question-box{
+  background:#eff6ff;
+  border:1px solid #bfdbfe;
+  padding:.45rem .7rem;
+  border-radius:10px;
+  font-weight:600;
+}
 .lang-ar{direction:rtl;font-family:Tajawal,"Noto Sans Arabic",sans-serif}
 
-.trigger-grid{display:flex;flex-wrap:wrap;gap:.55rem;margin-top:.7rem}
-.trigger-grid button{padding:.42rem .8rem;font-size:.9rem;background:#334155;border-radius:20px}
-#triggerSuggestion{margin-top:1rem;background:#eff6ff;border:1px solid #bfdbfe;padding:.85rem;border-radius:10px;min-height:56px}
-
+/* ─ Fixed UI ─ */
 .student-status{
   position:fixed;
   left:50%;
@@ -132,12 +180,11 @@ main{
   bottom:14px;
   background:rgba(11,28,45,.93);
   color:#fff;
-  padding:.6rem .95rem;
+  padding:.5rem .85rem;
   border-radius:999px;
   z-index:800;
-  font-size:.9rem;
+  font-size:.87rem;
 }
-
 .nav-bar{
   position:fixed;
   bottom:20px;
@@ -147,254 +194,182 @@ main{
   gap:10px;
   z-index:1000;
 }
-
-.nav-bar button{
-  background:#334155;
-  font-size:0.85rem;
-  padding:.4rem .8rem;
-}
-
+.nav-bar button{background:#334155;font-size:.85rem;padding:.4rem .8rem}
 .timer-box{
   position:fixed;
   top:16px;
   left:16px;
-  padding:.7rem;
+  padding:.6rem;
   border:1px solid #dbeafe;
   border-radius:12px;
   background:#f8fbff;
   z-index:1000;
-  min-width:200px;
-  box-shadow:0 12px 28px rgba(15,23,42,.15);
+  min-width:185px;
+  box-shadow:0 10px 24px rgba(15,23,42,.15);
   cursor:pointer;
 }
-.timer-display{font-size:1.5rem;font-weight:800;margin:.15rem 0}
+.timer-display{font-size:1.4rem;font-weight:800;margin:.1rem 0}
 .timer-display.warning{color:var(--danger);animation:pulse 1s infinite}
-.timer-note{font-size:.84rem;color:#334155;min-height:1.2rem}
-.timer-row{display:flex;gap:.45rem;margin-top:.5rem}
-.timer-row button{flex:1;padding:.45rem .6rem;font-size:.84rem;background:#0f172a}
+.timer-note{font-size:.8rem;color:#334155;min-height:1rem}
+.timer-row{display:flex;gap:.4rem;margin-top:.4rem}
+.timer-row button{flex:1;padding:.38rem .4rem;font-size:.78rem;background:#0f172a}
 .timer-box.collapsed .timer-note,
 .timer-box.collapsed .timer-row{display:none}
 
 @keyframes pulse{0%{transform:scale(1)}50%{transform:scale(1.04)}100%{transform:scale(1)}}
 
-@media (max-width:960px){
-  section{padding:1.3rem 5%}
-  .hero-stage{height:100dvh}
-  .overlay-ar{width:90%;padding:1.25rem;font-size:1.05rem}
-  .question-box{font-size:1.2rem}
-  .coach-below{padding:.85rem 1rem;font-size:.82rem;line-height:1.45}
+@media(max-width:768px){
+  .stage{padding:.4rem 3% 72px}
+  .stage-row img{width:42%}
+  h2{font-size:clamp(.85rem,2vw,1.15rem)}
 }
 </style>
 </head>
 <body>
 
+<!-- ════════════════  HERO  ════════════════ -->
 <section class="hero" id="heroSection">
   <h1 data-coach="he">🕵️‍♂️ משימת חילוץ סודית</h1>
   <p data-student="ar" class="lang-ar overlay-ar">مهمة إنقاذ سرّية – درس محاكاة حيوية</p>
-  <button onclick="startLesson()" data-student="ar" class="lang-ar overlay-ar">ابدأوا المهمة</button>
+  <button onclick="startLesson()" class="lang-ar overlay-ar">ابدأوا المهمة</button>
 </section>
 
+<!-- ════════════════  LESSON  ════════════════ -->
 <div id="lessonApp" class="hidden">
   <main class="main-shell" id="mainContent">
+
+    <!-- ─────────  שלב 0 / المرحلة 0  ───────── -->
     <section class="stage active" data-step="0">
       <div class="card">
-        <h2 data-student="ar" class="lang-ar overlay-ar">📖 المرحلة 0 – قصة البداية</h2>
-        <img src="images/mud-with-bag.png" alt="Bag in muddy puddle">
-        <div data-student="ar" class="lang-ar overlay-ar">
-          <p>تخيلوا أن ولدًا اسمه عيدو خرج في رحلة في الطبيعة.</p>
-          <p>أثناء المشي سقطت حقيبته داخل بركة طين عميقة.</p>
-          <p>الأرض رخوة، وكل من يقترب يغوص في الطين.</p>
-          <p>لا يمكن الدخول.</p>
-          <p>ولا يمكن الوصول إليها باليد.</p>
-          <div class="question-box">❓ كيف نُخرج الحقيبة دون أن نغوص؟</div>
+        <h2 class="lang-ar overlay-ar">📖 المرحلة 0 – قصة البداية</h2>
+        <div class="stage-row">
+          <img src="images/mud-with-bag.png" alt="Bag in muddy puddle">
+          <div class="stage-col lang-ar overlay-ar">
+            <p>ولدٌ اسمه عيدو خرج في رحلة بالطبيعة.</p>
+            <p>سقطت حقيبته في بركة طين عميقة.</p>
+            <p>الأرض رخوة — من يقترب يغوص. لا يُمكن الوصول باليد.</p>
+            <div class="question-box">❓ كيف نُخرج الحقيبة دون أن نغوص؟</div>
+            <div class="zoom-box">⏳ دقيقتان — اكتبوا فكرة في دردشة Zoom.</div>
+          </div>
         </div>
-      </div>
-      <div class="coach-below" data-coach="he">
-עכשיו אני רוצה שתדמיינו רגע סיטואציה אמיתית.
-ילד בשם עידו יצא לטיול בטבע.
-במהלך ההליכה – התיק שלו נפל לתוך שלולית בוץ עמוקה.
-האדמה רכה מאוד.
-מי שמתקרב – שוקע.
-אי אפשר להיכנס פנימה.
-אי אפשר להגיע עם היד – זה רחוק מדי.
-
-וזו השאלה שלנו היום:
-איך מחלצים את התיק – בלי לשקוע בבוץ?
-
-עכשיו אני מבקשת מכל אחד לכתוב בצ'אט רעיון קצר.
-בלי לחשוב על טבע.
-בלי השראה עדיין.
-רק פתרונות חופשיים שעולים לכם לראש.
-
-עכשיו יש לכם שתי דקות לכתוב רעיונות בצ'אט.
-אני מפעילה עכשיו את הטיימר.
-כשתשמעו שהזמן הסתיים – נחזור יחד לדיון.
+        <div data-coach="he">ילד בשם עידו — התיק נפל לבריכת בוץ עמוקה.
+האדמה רכה, מי שנכנס שוקע. אי אפשר להגיע עם היד.
+שאלה: איך מחלצים את התיק בלי לשקוע?
+שתי דקות — כתבו רעיון קצר בצ'אט (ללא השראת טבע).</div>
       </div>
     </section>
 
+    <!-- ─────────  שלב 1 / المرحلة 1  ───────── -->
     <section class="stage" data-step="1">
       <div class="card">
-        <h2 data-student="ar" class="lang-ar overlay-ar">💡 المرحلة 1 – أفكار سريعة</h2>
-        <div data-student="ar" class="lang-ar overlay-ar">
+        <h2 class="lang-ar overlay-ar">💡 المرحلة 1 – أفكار أولية</h2>
+        <div class="stage-col lang-ar overlay-ar">
           <div class="zoom-box">ننتقل الآن إلى مرحلة البحث: كيف يحلّ الطبيعة مشاكل مشابهة؟</div>
         </div>
-        <div data-coach="he">
-מצוין. עכשיו אנחנו עוברים לשלב הבא.
-היום אנחנו לא נשארים רק ברעיונות.
-אנחנו ניגשים לבעיה אמיתית – כמו מהנדסים.
-
-השאלה שלנו נשארת אותה שאלה:
-איך מחלצים את התיק בלי לשקוע בבוץ?
-
-אבל עכשיו נוסיף זווית חדשה:
-אנחנו הולכים לבדוק איך הטבע פותר בעיות דומות.
-        </div>
+        <div data-coach="he">עוברים לשלב הבא — כמו מהנדסים.
+השאלה נשארת: איך מחלצים את התיק בלי לשקוע?
+נוסיף זווית חדשה: כיצד הטבע פותר בעיות דומות?</div>
       </div>
     </section>
 
+    <!-- ─────────  שלב 2 / المرحلة 2 – ברווז / البطة  ───────── -->
     <section class="stage organism" data-step="2">
       <div class="card">
-        <h2 data-student="ar" class="lang-ar overlay-ar">🦆 المرحلة 2 – البطة</h2>
-        <img src="images/duck-real.png" alt="Duck webbed feet on soft ground">
-        <div data-student="ar" class="lang-ar overlay-ar">
-          <div class="stage-box">❓ ماذا تتوقعون؟ ما المميّز في قدم البطة؟ اكتبوا في دردشة Zoom.</div>
-          <div class="zoom-box">⏳ لديكم 3 دقائق للتفكير والإجابة في الدردشة.</div>
-          <div class="reveal-content">مبدأ التصميم: مساحة ملامسة واسعة تقلّل الضغط على الأرض الرخوة.</div>
+        <h2 class="lang-ar overlay-ar">🦆 المرحلة 2 – البطة</h2>
+        <div class="stage-row">
+          <img src="images/duck-real.png" alt="Duck webbed feet on soft ground">
+          <div class="stage-col lang-ar overlay-ar">
+            <div class="stage-box">❓ ما المميّز في قدم البطة؟ اكتبوا في دردشة Zoom.</div>
+            <div class="zoom-box">⏳ 3 دقائق للتفكير والإجابة في الدردشة.</div>
+            <div class="reveal-content">مبدأ: مساحة ملامسة واسعة ← تقليل الضغط على الأرض الرخوة.</div>
+          </div>
         </div>
-        <div data-coach="he">
-תסתכלו על הברווז.
-שימו לב לכפות הרגליים שלו.
-מה מיוחד בהן?
-
-לברווז יש קרומי שחייה.
-הקרומים יוצרים שטח מגע רחב עם הקרקע או המים.
-
-כששטח המגע רחב יותר – המשקל מתפזר.
-וכשהמשקל מתפזר – פחות שוקעים.
-
-המסקנה שלנו:
-פיזור משקל עוזר לא לשקוע.
-
-עכשיו יש לכם שלוש דקות לחשוב ולכתוב בצ'אט.
-אני מפעילה את הטיימר.
-תתמקדו בשאלה – מה מיוחד בכפות הרגליים?
-        </div>
+        <div data-coach="he">הברווז — קרומי שחייה = שטח מגע רחב עם הקרקע.
+שטח רחב ← משקל מתפזר ← פחות שוקעים.
+עיקרון: פיזור משקל מונע שקיעה.
+שלוש דקות — מה מיוחד בכפות הרגליים?</div>
       </div>
     </section>
 
+    <!-- ─────────  שלב 3 / المرحلة 3 – עכביש מים / بقّ الماء  ───────── -->
     <section class="stage organism" data-step="3">
       <div class="card">
-        <h2 data-student="ar" class="lang-ar overlay-ar">🕷️ المرحلة 3 – بقّ الماء</h2>
-        <img src="images/water-strider-real.png" alt="Water strider on water surface">
-        <div data-student="ar" class="lang-ar overlay-ar">
-          <div class="stage-box">❓ كيف يساعد شكل الأرجل على الثبات؟ اكتبوا في دردشة Zoom.</div>
-          <div class="zoom-box">⏳ 3 دقائق للإجابة في الدردشة.</div>
-          <div class="reveal-content">مبدأ التصميم: توزيع الحمل على نقاط ملامسة متعددة يزيد الاستقرار.</div>
+        <h2 class="lang-ar overlay-ar">🕷️ المرحلة 3 – بقّ الماء</h2>
+        <div class="stage-row">
+          <img src="images/water-strider-real.png" alt="Water strider on water surface">
+          <div class="stage-col lang-ar overlay-ar">
+            <div class="stage-box">❓ كيف يساعد شكل الأرجل على الثبات؟ اكتبوا في دردشة Zoom.</div>
+            <div class="zoom-box">⏳ 3 دقائق للإجابة في الدردشة.</div>
+            <div class="reveal-content">مبدأ: توزيع الحمل على نقاط ملامسة متعددة ← استقرار أكبر.</div>
+          </div>
         </div>
-        <div data-coach="he">
-עכשיו נסתכל על עכביש מים.
-איך הוא מצליח ללכת על מים ולא לשקוע?
-
-יש לו רגליים ארוכות ודקות מאוד.
-הן מפזרות את המשקל על פני שטח גדול.
-ויש להן גם מבנה מיוחד שמונע שבירה של פני המים.
-
-גם כאן אנחנו רואים:
-פיזור נכון של משקל מונע שקיעה.
-
-עכשיו יש לכם שלוש דקות לחשוב ולכתוב בצ'אט.
-אני מפעילה את הטיימר.
-        </div>
+        <div data-coach="he">עכביש מים — רגליים ארוכות ודקות מפזרות משקל.
+מבנה הרגליים מונע שבירת פני המים.
+עיקרון: ריבוי נקודות מגע מונע שקיעה.
+שלוש דקות — כיצד הרגליים עוזרות ליציבות?</div>
       </div>
     </section>
 
+    <!-- ─────────  שלב 4 / المرحلة 4 – פיל / الفيل  ───────── -->
     <section class="stage organism" data-step="4">
       <div class="card">
-        <h2 data-student="ar" class="lang-ar overlay-ar">🐘 المرحلة 4 – الفيل</h2>
-        <img src="images/elephant-foot-real.png" alt="Elephant foot on soft ground">
-        <div data-student="ar" class="lang-ar overlay-ar">
-          <div class="stage-box">❓ لماذا لا يغوص الفيل بسهولة رغم وزنه؟ اكتبوا في دردشة Zoom.</div>
-          <div class="zoom-box">⏳ 3 دقائق للإجابة في الدردشة.</div>
-          <div class="reveal-content">مبدأ التصميم: قدم عريضة ومرنة توزع القوة على مساحة أكبر.</div>
+        <h2 class="lang-ar overlay-ar">🐘 المرحلة 4 – الفيل</h2>
+        <div class="stage-row">
+          <img src="images/elephant-foot-real.png" alt="Elephant foot on soft ground">
+          <div class="stage-col lang-ar overlay-ar">
+            <div class="stage-box">❓ لماذا لا يغوص الفيل رغم وزنه؟ اكتبوا في دردشة Zoom.</div>
+            <div class="zoom-box">⏳ 3 دقائق للإجابة في الدردشة.</div>
+            <div class="reveal-content">مبدأ: قدم عريضة ومرنة ← توزيع القوة على مساحة أكبر.</div>
+          </div>
         </div>
-        <div data-coach="he">
-עכשיו תחשבו על פיל.
-הוא חיה כבדה מאוד.
-ובכל זאת – הוא לא שוקע בקלות בבוץ.
-
-למה?
-
-כי יש לו כף רגל רחבה.
-הכף הרחבה מפזרת את המשקל על שטח גדול יותר.
-
-ושוב אנחנו רואים את אותו עיקרון:
-כשמשקל מתפזר – לא שוקעים.
-
-עכשיו יש לכם שלוש דקות לחשוב ולכתוב בצ'אט.
-אני מפעילה את הטיימר.
-        </div>
+        <div data-coach="he">פיל כבד מאוד — ובכל זאת לא שוקע בקלות.
+כף רגל רחבה ← משקל מתפזר ← פחות לחץ על הקרקע.
+עיקרון: שטח מגע גדול = פחות שקיעה.
+שלוש דקות — למה הפיל לא שוקע בקלות?</div>
       </div>
     </section>
 
+    <!-- ─────────  שלב 5 / المرحلة 5 – המצאה / الاختراع  ───────── -->
     <section class="stage" data-step="5">
       <div class="card">
-        <h2 data-student="ar" class="lang-ar overlay-ar">🔧 المرحلة 5 – الاختراع</h2>
-        <div data-student="ar" class="lang-ar overlay-ar">
-          <p>اختاروا مبدأً واحدًا من الكائنات وصمّموا أداة إنقاذ قابلة للتطبيق.</p>
-          <div class="zoom-box">⏳ لديكم 10 دقائق للعمل في الغرف الصغيرة.</div>
+        <h2 class="lang-ar overlay-ar">🔧 المرحلة 5 – الاختراع</h2>
+        <div class="stage-col lang-ar overlay-ar">
+          <p>اختاروا مبدأً من الكائنات وصمّموا أداة إنقاذ قابلة للتطبيق.</p>
+          <div class="zoom-box">⏳ 10 دقائق في غرف Zoom الصغيرة.</div>
+          <div class="stage-box">أفكار: حذاء خاص / لوح عريض / عصا بهيكل مميّز / روبوت صغير</div>
+          <div class="reveal-content">فكّروا: أيّ مبدأ أخذتم من الطبيعة؟ وكيف يحلّ المشكلة؟</div>
         </div>
-        <div data-coach="he">
-עכשיו אתם עוברים להיות מהנדסים.
-אני מחלקת אתכם לחדרים קטנים בזום.
-
-המשימה שלכם:
-לתכנן כלי שיחלץ את התיק מהבוץ – בהשראת אחד מהיצורים שראינו.
-
-אתם יכולים לבחור:
-נעליים מיוחדות.
-לוח רחב לעמידה.
-מוט ארוך עם מבנה מיוחד.
-רובוט קטן.
-או כל רעיון אחר שמבוסס על פיזור משקל.
-
-תחשבו:
-איזה עיקרון לקחתם מהטבע?
-ואיך הוא עוזר לכם לפתור את הבעיה?
-
-עכשיו אתם עוברים לחדרים קטנים.
-יש לכם עשר דקות עבודה.
-אני מפעילה טיימר לעשר דקות.
-כשהטיימר יסתיים – כולם חוזרים למליאה.
-        </div>
+        <div data-coach="he">עוברים לחדרים קטנים בזום — 10 דקות.
+תכננו כלי שיחלץ את התיק מהבוץ, בהשראת אחד מהיצורים.
+אפשרויות: נעל מיוחדת / לוח רחב / מוט עם מבנה / רובוט.
+חשבו: איזה עיקרון לקחתם? ואיך הוא עוזר לפתרון?</div>
       </div>
     </section>
 
+    <!-- ─────────  שלב 6 / المرحلة 6 – סיכום / الخلاصة  ───────── -->
     <section class="stage" data-step="6">
       <div class="card">
-        <h2 data-student="ar" class="lang-ar overlay-ar">✅ المرحلة 6 – الخلاصة</h2>
-        <div data-student="ar" class="lang-ar overlay-ar">
-          <p>١️⃣ مشكلة حقيقية → ٢️⃣ إلهام من الطبيعة → ٣️⃣ مبدأ هندسي → ٤️⃣ حل مبتكر.</p>
-          <div class="zoom-box">سؤال ختامي: أي مبدأ من الطبيعة ساعدكم أكثر على التفكير كمخترعين؟</div>
+        <h2 class="lang-ar overlay-ar">✅ المرحلة 6 – الخلاصة</h2>
+        <div class="stage-col lang-ar overlay-ar">
+          <p>١️⃣ مشكلة حقيقية ← ٢️⃣ إلهام من الطبيعة ← ٣️⃣ مبدأ هندسي ← ٤️⃣ حل مبتكر</p>
+          <div class="zoom-box">سؤال ختامي: أيّ مبدأ من الطبيعة ساعدكم على التفكير كمخترعين؟</div>
         </div>
-        <div data-coach="he">
-בואו נסכם את מה שעשינו היום.
-
-1️⃣ זיהינו בעיה אמיתית.
+        <div data-coach="he">סיכום ביומימיקרי:
+1️⃣ זיהינו בעיה אמיתית
 2️⃣ שאלנו: מי בטבע מתמודד עם בעיה דומה?
-3️⃣ בדקנו תכונות של האורגניזם.
-4️⃣ לקחנו עיקרון הנדסי.
-5️⃣ והמצאנו פתרון חדש לבעיה קיימת – בהשראה מהטבע.
-
-זה נקרא ביומימיקרי.
-למידה מהטבע כדי לפתח פתרונות חכמים.
-        </div>
+3️⃣ לקחנו עיקרון הנדסי מהאורגניזם
+4️⃣ המצאנו פתרון בהשראת הטבע
+זה ביומימיקרי — למידה מהטבע לפתרונות חכמים.</div>
       </div>
     </section>
+
   </main>
 </div>
 
+<!-- ─ Status bar ─ -->
 <div id="studentStatus" class="student-status" data-student="ar">⏳ انتظروا تعليمات المعلمة</div>
 
+<!-- ─ Timer ─ -->
 <div class="timer-box hidden" id="timerBox">
   <div class="timer-display" id="timerDisplay">03:00</div>
   <div class="timer-note" id="timerNote"></div>
@@ -406,6 +381,7 @@ main{
   </div>
 </div>
 
+<!-- ─ Navigation ─ -->
 <div class="nav-bar hidden" id="navBar">
   <button onclick="goToStep(currentStep-1)" aria-label="Previous step">⬅️</button>
   <button onclick="goToStep(currentStep+1)" aria-label="Next step">➡️</button>
@@ -413,17 +389,7 @@ main{
 
 <script>
 const stages = Array.from(document.querySelectorAll('.stage'));
-const TOTAL_STEPS = stages.length;
-
-const STEP_TIMES = {
-  0: 120,
-  1: 60,
-  2: 180,
-  3: 180,
-  4: 180,
-  5: 600,
-  6: 120
-};
+const STEP_TIMES = { 0:120, 1:60, 2:180, 3:180, 4:180, 5:600, 6:120 };
 
 let currentStep = 0;
 let countdown;
@@ -431,55 +397,39 @@ let remainingTime = STEP_TIMES[0];
 
 function goToStep(newStep){
   if(newStep < 0 || newStep >= stages.length) return;
-
   const current = stages[currentStep];
-  const next = stages[newStep];
-
+  const next    = stages[newStep];
   clearInterval(countdown);
-
   current.classList.remove('active');
   current.classList.add('exit-left');
-
-  setTimeout(()=>{
-    current.classList.remove('exit-left');
-  },600);
-
+  setTimeout(()=>{ current.classList.remove('exit-left'); }, 600);
   next.classList.add('active');
-
-  currentStep = newStep;
+  currentStep   = newStep;
   remainingTime = STEP_TIMES[currentStep] || 120;
   updateDisplay();
-  setTimerNote(`זמן מומלץ לשלב: ${Math.floor(remainingTime/60)}:${String(remainingTime%60).padStart(2,'0')}`);
+  setTimerNote(`זמן מומלץ לשלב: ${fmt(remainingTime)}`);
   startStepTimer();
 }
 
+function fmt(s){ return `${Math.floor(s/60).toString().padStart(2,'0')}:${(s%60).toString().padStart(2,'0')}`; }
+
 function updateDisplay(){
-  const m = Math.floor(remainingTime/60).toString().padStart(2,'0');
-  const s = (remainingTime%60).toString().padStart(2,'0');
-  const timerDisplay = document.getElementById('timerDisplay');
-  timerDisplay.textContent = `${m}:${s}`;
-  timerDisplay.classList.toggle('warning', remainingTime <= 30 && remainingTime > 0);
+  const el = document.getElementById('timerDisplay');
+  el.textContent = fmt(remainingTime);
+  el.classList.toggle('warning', remainingTime <= 30 && remainingTime > 0);
 }
 
-function startStepTimer(){
-  remainingTime = STEP_TIMES[currentStep] || 120;
-  startTimer();
-}
+function startStepTimer(){ remainingTime = STEP_TIMES[currentStep] || 120; startTimer(); }
 
 function startTimer(event){
   if(event) event.stopPropagation();
   clearInterval(countdown);
   updateDisplay();
   setTimerNote('הטיימר רץ...');
-  countdown = setInterval(() => {
-    if(remainingTime > 0){
-      remainingTime--;
-      updateDisplay();
-    } else {
-      clearInterval(countdown);
-      setTimerNote('הזמן הסתיים');
-    }
-  },1000);
+  countdown = setInterval(()=>{
+    if(remainingTime > 0){ remainingTime--; updateDisplay(); }
+    else { clearInterval(countdown); setTimerNote('הזמן הסתיים'); }
+  }, 1000);
 }
 
 function pauseTimer(event){
@@ -501,12 +451,10 @@ function selectStepTime(event){
   clearInterval(countdown);
   remainingTime = STEP_TIMES[currentStep] || 120;
   updateDisplay();
-  setTimerNote(`זמן לשלב ${currentStep}: ${Math.floor(remainingTime/60)}:${String(remainingTime%60).padStart(2,'0')}`);
+  setTimerNote(`זמן לשלב ${currentStep}: ${fmt(remainingTime)}`);
 }
 
-function setTimerNote(msg){
-  document.getElementById('timerNote').textContent = msg;
-}
+function setTimerNote(msg){ document.getElementById('timerNote').textContent = msg; }
 
 function startLesson(){
   document.getElementById('heroSection').classList.add('hidden');
@@ -521,19 +469,12 @@ document.getElementById('timerBox').addEventListener('click',()=>{
   document.getElementById('timerBox').classList.toggle('collapsed');
 });
 
-document.addEventListener('keydown',(event)=>{
-  if(event.ctrlKey && event.key === 'ArrowRight'){
-    event.preventDefault();
-    goToStep(currentStep+1);
-  }
-  if(event.ctrlKey && event.key === 'ArrowLeft'){
-    event.preventDefault();
-    goToStep(currentStep-1);
-  }
+document.addEventListener('keydown', e=>{
+  if(e.ctrlKey && e.key==='ArrowRight'){ e.preventDefault(); goToStep(currentStep+1); }
+  if(e.ctrlKey && e.key==='ArrowLeft'){  e.preventDefault(); goToStep(currentStep-1); }
 });
 
 updateDisplay();
 </script>
-
 </body>
 </html>
