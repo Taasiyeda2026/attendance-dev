@@ -100,20 +100,27 @@ button{border:none;border-radius:30px;background:var(--accent);color:#fff;cursor
 
 .timer-box{
   position:fixed;
-  bottom:14px;
+  top:14px;
   left:14px;
   background:rgba(11,28,45,.95);
   color:white;
-  padding:.9rem;
+  padding:.6rem;
   border-radius:14px;
   z-index:999;
   width:220px;
   text-align:center;
   box-shadow:0 12px 24px rgba(0,0,0,.3);
+  display:flex;
+  flex-direction:column;
+  gap:.45rem;
 }
-.timer-display{font-size:1.65rem;font-weight:800;margin-bottom:.45rem}
+.timer-header{display:flex;align-items:center;justify-content:space-between;gap:.5rem}
+.timer-toggle{background:#334155;padding:.35rem .6rem;border-radius:8px;font-size:.78rem}
+.timer-box.minimized{width:auto;padding:.5rem .6rem}
+.timer-box.minimized .timer-controls{display:none}
+.timer-display{font-size:1.4rem;font-weight:800;margin:0}
 .timer-display.warning{color:var(--danger);animation:pulse 1s infinite}
-.timer-box select,.timer-box button{width:100%;margin:3px 0;padding:.42rem;border-radius:8px;font-size:.82rem}
+.timer-controls select,.timer-controls button{width:100%;margin:3px 0;padding:.42rem;border-radius:8px;font-size:.82rem}
 .timer-note{font-size:.78rem;min-height:18px;color:#c7d2fe;margin-top:.2rem}
 
 @keyframes pulse{0%{transform:scale(1)}50%{transform:scale(1.04)}100%{transform:scale(1)}}
@@ -301,19 +308,24 @@ button{border:none;border-radius:30px;background:var(--accent);color:#fff;cursor
   </div>
 </div>
 
-<div class="timer-box" id="timerBox">
-  <div class="timer-display" id="timerDisplay">03:00</div>
-  <select id="timeSelect">
-    <option value="180" selected>3 דקות – פתיחה</option>
-    <option value="120">2 דקות – רעיונות/סיכום</option>
-    <option value="300">5 דקות – אורגניזם</option>
-    <option value="600">10 דקות – המצאה</option>
-  </select>
-  <button onclick="startTimer()">Start</button>
-  <button onclick="startStepTimer()">Start Step</button>
-  <button onclick="pauseTimer()">Pause</button>
-  <button onclick="resetTimer()">Reset</button>
-  <div class="timer-note" id="timerNote"></div>
+<div class="timer-box minimized" id="timerBox">
+  <div class="timer-header">
+    <div class="timer-display" id="timerDisplay">03:00</div>
+    <button class="timer-toggle" id="timerToggle" onclick="toggleTimerBox()">פתח</button>
+  </div>
+  <div class="timer-controls" id="timerControls">
+    <select id="timeSelect">
+      <option value="180" selected>3 דקות – פתיחה</option>
+      <option value="120">2 דקות – רעיונות/סיכום</option>
+      <option value="300">5 דקות – אורגניזם</option>
+      <option value="600">10 דקות – המצאה</option>
+    </select>
+    <button onclick="startTimer()">Start</button>
+    <button onclick="startStepTimer()">Start Step</button>
+    <button onclick="pauseTimer()">Pause</button>
+    <button onclick="resetTimer()">Reset</button>
+    <div class="timer-note" id="timerNote"></div>
+  </div>
 </div>
 
 <button class="teacher-toggle" onclick="toggleTeacherPanel()">👩‍🏫</button>
@@ -424,6 +436,13 @@ function resetTimer(){
 }
 
 function setTimerNote(msg){ document.getElementById('timerNote').textContent = msg; }
+
+function toggleTimerBox(){
+  const timerBox = document.getElementById('timerBox');
+  const timerToggle = document.getElementById('timerToggle');
+  const isMinimized = timerBox.classList.toggle('minimized');
+  timerToggle.textContent = isMinimized ? 'פתח' : 'סגור';
+}
 
 function toggleReveal(id){
   document.getElementById(id).classList.toggle('hidden');
