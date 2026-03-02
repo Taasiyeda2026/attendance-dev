@@ -30,9 +30,16 @@ h2{font-size:clamp(1.2rem,3.2vw,1.9rem);color:var(--dark);border-right:5px solid
 p,li{font-size:1.03rem}
 button{border:none;border-radius:12px;background:var(--accent);color:#fff;cursor:pointer}
 
-[data-coach="he"]{ display:none; }
-body.mode-teacher [data-coach="he"]{ display:block; }
-body.mode-teacher [data-student="ar"]{ opacity:0.95; }
+[data-coach="he"]{
+  display:block;
+  font-size:0.85rem;
+  color:#475569;
+  margin-top:1rem;
+  padding:.75rem;
+  border-right:3px solid #e2e8f0;
+  background:#f8fafc;
+  border-radius:10px;
+}
 
 .hero{
   min-height:100vh;
@@ -90,87 +97,49 @@ body.mode-teacher [data-student="ar"]{ opacity:0.95; }
   font-size:.9rem;
 }
 
-.mode-toggle{
+.nav-bar{
   position:fixed;
-  top:12px;
-  right:12px;
-  z-index:1100;
-  border-radius:999px;
-  background:#111827;
-  padding:.45rem .75rem;
-  font-size:.82rem;
-}
-
-.teacher-toggle{
-  position:fixed;
-  bottom:14px;
-  right:14px;
-  width:56px;
-  height:56px;
-  border-radius:50%;
-  font-size:1.35rem;
-  z-index:1001;
-  background:#7c3aed;
-}
-.teacher-panel{
-  position:fixed;
-  right:14px;
-  bottom:78px;
-  width:340px;
-  max-height:78vh;
-  overflow:auto;
-  background:#fff;
-  border:1px solid var(--border);
-  border-radius:14px;
-  box-shadow:0 18px 32px rgba(0,0,0,.18);
-  padding:.9rem;
+  bottom:20px;
+  left:50%;
+  transform:translateX(-50%);
+  display:flex;
+  gap:10px;
   z-index:1000;
 }
-.teacher-row{display:flex;gap:.45rem;margin-bottom:.5rem}
-.teacher-row button{flex:1;padding:.45rem .6rem;font-size:.84rem;background:#0f172a}
-.step-indicator{font-size:.86rem;margin-bottom:.6rem;color:#334155}
-.panel-progress{display:grid;grid-template-columns:repeat(7,1fr);gap:.35rem;margin-bottom:.65rem}
-.step-dot{padding:.35rem .2rem;font-size:.72rem;background:#e2e8f0;color:#334155;border-radius:8px;border:1px solid #cbd5e1}
-.step-dot.active{background:#1f6f8b;color:#fff;border-color:#1f6f8b}
-.step-dot.completed{background:#dcfce7;color:#14532d;border-color:#86efac}
 
-.coach-overlay{
-  position:fixed;
-  top:54px;
-  left:14px;
-  width:min(360px,88vw);
-  max-height:68vh;
-  overflow:auto;
-  background:rgba(15,23,42,.95);
-  color:#fff;
-  border:1px solid #334155;
-  border-radius:14px;
-  padding:.8rem;
-  z-index:1002;
+.nav-bar button{
+  background:#334155;
+  font-size:0.85rem;
+  padding:.4rem .8rem;
 }
-.coach-overlay h3{font-size:.95rem;color:#c7d2fe;margin-bottom:.5rem}
-.coach-text{font-size:.9rem}
 
-.timer-box{margin-top:.7rem;padding:.7rem;border:1px solid #dbeafe;border-radius:12px;background:#f8fbff}
+.timer-box{
+  position:fixed;
+  bottom:66px;
+  left:50%;
+  transform:translateX(-50%);
+  margin-top:.7rem;
+  padding:.7rem;
+  border:1px solid #dbeafe;
+  border-radius:12px;
+  background:#f8fbff;
+  z-index:1000;
+  min-width:240px;
+}
 .timer-display{font-size:1.5rem;font-weight:800;margin:.15rem 0}
 .timer-display.warning{color:var(--danger);animation:pulse 1s infinite}
 .timer-note{font-size:.84rem;color:#334155;min-height:1.2rem}
+.timer-row{display:flex;gap:.45rem;margin-top:.5rem}
+.timer-row button{flex:1;padding:.45rem .6rem;font-size:.84rem;background:#0f172a}
 
 @keyframes pulse{0%{transform:scale(1)}50%{transform:scale(1.04)}100%{transform:scale(1)}}
 
-body.mode-student .teacher-toggle,
-body.mode-student .teacher-panel,
-body.mode-student .coach-overlay{display:none}
-
 @media (max-width:960px){
   section{padding:1.3rem 5%}
-  .teacher-panel{width:min(94vw,360px)}
 }
 </style>
 </head>
-<body class="mode-student">
-
-<button id="modeToggle" class="mode-toggle" onclick="toggleMode()">Mode: student</button>
+<body>
 
 <section class="hero" id="heroSection">
   <h1 data-coach="he">🕵️‍♂️ משימת חילוץ סודית</h1>
@@ -380,41 +349,23 @@ body.mode-student .coach-overlay{display:none}
 
 <div id="studentStatus" class="student-status" data-student="ar">⏳ انتظروا تعليمات المعلمة</div>
 
-<button class="teacher-toggle" onclick="toggleTeacherPanel()" aria-label="Teacher Panel">👩‍🏫</button>
-<div class="teacher-panel hidden" id="teacherPanel">
-  <h3>Teacher Panel</h3>
-  <div class="step-indicator" id="stepIndicator"></div>
-  <div class="panel-progress" id="panelProgress"></div>
-  <div class="teacher-row">
-    <button id="prevBtn" onclick="goToStep(currentStep-1)">הקודם</button>
-    <button id="nextBtn" onclick="goToStep(currentStep+1)">הבא</button>
-  </div>
-  <div class="timer-box">
-    <div class="timer-display" id="timerDisplay">03:00</div>
-    <div class="timer-note" id="timerNote"></div>
-    <div class="teacher-row">
-      <button onclick="startStepTimer()">⏱️ Start Step Timer</button>
-      <button onclick="pauseTimer()">Pause</button>
-      <button onclick="resetStepTimer()">Reset</button>
-    </div>
+<div class="timer-box hidden" id="timerBox">
+  <div class="timer-display" id="timerDisplay">03:00</div>
+  <div class="timer-note" id="timerNote"></div>
+  <div class="timer-row">
+    <button onclick="startStepTimer()">⏱️ Start Step Timer</button>
+    <button onclick="pauseTimer()">Pause</button>
+    <button onclick="resetStepTimer()">Reset</button>
   </div>
 </div>
 
-<aside class="coach-overlay" id="coachOverlay">
-  <h3>חלון מדריכה – שלב נוכחי</h3>
-  <div class="coach-text" id="coachText">—</div>
-</aside>
+<div class="nav-bar hidden" id="navBar">
+  <button onclick="goToStep(currentStep-1)">הקודם</button>
+  <button onclick="goToStep(currentStep+1)">הבא</button>
+</div>
 
 <script>
-const STEPS = [
-  { id:0, label:'סיפור' },
-  { id:1, label:'רעיונות' },
-  { id:2, label:'ברווז' },
-  { id:3, label:'עכביש מים' },
-  { id:4, label:'פיל' },
-  { id:5, label:'המצאה' },
-  { id:6, label:'סיכום' }
-];
+const TOTAL_STEPS = 7;
 
 const STEP_TIMES = {
   0: 120,
@@ -429,61 +380,14 @@ const STEP_TIMES = {
 let currentStep = 0;
 let countdown;
 let remainingTime = STEP_TIMES[0];
-let mode = localStorage.getItem('lessonMode') || 'student';
-
-function applyMode(){
-  const isTeacher = mode === 'teacher';
-  document.body.classList.toggle('mode-teacher', isTeacher);
-  document.body.classList.toggle('mode-student', !isTeacher);
-  document.getElementById('modeToggle').textContent = `Mode: ${mode}`;
-  if(!isTeacher){
-    document.getElementById('teacherPanel').classList.add('hidden');
-  }
-}
-
-function toggleMode(){
-  mode = mode === 'student' ? 'teacher' : 'student';
-  localStorage.setItem('lessonMode', mode);
-  applyMode();
-}
-
-function renderTeacherProgress(){
-  const panelProgress = document.getElementById('panelProgress');
-  panelProgress.innerHTML = STEPS.map(step => (
-    `<button class="step-dot" id="dot-${step.id}" onclick="goToStep(${step.id})">${step.id+1}</button>`
-  )).join('');
-}
-
-function updateProgressUI(){
-  document.getElementById('stepIndicator').textContent = `שלב ${currentStep+1} מתוך ${STEPS.length} — ${STEPS[currentStep].label}`;
-  STEPS.forEach(step => {
-    const dot = document.getElementById(`dot-${step.id}`);
-    if(!dot) return;
-    dot.classList.remove('active','completed');
-    if(step.id < currentStep) dot.classList.add('completed');
-    if(step.id === currentStep) dot.classList.add('active');
-  });
-  document.getElementById('prevBtn').disabled = currentStep === 0;
-  document.getElementById('nextBtn').disabled = currentStep === STEPS.length - 1;
-}
-
-function updateCoachOverlay(){
-  const stepEl = document.querySelector(`.step[data-step="${currentStep}"]`);
-  const coachBits = [...stepEl.querySelectorAll('[data-coach="he"]')]
-    .map(el => el.textContent.trim())
-    .filter(Boolean);
-  document.getElementById('coachText').textContent = coachBits.join(' • ') || 'אין טקסט מדריכה לשלב זה.';
-}
 
 function goToStep(step){
-  if(step < 0 || step >= STEPS.length) return;
+  if(step < 0 || step >= TOTAL_STEPS) return;
   clearInterval(countdown);
   currentStep = step;
   document.querySelectorAll('.step').forEach(section => {
     section.classList.toggle('active', Number(section.dataset.step) === currentStep);
   });
-  updateProgressUI();
-  updateCoachOverlay();
   remainingTime = STEP_TIMES[currentStep] || 120;
   updateDisplay();
   setTimerNote(`זמן מומלץ לשלב: ${Math.floor(remainingTime/60)}:${String(remainingTime%60).padStart(2,'0')}`);
@@ -534,23 +438,15 @@ function setTimerNote(msg){
   document.getElementById('timerNote').textContent = msg;
 }
 
-function toggleTeacherPanel(){
-  if(mode !== 'teacher') return;
-  document.getElementById('teacherPanel').classList.toggle('hidden');
-}
-
 function startLesson(){
   document.getElementById('heroSection').classList.add('hidden');
   document.getElementById('lessonApp').classList.remove('hidden');
+  document.getElementById('navBar').classList.remove('hidden');
+  document.getElementById('timerBox').classList.remove('hidden');
   goToStep(0);
 }
 
 document.addEventListener('keydown',(event)=>{
-  if(event.ctrlKey && event.key.toLowerCase() === 'm'){
-    event.preventDefault();
-    toggleMode();
-  }
-  if(mode !== 'teacher') return;
   if(event.ctrlKey && event.key === 'ArrowRight'){
     event.preventDefault();
     goToStep(currentStep+1);
@@ -561,11 +457,7 @@ document.addEventListener('keydown',(event)=>{
   }
 });
 
-renderTeacherProgress();
-applyMode();
 updateDisplay();
-updateProgressUI();
-updateCoachOverlay();
 </script>
 
 </body>
