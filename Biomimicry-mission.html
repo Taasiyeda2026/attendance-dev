@@ -4,7 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>משימת חילוץ סודית – שיעור ביומימיקרי</title>
-
 <style>
 :root{
   --dark:#0b1c2d;
@@ -12,43 +11,26 @@
   --accent-2:#ff8a00;
   --accent-3:#7c3aed;
   --light:#f4f7fa;
-  --border:#e2e8f0;
-  --stage:#eef6fb;
+  --border:#dbe7f3;
+  --success:#10b981;
+  --danger:#ef4444;
 }
 
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:Heebo,system-ui,sans-serif;background:linear-gradient(180deg,#f8fbff 0%,#f3f7fc 50%,#edf3f9 100%);line-height:1.8;color:#0f172a}
-section{padding:4rem 8%}
+body{
+  font-family:Heebo,system-ui,sans-serif;
+  background:linear-gradient(180deg,#f8fbff 0%,#f3f7fc 50%,#edf3f9 100%);
+  line-height:1.75;
+  color:#0f172a;
+}
+section{padding:2.5rem 8%}
 .hidden{display:none}
-h1,h2,h3{margin-bottom:1.2rem;line-height:1.35}
-h1{
-  font-size:clamp(2.2rem,6vw,4.2rem);
-  text-shadow:0 6px 22px rgba(0,0,0,.25);
-  letter-spacing:.6px;
-}
-h2{
-  font-size:clamp(1.5rem,4vw,2.3rem);
-  color:var(--dark);
-  border-right:6px solid var(--accent-2);
-  padding-right:.8rem;
-}
-p{
-  font-size:1.1rem;
-}
-strong{
-  color:var(--accent-3);
-  font-weight:800;
-}
-
-button{
-  padding:.7rem 1.6rem;
-  border:none;
-  border-radius:30px;
-  background:var(--accent);
-  color:white;
-  cursor:pointer;
-  margin-top:1rem;
-}
+h1,h2,h3{margin-bottom:1rem;line-height:1.35}
+h1{font-size:clamp(2.1rem,6vw,4rem);text-shadow:0 6px 22px rgba(0,0,0,.25)}
+h2{font-size:clamp(1.35rem,3.8vw,2rem);color:var(--dark);border-right:5px solid var(--accent-2);padding-right:.75rem}
+p,li{font-size:1.05rem}
+strong{color:var(--accent-3);font-weight:800}
+button{border:none;border-radius:30px;background:var(--accent);color:#fff;cursor:pointer}
 
 .hero{
   min-height:100vh;
@@ -62,255 +44,407 @@ button{
   justify-content:center;
   align-items:center;
   text-align:center;
+  padding:2rem;
 }
+.hero button{margin-top:1rem;padding:.8rem 1.8rem;font-size:1rem}
+
+.progress-wrap{
+  position:sticky;
+  top:0;
+  z-index:900;
+  background:#fff;
+  border-bottom:1px solid var(--border);
+  padding:.9rem 1rem;
+}
+.progress-bar{
+  max-width:1200px;
+  margin:0 auto;
+  display:grid;
+  grid-template-columns:repeat(7,minmax(80px,1fr));
+  gap:.5rem;
+}
+.step-dot{
+  border:1px solid #bfd2e8;
+  background:#f7fbff;
+  color:#27425e;
+  border-radius:14px;
+  padding:.55rem .5rem;
+  font-size:.83rem;
+  min-height:64px;
+}
+.step-dot.active{background:#1f6f8b;color:#fff;border-color:#1f6f8b;box-shadow:0 8px 18px rgba(31,111,139,.28)}
+.step-dot.completed{background:#eafaf3;border-color:#8adeb6;color:#0f5132}
 
 .card{
   background:linear-gradient(165deg,#ffffff 0%,#f9fcff 100%);
-  border-radius:22px;
-  padding:2.2rem;
-  margin-bottom:2rem;
-  box-shadow:0 16px 34px rgba(10,32,58,.12);
+  border-radius:20px;
+  padding:1.8rem;
+  margin-bottom:1.5rem;
+  box-shadow:0 15px 28px rgba(10,32,58,.1);
   border:1px solid var(--border);
-  position:relative;
-  overflow:hidden;
 }
+.stage-box{background:linear-gradient(135deg,#ecf8ff,#f4efff);padding:1rem 1.2rem;border-radius:12px;margin-top:1rem;border-right:5px solid var(--accent);font-weight:600}
+.zoom-box{background:#f8fafc;border:1px solid #cbd5e1;border-radius:12px;padding:.9rem 1rem;margin-top:.8rem}
 
-.card::before{
-  content:"";
-  position:absolute;
-  width:150px;
-  height:150px;
-  left:-40px;
-  top:-55px;
-  background:radial-gradient(circle,rgba(31,111,139,.2),transparent 65%);
-  pointer-events:none;
-}
+.organism img{width:100%;max-height:320px;object-fit:cover;border-radius:12px;margin-bottom:1rem;border:1px solid var(--border)}
+.reveal-content{margin-top:1rem;padding:.9rem;border-radius:12px;background:#fff7ed;border:1px solid #fed7aa}
 
-.stage-box{
-  background:linear-gradient(135deg,#ecf8ff,#f4efff);
-  padding:1rem 1.2rem;
-  border-radius:14px;
-  margin-top:1.2rem;
-  border-right:6px solid var(--accent);
-  font-weight:600;
-}
+.bilingual{display:grid;grid-template-columns:1fr 1fr;gap:24px;align-items:start}
+.lang-col{direction:rtl;padding:0 8px}
+.lang-col + .lang-col{border-right:1px solid #d6e1ee}
+.lang-ar{font-family:Tajawal,"Noto Sans Arabic",sans-serif}
 
-.organism img{
-  width:100%;
-  max-height:360px;
-  object-fit:cover;
-  border-radius:12px;
-  margin-bottom:1rem;
-}
+.trigger-grid{display:flex;flex-wrap:wrap;gap:.6rem;margin-top:.7rem}
+.trigger-grid button{padding:.45rem .95rem;font-size:.92rem;background:#334155}
+#triggerSuggestion{margin-top:1rem;background:#eff6ff;border:1px solid #bfdbfe;padding:.85rem;border-radius:10px;min-height:56px}
 
-/* TIMER */
 .timer-box{
   position:fixed;
-  bottom:15px;
-  left:15px;
-  background:rgba(11,28,45,.92);
-  backdrop-filter:blur(4px);
+  bottom:14px;
+  left:14px;
+  background:rgba(11,28,45,.95);
   color:white;
-  padding:.85rem;
+  padding:.9rem;
   border-radius:14px;
-  z-index:9999;
-  width:190px;
+  z-index:999;
+  width:220px;
   text-align:center;
   box-shadow:0 12px 24px rgba(0,0,0,.3);
 }
-.timer-display{
-  font-size:1.6rem;
-  font-weight:800;
-  margin-bottom:.5rem;
-}
-select{
-  width:100%;
-  padding:.3rem;
-  margin-bottom:.5rem;
-  border-radius:6px;
-}
-.timer-box button{
-  width:100%;
-  margin:3px 0;
-  font-size:.8rem;
-  padding:.4rem;
-}
+.timer-display{font-size:1.65rem;font-weight:800;margin-bottom:.45rem}
+.timer-display.warning{color:var(--danger);animation:pulse 1s infinite}
+.timer-box select,.timer-box button{width:100%;margin:3px 0;padding:.42rem;border-radius:8px;font-size:.82rem}
+.timer-note{font-size:.78rem;min-height:18px;color:#c7d2fe;margin-top:.2rem}
 
-#mainContent section:first-child{
-  padding-top:5rem;
-}
+@keyframes pulse{0%{transform:scale(1)}50%{transform:scale(1.04)}100%{transform:scale(1)}}
 
-@media (max-width:900px){
-  section{padding:3rem 5%}
-  .card{padding:1.5rem}
-  .timer-box{
-    width:160px;
-    bottom:10px;
-    left:10px;
-  }
-  .timer-display{font-size:1.35rem}
+.teacher-toggle{
+  position:fixed;
+  bottom:14px;
+  right:14px;
+  width:56px;
+  height:56px;
+  border-radius:50%;
+  font-size:1.4rem;
+  z-index:1001;
+  background:#7c3aed;
 }
+.teacher-panel{
+  position:fixed;
+  right:14px;
+  bottom:78px;
+  width:285px;
+  max-height:70vh;
+  overflow:auto;
+  background:#fff;
+  border:1px solid var(--border);
+  border-radius:14px;
+  box-shadow:0 18px 32px rgba(0,0,0,.18);
+  padding:.85rem;
+  z-index:1000;
+}
+.teacher-panel h3{font-size:1rem;margin-bottom:.55rem}
+.teacher-panel .row-btn{width:100%;padding:.45rem .65rem;margin:.2rem 0;background:#0f172a;font-size:.85rem}
 
+@media (max-width:960px){
+  .progress-bar{grid-template-columns:repeat(2,1fr)}
+  .bilingual{grid-template-columns:1fr;gap:14px}
+  .lang-col + .lang-col{border-right:none;border-top:1px solid #d6e1ee;padding-top:10px}
+  section{padding:1.6rem 5%}
+}
 </style>
 </head>
 <body>
 
-<!-- TIMER CONTROL FOR INSTRUCTOR -->
-<div class="timer-box">
-  <div class="timer-display" id="timerDisplay">03:00</div>
-  <select id="timeSelect">
-    <option value="180" selected>3 דקות – פתיחה</option>
-    <option value="120">2 דקות – צ'אט</option>
-    <option value="300">5 דקות – חקר</option>
-    <option value="600">10 דקות – פיתוח</option>
-  </select>
-  <button onclick="startTimer()">Start</button>
-  <button onclick="pauseTimer()">Pause</button>
-  <button onclick="resetTimer()">Reset</button>
-</div>
-
-<!-- HERO -->
-<section class="hero">
+<section class="hero" id="heroSection">
   <h1>🕵️‍♂️ משימת חילוץ סודית</h1>
-  <p>שיעור ביומימיקרי – כיתה ט'</p>
+  <p>שיעור ביומימיקרי – חקר בהשראת הטבע</p>
   <button onclick="startLesson()">התחל שיעור</button>
 </section>
 
-<div id="mainContent" class="hidden">
-
-<!-- STAGE 1 -->
-<section>
-  <div class="card">
-    <h2>שלב 1 – פתיחה דרמטית (3 דקות)</h2>
-    <p><strong>נוסח למדריכה להקראה:</strong></p>
-    <p>
-    דמיינו שאתם צוות פיתוח טכנולוגי. במהלך טיול שטח תלמיד בשם עידו איבד את התיק שלו. 
-    התיק נפל לתוך שלולית בוץ עמוקה. הקרקע רכה מאוד. כל מי שמנסה להתקרב – שוקע.
-    אי אפשר להיכנס. אי אפשר להגיע ביד. אין ציוד הנדסי זמין.
-    אתם מקבלים משימה: לפתח פתרון שיחלץ את התיק – בלי לשקוע.
-    </p>
-    <div class="stage-box">
-      ❓ שאלה לצ'אט (2 דקות): איך מחלצים את התיק בלי לשקוע? 
-      כולם כותבים רעיון חופשי בצ'אט.
-    </div>
+<div id="lessonApp" class="hidden">
+  <div class="progress-wrap">
+    <div class="progress-bar" id="progressBar"></div>
   </div>
-</section>
 
-<!-- STAGE 2 -->
-<section>
-  <div class="card">
-    <h2>שלב 2 – מעבר לחשיבה הנדסית (5 דקות)</h2>
-    <p><strong>נוסח למדריכה:</strong></p>
-    <p>
-    במקום לשאול "מה נבנה", נשאל: מי בטבע כבר מתמודד עם קרקע רכה?
-    אנחנו מחפשים עיקרון, לא חיה.
-    </p>
+  <div id="mainContent">
+    <section class="step-section" data-step="0">
+      <div class="card">
+        <h2>📖 שלב 0 – סיפור פתיחה</h2>
+        <div class="bilingual">
+          <div class="lang-col">
+            <p><strong>הנחיה למדריכה (עברית):</strong> דמיינו שתלמיד איבד תיק בשלולית בוץ עמוקה. הקרקע רכה וכל מי שמתקרב שוקע.</p>
+            <p>המשימה: לפתח דרך לחלץ את התיק בלי לשקוע ובלי ציוד הנדסי.</p>
+          </div>
+          <div class="lang-col lang-ar">
+            <p><strong>إرشاد للمُدرّبة (عربي):</strong> تخيلوا أن حقيبة سقطت داخل بركة طين عميقة، والأرض رخوة وكل من يقترب يغوص.</p>
+            <p>المهمة: تطوير طريقة لاستخراج الحقيبة بدون الغرق وبدون معدات هندسية جاهزة.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="step-section hidden" data-step="1">
+      <div class="card">
+        <h2>💡 שלב 1 – רעיונות (השתתפות בזום)</h2>
+        <div class="bilingual">
+          <div class="lang-col">
+            <div class="zoom-box"><strong>הנחיה למדריכה – להקראה:</strong> לפני שנבנה פתרון, נאסוף כיוונים יצירתיים קצרים מכל התלמידים.</div>
+            <div class="zoom-box"><strong>שאלה לתלמידים:</strong> איך נחלץ תיק מבוץ עמוק בלי לשקוע?</div>
+            <div class="zoom-box"><strong>הנחיה לצ'אט Zoom:</strong> כל תלמיד כותב רעיון קצר במשפט אחד בצ'אט של Zoom.</div>
+          </div>
+          <div class="lang-col lang-ar">
+            <div class="zoom-box"><strong>إرشاد للمُدرّبة:</strong> قبل بناء الحل، نجمع أفكارًا إبداعية قصيرة من جميع الطلاب.</div>
+            <div class="zoom-box"><strong>سؤال للطلاب:</strong> كيف نستخرج الحقيبة من الطين العميق دون أن نغوص؟</div>
+            <div class="zoom-box"><strong>تعليمات دردشة Zoom:</strong> كل طالب يكتب فكرة قصيرة بجملة واحدة في دردشة Zoom.</div>
+          </div>
+        </div>
+        <div class="stage-box">
+          כרטיסי טריגר למדריכה (לא שומרים נתונים):
+          <div class="trigger-grid">
+            <button onclick="showTriggerSuggestion('🪢 חבל ארוך / حبل طويل')">🪢 חבל ארוך</button>
+            <button onclick="showTriggerSuggestion('🥢 מוט ארוך / عصا طويلة')">🥢 מוט ארוך</button>
+            <button onclick="showTriggerSuggestion('🌉 גשר זמני / جسر مؤقت')">🌉 גשר זמני</button>
+            <button onclick="showTriggerSuggestion('🛹 לוח רחב / لوح عريض')">🛹 לוח רחב</button>
+            <button onclick="showTriggerSuggestion('🤖 רובוט קטן / روبوت صغير')">🤖 רובוט קטן</button>
+          </div>
+          <div id="triggerSuggestion">לחצו על טריגר כדי להציג דוגמה למדריכה.</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="step-section hidden organism" data-step="2">
+      <div class="card">
+        <h2>🦆 שלב 2 – ברווז</h2>
+        <img src="images/duck-real.png" alt="Realistic duck foot on soft ground">
+        <div class="bilingual">
+          <div class="lang-col">
+            <div class="stage-box">❓ מה אתם חושבים? מה מיוחד בכפות הרגליים של הברווז? כתבו בצ'אט Zoom.</div>
+            <button onclick="toggleReveal('reveal2')">גלו את העיקרון</button>
+            <div class="reveal-content hidden" id="reveal2"><strong>עיקרון תכנוני:</strong> שטח מגע רחב מפחית לחץ על הקרקע הרכה.<br><strong>דוגמה טכנולוגית:</strong> נעלי שלג רחבות למניעת שקיעה.</div>
+          </div>
+          <div class="lang-col lang-ar">
+            <div class="stage-box">❓ ماذا تتوقعون؟ ما المميّز في قدم البطة؟ اكتبوا في دردشة Zoom.</div>
+            <div class="reveal-content">يظهر المبدأ بعد الضغط على زر الكشف.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="step-section hidden organism" data-step="3">
+      <div class="card">
+        <h2>🕷️ שלב 3 – עכביש מים</h2>
+        <img src="images/water-strider-real.png" alt="Realistic water strider insect on water surface">
+        <div class="bilingual">
+          <div class="lang-col">
+            <div class="stage-box">❓ מה אתם חושבים? איך מבנה הרגליים עוזר ליציבות? כתבו בצ'אט Zoom.</div>
+            <button onclick="toggleReveal('reveal3')">גלו את העיקרון</button>
+            <div class="reveal-content hidden" id="reveal3"><strong>עיקרון תכנוני:</strong> חלוקת עומס חכמה על כמה נקודות מגע משפרת יציבות.<br><strong>דוגמה טכנולוגית:</strong> רובוטי שטח עם רגליים דקות מרובות תומכות.</div>
+          </div>
+          <div class="lang-col lang-ar">
+            <div class="stage-box">❓ ما رأيكم؟ كيف يساعد شكل الأرجل على الثبات؟ اكتبوا في دردشة Zoom.</div>
+            <div class="reveal-content">يظهر المبدأ بعد الضغط على زر الكشف.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="step-section hidden organism" data-step="4">
+      <div class="card">
+        <h2>🐘 שלב 4 – פיל</h2>
+        <img src="images/elephant-foot-real.png" alt="Realistic elephant foot showing wide pressure distribution">
+        <div class="bilingual">
+          <div class="lang-col">
+            <div class="stage-box">❓ מה אתם חושבים? למה פיל כבד לא שוקע בקלות? כתבו בצ'אט Zoom.</div>
+            <button onclick="toggleReveal('reveal4')">גלו את העיקרון</button>
+            <div class="reveal-content hidden" id="reveal4"><strong>עיקרון תכנוני:</strong> כף רגל רחבה וגמישה מפזרת את הכוח על שטח גדול.<br><strong>דוגמה טכנולוגית:</strong> פדים רחבים לכלים כבדים באתרי בוץ.</div>
+          </div>
+          <div class="lang-col lang-ar">
+            <div class="stage-box">❓ ماذا تتوقعون؟ لماذا لا يغوص الفيل بسهولة رغم وزنه؟ اكتبوا في دردشة Zoom.</div>
+            <div class="reveal-content">يظهر المبدأ بعد الضغط على زر الكشف.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="step-section hidden" data-step="5">
+      <div class="card">
+        <h2>🔧 שלב 5 – המצאה</h2>
+        <div class="bilingual">
+          <div class="lang-col">
+            <p><strong>הנחיה למדריכה:</strong> בחרו עיקרון אחד מהאורגניזמים ותכננו כלי חילוץ ישים.</p>
+            <div class="zoom-box">כתבו בצ'אט Zoom: שם הפתרון + איך הוא מפזר לחץ.</div>
+          </div>
+          <div class="lang-col lang-ar">
+            <p><strong>إرشاد للمُدرّبة:</strong> اختاروا مبدأً واحدًا من الكائنات وصمّموا أداة إنقاذ قابلة للتطبيق.</p>
+            <div class="zoom-box">اكتبوا في دردشة Zoom: اسم الحل وكيف يوزّع الضغط.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="step-section hidden" data-step="6">
+      <div class="card">
+        <h2>✅ שלב 6 – סיכום</h2>
+        <div class="bilingual">
+          <div class="lang-col">
+            <p>1️⃣ בעיה אמיתית → 2️⃣ השראה מהטבע → 3️⃣ עיקרון הנדסי → 4️⃣ פתרון חדש.</p>
+            <div class="zoom-box">שאלת סיום: איזה עיקרון טבעי הכי עזר לכם לחשוב כמו ממציאים?</div>
+          </div>
+          <div class="lang-col lang-ar">
+            <p>١️⃣ مشكلة حقيقية → ٢️⃣ إلهام من الطبيعة → ٣️⃣ مبدأ هندسي → ٤️⃣ حل مبتكر.</p>
+            <div class="zoom-box">سؤال ختامي: أي مبدأ من الطبيعة ساعدكم أكثر على التفكير كمخترعين؟</div>
+          </div>
+        </div>
+      </div>
+    </section>
   </div>
-</section>
+</div>
 
-<!-- DUCK -->
-<section class="organism">
-  <div class="card">
-    <h2>🦆 ברווז</h2>
-    <img src="duck.png" alt="Duck">
-    <div class="stage-box">
-      ❓ שאלה לזום: מה מיוחד בכפות הרגליים שלו?
-      <br>
-      💡 הובלה: האם המשקל קטן? או שהשטח גדול יותר?
-    </div>
-    <p><strong>מסקנה:</strong> הגדלת שטח מגע → הפחתת לחץ (לחץ = כוח / שטח)</p>
-  </div>
-</section>
+<div class="timer-box" id="timerBox">
+  <div class="timer-display" id="timerDisplay">03:00</div>
+  <select id="timeSelect">
+    <option value="180" selected>3 דקות – פתיחה</option>
+    <option value="120">2 דקות – רעיונות/סיכום</option>
+    <option value="300">5 דקות – אורגניזם</option>
+    <option value="600">10 דקות – המצאה</option>
+  </select>
+  <button onclick="startTimer()">Start</button>
+  <button onclick="startStepTimer()">Start Step</button>
+  <button onclick="pauseTimer()">Pause</button>
+  <button onclick="resetTimer()">Reset</button>
+  <div class="timer-note" id="timerNote"></div>
+</div>
 
-<!-- WATER STRIDER -->
-<section class="organism">
-  <div class="card">
-    <h2>🕷 עכביש מים</h2>
-    <img src="water-strider.png" alt="Water Strider">
-    <div class="stage-box">
-      ❓ שאלה לזום: כיצד מבנה הרגליים משפיע על היציבות?
-    </div>
-    <p><strong>מסקנה:</strong> מבנה חכם מפזר עומס ומייצר יציבות.</p>
-  </div>
-</section>
-
-<!-- ELEPHANT -->
-<section class="organism">
-  <div class="card">
-    <h2>🐘 פיל</h2>
-    <img src="elephant.png" alt="Elephant">
-    <div class="stage-box">
-      ❓ שאלה לזום: למה פיל לא שוקע למרות שהוא כבד?
-    </div>
-    <p><strong>מסקנה:</strong> כף רגל רחבה + התאמה לקרקע.</p>
-  </div>
-</section>
-
-<!-- INVENTION -->
-<section>
-  <div class="card">
-    <h2>שלב 3 – פיתוח פתרון (10 דקות)</h2>
-    <p><strong>נוסח למדריכה:</strong></p>
-    <p>
-    בחרו עיקרון אחד שלמדנו. תכננו כלי חילוץ בהשראתו.
-    הגדירו: איך הוא מפחית לחץ? איך הוא פועל בפועל?
-    </p>
-    <div class="stage-box">
-      עבודה בחדרים קטנים בזום – 10 דקות.
-    </div>
-  </div>
-</section>
-
-<!-- SUMMARY -->
-<section>
-  <div class="card">
-    <h2>סיכום – חקר מקרה ביומימטי</h2>
-    <p>
-    1️⃣ זיהינו בעיה<br>
-    2️⃣ חיפשנו בטבע מערכת דומה<br>
-    3️⃣ ניתחנו תכונות ביולוגיות<br>
-    4️⃣ הפקנו עיקרון הנדסי<br>
-    5️⃣ פיתחנו פתרון טכנולוגי
-    </p>
-  </div>
-</section>
-
+<button class="teacher-toggle" onclick="toggleTeacherPanel()">👩‍🏫</button>
+<div class="teacher-panel hidden" id="teacherPanel">
+  <h3>Teacher Panel</h3>
+  <div id="teacherNav"></div>
 </div>
 
 <script>
+const STEPS = [
+  { id:0, label:'📖 סיפור', key:'סיפור' },
+  { id:1, label:'💡 רעיונות', key:'רעיונות' },
+  { id:2, label:'🦆 ברווז', key:'ברווז' },
+  { id:3, label:'🕷️ עכביש מים', key:'עכביש' },
+  { id:4, label:'🐘 פיל', key:'פיל' },
+  { id:5, label:'🔧 המצאה', key:'המצאה' },
+  { id:6, label:'✅ סיכום', key:'סיכום' }
+];
+
+const STEP_TIMES = {
+  0: 180,
+  1: 120,
+  2: 300,
+  3: 300,
+  4: 300,
+  5: 600,
+  6: 120
+};
+
+let currentStep = 0;
 let countdown;
-let remainingTime = 180;
+let remainingTime = STEP_TIMES[0];
+
+function renderNavigation(){
+  const progressBar = document.getElementById('progressBar');
+  const teacherNav = document.getElementById('teacherNav');
+
+  progressBar.innerHTML = STEPS.map(step =>
+    `<button class="step-dot" id="dot-${step.id}" onclick="goToStep(${step.id})">${step.label}</button>`
+  ).join('');
+
+  teacherNav.innerHTML = STEPS.map(step =>
+    `<button class="row-btn" onclick="goToStep(${step.id})">מעבר ל-${step.key}</button>
+     <button class="row-btn" onclick="goToStep(${step.id}); startStepTimer()">Start timer for this step</button>`
+  ).join('');
+
+  updateProgressClasses();
+}
+
+function updateProgressClasses(){
+  STEPS.forEach(step => {
+    const dot = document.getElementById(`dot-${step.id}`);
+    if(!dot) return;
+    dot.classList.remove('active','completed');
+    if(step.id < currentStep) dot.classList.add('completed');
+    if(step.id === currentStep) dot.classList.add('active');
+  });
+}
+
+function goToStep(step){
+  currentStep = step;
+  document.querySelectorAll('.step-section').forEach(section => {
+    section.classList.toggle('hidden', parseInt(section.dataset.step,10) !== step);
+  });
+  updateProgressClasses();
+}
 
 function updateDisplay(){
-  let m = Math.floor(remainingTime/60).toString().padStart(2,'0');
-  let s = (remainingTime%60).toString().padStart(2,'0');
-  document.getElementById('timerDisplay').textContent = m+":"+s;
-  if(remainingTime<=30){document.getElementById('timerDisplay').style.color='red';}
+  const m = Math.floor(remainingTime/60).toString().padStart(2,'0');
+  const s = (remainingTime%60).toString().padStart(2,'0');
+  const timerDisplay = document.getElementById('timerDisplay');
+  timerDisplay.textContent = `${m}:${s}`;
+  timerDisplay.classList.toggle('warning', remainingTime <= 30 && remainingTime > 0);
 }
 
 function startTimer(){
-  remainingTime = parseInt(document.getElementById('timeSelect').value);
-  updateDisplay();
+  remainingTime = parseInt(document.getElementById('timeSelect').value,10);
+  runTimer();
+}
+
+function startStepTimer(){
+  remainingTime = STEP_TIMES[currentStep] || 120;
+  runTimer();
+}
+
+function runTimer(){
   clearInterval(countdown);
+  updateDisplay();
+  setTimerNote('');
   countdown = setInterval(()=>{
-    if(remainingTime>0){remainingTime--;updateDisplay();}
-    else{clearInterval(countdown);alert('הזמן הסתיים');}
+    if(remainingTime > 0){
+      remainingTime--;
+      updateDisplay();
+    } else {
+      clearInterval(countdown);
+      setTimerNote('הזמן הסתיים');
+    }
   },1000);
 }
 
-function pauseTimer(){clearInterval(countdown);} 
+function pauseTimer(){ clearInterval(countdown); }
 
 function resetTimer(){
   clearInterval(countdown);
-  remainingTime = parseInt(document.getElementById('timeSelect').value);
-  document.getElementById('timerDisplay').style.color='white';
+  remainingTime = parseInt(document.getElementById('timeSelect').value,10);
+  setTimerNote('');
   updateDisplay();
 }
 
-function startLesson(){
-  document.querySelector('.hero').style.display='none';
-  document.getElementById('mainContent').classList.remove('hidden');
+function setTimerNote(msg){ document.getElementById('timerNote').textContent = msg; }
+
+function toggleReveal(id){
+  document.getElementById(id).classList.toggle('hidden');
 }
+
+function showTriggerSuggestion(text){
+  document.getElementById('triggerSuggestion').textContent = `הצעה למדריכה: ${text}`;
+}
+
+function toggleTeacherPanel(){
+  document.getElementById('teacherPanel').classList.toggle('hidden');
+}
+
+function startLesson(){
+  document.getElementById('heroSection').classList.add('hidden');
+  document.getElementById('lessonApp').classList.remove('hidden');
+  goToStep(0);
+}
+
+renderNavigation();
+updateDisplay();
 </script>
 
 </body>
