@@ -115,22 +115,24 @@ button{border:none;border-radius:12px;background:var(--accent);color:#fff;cursor
 
 .timer-box{
   position:fixed;
-  bottom:66px;
-  left:50%;
-  transform:translateX(-50%);
-  margin-top:.7rem;
+  top:16px;
+  left:16px;
   padding:.7rem;
   border:1px solid #dbeafe;
   border-radius:12px;
   background:#f8fbff;
   z-index:1000;
-  min-width:240px;
+  min-width:200px;
+  box-shadow:0 12px 28px rgba(15,23,42,.15);
+  cursor:pointer;
 }
 .timer-display{font-size:1.5rem;font-weight:800;margin:.15rem 0}
 .timer-display.warning{color:var(--danger);animation:pulse 1s infinite}
 .timer-note{font-size:.84rem;color:#334155;min-height:1.2rem}
 .timer-row{display:flex;gap:.45rem;margin-top:.5rem}
 .timer-row button{flex:1;padding:.45rem .6rem;font-size:.84rem;background:#0f172a}
+.timer-box.collapsed .timer-note,
+.timer-box.collapsed .timer-row{display:none}
 
 @keyframes pulse{0%{transform:scale(1)}50%{transform:scale(1.04)}100%{transform:scale(1)}}
 
@@ -353,15 +355,16 @@ button{border:none;border-radius:12px;background:var(--accent);color:#fff;cursor
   <div class="timer-display" id="timerDisplay">03:00</div>
   <div class="timer-note" id="timerNote"></div>
   <div class="timer-row">
-    <button onclick="startStepTimer()">⏱️ Start Step Timer</button>
-    <button onclick="pauseTimer()">Pause</button>
-    <button onclick="resetStepTimer()">Reset</button>
+    <button onclick="selectStepTime(event)">בחירת זמן</button>
+    <button onclick="startTimer(event)">הפעלה</button>
+    <button onclick="resetStepTimer(event)">איפוס</button>
+    <button onclick="pauseTimer(event)">עצור</button>
   </div>
 </div>
 
 <div class="nav-bar hidden" id="navBar">
-  <button onclick="goToStep(currentStep-1)">הקודם</button>
-  <button onclick="goToStep(currentStep+1)">הבא</button>
+  <button onclick="goToStep(currentStep-1)" aria-label="Previous step">⬅️</button>
+  <button onclick="goToStep(currentStep+1)" aria-label="Next step">➡️</button>
 </div>
 
 <script>
@@ -404,10 +407,11 @@ function updateDisplay(){
 
 function startStepTimer(){
   remainingTime = STEP_TIMES[currentStep] || 120;
-  runTimer();
+  startTimer();
 }
 
-function runTimer(){
+function startTimer(event){
+  if(event) event.stopPropagation();
   clearInterval(countdown);
   updateDisplay();
   setTimerNote('הטיימר רץ...');
@@ -422,16 +426,26 @@ function runTimer(){
   },1000);
 }
 
-function pauseTimer(){
+function pauseTimer(event){
+  if(event) event.stopPropagation();
   clearInterval(countdown);
   setTimerNote('הטיימר מושהה');
 }
 
-function resetStepTimer(){
+function resetStepTimer(event){
+  if(event) event.stopPropagation();
   clearInterval(countdown);
   remainingTime = STEP_TIMES[currentStep] || 120;
   updateDisplay();
   setTimerNote('איפוס לטיימר של השלב הנוכחי');
+}
+
+function selectStepTime(event){
+  if(event) event.stopPropagation();
+  clearInterval(countdown);
+  remainingTime = STEP_TIMES[currentStep] || 120;
+  updateDisplay();
+  setTimerNote(`זמן לשלב ${currentStep}: ${Math.floor(remainingTime/60)}:${String(remainingTime%60).padStart(2,'0')}`);
 }
 
 function setTimerNote(msg){
@@ -443,8 +457,13 @@ function startLesson(){
   document.getElementById('lessonApp').classList.remove('hidden');
   document.getElementById('navBar').classList.remove('hidden');
   document.getElementById('timerBox').classList.remove('hidden');
+  document.getElementById('timerBox').classList.add('collapsed');
   goToStep(0);
 }
+
+document.getElementById('timerBox').addEventListener('click',()=>{
+  document.getElementById('timerBox').classList.toggle('collapsed');
+});
 
 document.addEventListener('keydown',(event)=>{
   if(event.ctrlKey && event.key === 'ArrowRight'){
