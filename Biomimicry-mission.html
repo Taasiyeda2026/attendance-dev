@@ -222,12 +222,17 @@ main{position:relative;height:100vh}
   width: 70%;
   max-width: 420px;
   height: auto;
+  max-height: 35vh;
+  object-fit: contain;
 }
 
 .organism .stage-col {
   width: 100%;
   text-align: center;
   align-items: center;
+  overflow-y: auto;
+  flex-shrink: 1;
+  min-height: 120px;
 }
 
 .organism .stage-box {
