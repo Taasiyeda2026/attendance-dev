@@ -29,36 +29,36 @@
     }
 
     .container {
-      max-width: 1450px;
+      max-width: 100%;
       margin: 0 auto;
-      padding: 24px;
+      padding: 12px;
     }
 
     .header {
       display: flex;
       flex-wrap: wrap;
-      gap: 14px;
+      gap: 8px;
       align-items: center;
       justify-content: space-between;
-      margin-bottom: 16px;
+      margin-bottom: 10px;
     }
 
     .title-wrap h1 {
       margin: 0;
-      font-size: 1.4rem;
+      font-size: 1.15rem;
       font-weight: 800;
     }
 
     .title-wrap p {
       margin: 3px 0 0;
       color: var(--muted);
-      font-size: 0.9rem;
+      font-size: 0.78rem;
     }
 
     .toolbar {
       display: flex;
       flex-wrap: wrap;
-      gap: 10px;
+      gap: 6px;
       align-items: center;
     }
 
@@ -70,8 +70,8 @@
       background: #fff;
       color: #334155;
       border-radius: 999px;
-      font-size: 0.85rem;
-      padding: 7px 12px;
+      font-size: 0.75rem;
+      padding: 4px 8px;
     }
 
     .dot { width: 10px; height: 10px; border-radius: 50%; }
@@ -81,11 +81,11 @@
 
     button, select, input {
       border: 1px solid var(--border);
-      border-radius: 10px;
+      border-radius: 8px;
       background: #fff;
       color: var(--text);
-      padding: 8px 10px;
-      font-size: 0.9rem;
+      padding: 5px 8px;
+      font-size: 0.8rem;
     }
 
     button {
@@ -104,15 +104,15 @@
     .board-wrap {
       background: var(--panel);
       border: 1px solid var(--border);
-      border-radius: 18px;
+      border-radius: 12px;
       overflow: auto;
-      box-shadow: 0 12px 30px rgba(15, 23, 42, .08);
+      box-shadow: 0 8px 20px rgba(15, 23, 42, .06);
     }
 
     .board {
-      min-width: 1100px;
+      min-width: 980px;
       display: grid;
-      grid-template-columns: 130px repeat(6, minmax(140px, 1fr));
+      grid-template-columns: 95px repeat(6, minmax(120px, 1fr));
     }
 
     .head-cell {
@@ -124,17 +124,17 @@
       border-left: 1px solid var(--border);
       text-align: center;
       font-weight: 700;
-      font-size: 0.9rem;
-      padding: 12px 8px;
+      font-size: 0.78rem;
+      padding: 6px 4px;
     }
 
     .time-cell {
       border-top: 1px solid var(--border);
       border-left: 1px solid var(--border);
       background: #fbfdff;
-      font-size: 0.8rem;
+      font-size: 0.72rem;
       color: #334155;
-      padding: 12px 8px;
+      padding: 6px 4px;
       font-weight: 700;
       text-align: center;
       position: sticky;
@@ -145,8 +145,8 @@
     .slot {
       border-top: 1px solid var(--border);
       border-left: 1px solid var(--border);
-      min-height: 82px;
-      padding: 8px;
+      min-height: 62px;
+      padding: 4px;
       transition: background .2s ease;
       position: relative;
     }
@@ -156,7 +156,7 @@
     .slot.empty::before {
       content: "+ שיבוץ";
       color: #94a3b8;
-      font-size: .8rem;
+      font-size: .7rem;
       position: absolute;
       inset: 0;
       display: grid;
@@ -166,20 +166,23 @@
 
     .slot.drag-over {
       outline: 2px dashed #60a5fa;
-      outline-offset: -5px;
+      outline-offset: -3px;
       background: #eff6ff;
     }
 
     .event-card {
-      border-radius: 12px;
+      border-radius: 8px;
       color: #fff;
-      padding: 8px;
-      font-size: .83rem;
-      line-height: 1.25;
+      padding: 5px 6px;
+      font-size: .72rem;
+      line-height: 1.15;
       box-shadow: 0 6px 14px rgba(15, 23, 42, 0.22);
       cursor: pointer;
       transition: transform .2s ease;
+      margin-bottom: 4px;
     }
+
+    .event-card:last-child { margin-bottom: 0; }
 
     .event-card:hover { transform: scale(1.02); }
     .event-card.z1 { background: linear-gradient(180deg, #3b82f6, #2563eb); }
@@ -187,7 +190,16 @@
     .event-card.z3 { background: linear-gradient(180deg, #a855f7, #9333ea); }
 
     .event-card .line1 { font-weight: 700; }
-    .event-card .line2 { opacity: .92; margin-top: 3px; }
+    .event-card .line2 { opacity: .92; margin-top: 2px; }
+
+    .slot-capacity {
+      position: absolute;
+      left: 4px;
+      bottom: 3px;
+      font-size: .62rem;
+      color: #94a3b8;
+      pointer-events: none;
+    }
 
     dialog {
       border: none;
@@ -293,9 +305,9 @@
 
   <script>
     const DAYS = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
-    const TIME_SLOTS_LONG = ["08:00-10:00", "10:00-12:00", "12:00-14:00", "14:00-16:00"];
     const TIME_SLOTS_SHORT = ["08:00-09:00", "09:00-10:00", "10:00-11:00", "11:00-12:00", "12:00-13:00", "13:00-14:00", "14:00-15:00"];
-    const TIME_SLOTS = [...TIME_SLOTS_LONG, ...TIME_SLOTS_SHORT];
+    const TIME_SLOTS_LONG = ["08:00-10:00", "10:00-12:00", "12:00-14:00", "14:00-16:00"];
+    const TIME_SLOTS = [...TIME_SLOTS_SHORT, ...TIME_SLOTS_LONG];
     const ZOOMS = ["Zoom1", "Zoom2", "Zoom3"];
 
     const INSTRUCTORS = [
@@ -346,8 +358,16 @@
       localStorage.setItem(STORAGE_KEY, JSON.stringify(schedule));
     }
 
-    function findEvent(day, time) {
-      return schedule.find((e) => e.day === day && e.time === time) || null;
+    function eventKey(event) {
+      return `${event.day}|${event.time}|${event.zoom}`;
+    }
+
+    function findEvents(day, time) {
+      return schedule.filter((e) => e.day === day && e.time === time);
+    }
+
+    function findEventByKey(key) {
+      return schedule.find((e) => eventKey(e) === key) || null;
     }
 
     function overlapsAt(day, time, predicate, ignoreKey = "") {
@@ -370,18 +390,32 @@
       return ZOOMS.filter((z) => isZoomFree(day, time, z, ignoreKey));
     }
 
-    function upsertEvent(payload) {
-      const idx = schedule.findIndex((e) => e.day === payload.day && e.time === payload.time);
+    function upsertEvent(payload, previousKey = "") {
+      const idx = previousKey
+        ? schedule.findIndex((e) => eventKey(e) === previousKey)
+        : schedule.findIndex((e) => eventKey(e) === eventKey(payload));
       if (idx >= 0) schedule[idx] = payload;
       else schedule.push(payload);
       persistSchedule();
       renderBoard();
     }
 
-    function deleteEvent(day, time) {
-      schedule = schedule.filter((e) => !(e.day === day && e.time === time));
+    function deleteEventByKey(key) {
+      schedule = schedule.filter((e) => eventKey(e) !== key);
       persistSchedule();
       renderBoard();
+    }
+
+    function getPreferredZoom(day, time, instructor, ignoreKey = "") {
+      const freeZooms = getAvailableZooms(day, time, ignoreKey);
+      if (!freeZooms.length) return "";
+
+      const previousSameDay = schedule.find((e) => e.day === day && e.instructor === instructor && eventKey(e) !== ignoreKey);
+      if (previousSameDay && freeZooms.includes(previousSameDay.zoom)) {
+        return previousSameDay.zoom;
+      }
+
+      return ZOOMS.find((z) => freeZooms.includes(z)) || "";
     }
 
     function eventVisible(ev) {
@@ -401,17 +435,21 @@
       TIME_SLOTS.forEach((slot) => {
         boardEl.insertAdjacentHTML("beforeend", `<div class="time-cell">${slot}</div>`);
         DAYS.forEach((day) => {
-          const ev = findEvent(day, slot);
-          const key = `${day}|${slot}`;
-          const hidden = ev && !eventVisible(ev);
-          const emptyClass = !ev || hidden ? "empty" : "";
-          const card = ev && !hidden
-            ? `<div class="event-card ${ev.zoom === "Zoom1" ? "z1" : ev.zoom === "Zoom2" ? "z2" : "z3"}" draggable="true" data-drag-key="${key}">
+          const allEvents = findEvents(day, slot);
+          const visibleEvents = allEvents.filter(eventVisible);
+          const emptyClass = visibleEvents.length === 0 ? "empty" : "";
+          const cards = visibleEvents.map((ev) => {
+            const key = eventKey(ev);
+            return `<div class="event-card ${ev.zoom === "Zoom1" ? "z1" : ev.zoom === "Zoom2" ? "z2" : "z3"}" draggable="true" data-drag-key="${key}">
                 <div class="line1">${ev.instructor}</div>
                 <div class="line2">${ev.zoom}</div>
-              </div>` : "";
+              </div>`;
+          }).join("");
 
-          boardEl.insertAdjacentHTML("beforeend", `<div class="slot ${emptyClass}" data-day="${day}" data-time="${slot}">${card}</div>`);
+          boardEl.insertAdjacentHTML(
+            "beforeend",
+            `<div class="slot ${emptyClass}" data-day="${day}" data-time="${slot}">${cards}<div class="slot-capacity">${allEvents.length}/3 Zoom used</div></div>`
+          );
         });
       });
 
@@ -436,32 +474,35 @@
           const dragKey = e.dataTransfer.getData("text/plain");
           if (!dragKey) return;
 
-          const [fromDay, fromTime] = dragKey.split("|");
+          const moving = findEventByKey(dragKey);
+          if (!moving) return;
+
+          const fromDay = moving.day;
+          const fromTime = moving.time;
           const toDay = slotEl.dataset.day;
           const toTime = slotEl.dataset.time;
           if (fromDay === toDay && fromTime === toTime) return;
 
-          const moving = findEvent(fromDay, fromTime);
-          if (!moving) return;
-          if (findEvent(toDay, toTime)) return alert("היעד כבר תפוס. אפשר רק להחליף דרך Edit.");
+          if (findEvents(toDay, toTime).length >= ZOOMS.length) {
+            return alert("No available Zoom accounts for this time slot.");
+          }
 
-          if (!isInstructorFree(toDay, toTime, moving.instructor, `${fromDay}|${fromTime}`)) {
+          if (!isInstructorFree(toDay, toTime, moving.instructor, eventKey(moving))) {
             return alert("לא ניתן לגרור: המדריך כבר משובץ בשעה חופפת.");
           }
-          if (!isZoomFree(toDay, toTime, moving.zoom, `${fromDay}|${fromTime}`)) {
+          if (!isZoomFree(toDay, toTime, moving.zoom, eventKey(moving))) {
             return alert("לא ניתן לגרור: חשבון הזום כבר בשימוש בשעה חופפת.");
           }
 
-          deleteEvent(fromDay, fromTime);
-          upsertEvent({ day: toDay, time: toTime, instructor: moving.instructor, zoom: moving.zoom });
+          const updated = { ...moving, day: toDay, time: toTime };
+          upsertEvent(updated, eventKey(moving));
         };
       });
 
       document.querySelectorAll(".event-card").forEach((card) => {
         card.onclick = (e) => {
           e.stopPropagation();
-          const [day, time] = card.dataset.dragKey.split("|");
-          openModal(day, time);
+          openModalByKey(card.dataset.dragKey);
         };
 
         card.ondragstart = (e) => {
@@ -472,10 +513,28 @@
     }
 
     function openModal(day, time) {
-      const existing = findEvent(day, time);
-      modalContext = { day, time, existing };
+      modalContext = { day, time, existing: null };
 
       document.getElementById("slotMeta").textContent = `${day} | ${time}`;
+      document.getElementById("modalTitle").textContent = "New Assignment";
+      document.getElementById("deleteBtn").style.display = "none";
+
+      instructorSelect.innerHTML = `<option value="">בחר מדריך</option>${INSTRUCTORS.map(i => `<option value="${i}">${i}</option>`).join("")}`;
+      instructorSelect.value = "";
+
+      refreshZoomOptions();
+      zoomSelect.value = "";
+      validateSelections();
+
+      modal.showModal();
+    }
+
+    function openModalByKey(key) {
+      const existing = findEventByKey(key);
+      if (!existing) return;
+      modalContext = { day: existing.day, time: existing.time, existing };
+
+      document.getElementById("slotMeta").textContent = `${existing.day} | ${existing.time}`;
       document.getElementById("modalTitle").textContent = existing ? "Edit Slot" : "New Assignment";
       document.getElementById("deleteBtn").style.display = existing ? "inline-block" : "none";
 
@@ -492,7 +551,7 @@
     function refreshZoomOptions() {
       if (!modalContext) return;
       const { day, time, existing } = modalContext;
-      const ignore = existing ? `${existing.day}|${existing.time}` : "";
+      const ignore = existing ? eventKey(existing) : "";
       const free = getAvailableZooms(day, time, ignore);
       const options = new Set(free);
       if (existing?.zoom) options.add(existing.zoom);
@@ -507,7 +566,13 @@
       const instructor = instructorSelect.value;
       const zoom = zoomSelect.value;
       const { day, time, existing } = modalContext;
-      const ignore = existing ? `${existing.day}|${existing.time}` : "";
+      const ignore = existing ? eventKey(existing) : "";
+
+      if (!existing && findEvents(day, time).length >= ZOOMS.length) {
+        validationMessage.textContent = "No available Zoom accounts for this time slot.";
+        document.getElementById("saveBtn").disabled = true;
+        return false;
+      }
 
       if (!instructor || !zoom) {
         document.getElementById("saveBtn").disabled = true;
@@ -540,13 +605,14 @@
         instructor: instructorSelect.value,
         zoom: zoomSelect.value,
       };
-      upsertEvent(payload);
+      upsertEvent(payload, modalContext.existing ? eventKey(modalContext.existing) : "");
       modal.close();
     };
 
     document.getElementById("deleteBtn").onclick = () => {
       if (!modalContext) return;
-      deleteEvent(modalContext.day, modalContext.time);
+      if (!modalContext.existing) return;
+      deleteEventByKey(eventKey(modalContext.existing));
       modal.close();
     };
 
@@ -555,7 +621,7 @@
     instructorSelect.onchange = () => {
       if (!modalContext) return;
       const { day, time, existing } = modalContext;
-      const ignore = existing ? `${existing.day}|${existing.time}` : "";
+      const ignore = existing ? eventKey(existing) : "";
       const chosen = instructorSelect.value;
 
       if (chosen && !isInstructorFree(day, time, chosen, ignore)) {
@@ -564,6 +630,15 @@
         validationMessage.textContent = "";
       }
       refreshZoomOptions();
+      const preferredZoom = chosen ? getPreferredZoom(day, time, chosen, ignore) : "";
+      if (preferredZoom) {
+        zoomSelect.value = preferredZoom;
+      } else if (chosen && !existing) {
+        zoomSelect.value = "";
+        if (!getAvailableZooms(day, time, ignore).length) {
+          validationMessage.textContent = "No available Zoom account for this time slot.";
+        }
+      }
       validateSelections();
     };
 
