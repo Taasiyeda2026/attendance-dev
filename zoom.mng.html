@@ -122,10 +122,14 @@
       background: #f5f8ff;
       border-bottom: 1px solid var(--border);
       border-left: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
       text-align: center;
-      font-weight: 700;
+      font-weight: 800;
       font-size: 0.9rem;
-      padding: 12px 8px;
+      height: 56px;
+      padding: 8px;
     }
 
     .time-cell {
@@ -134,7 +138,10 @@
       background: #fbfdff;
       font-size: 0.8rem;
       color: #334155;
-      padding: 12px 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 8px;
       font-weight: 700;
       text-align: center;
       position: sticky;
@@ -147,6 +154,12 @@
       border-left: 1px solid var(--border);
       min-height: 82px;
       padding: 8px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      gap: 6px;
       transition: background .2s ease;
       position: relative;
     }
@@ -176,6 +189,8 @@
       padding: 8px;
       font-size: .83rem;
       line-height: 1.25;
+      text-align: center;
+      width: min(100%, 180px);
       box-shadow: 0 6px 14px rgba(15, 23, 42, 0.22);
       cursor: pointer;
       transition: transform .2s ease;
@@ -292,7 +307,7 @@
   </dialog>
 
   <script>
-    const DAYS = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
+    const DAYS = ["ראשון", "שני", "שלישי", "רביעי", "חמישי", "שישי"];
     const TIME_SLOTS_LONG = ["08:00-10:00", "10:00-12:00", "12:00-14:00", "14:00-16:00"];
     const TIME_SLOTS_SHORT = ["08:00-09:00", "09:00-10:00", "10:00-11:00", "11:00-12:00", "12:00-13:00", "13:00-14:00", "14:00-15:00"];
     const TIME_SLOTS = [...TIME_SLOTS_LONG, ...TIME_SLOTS_SHORT];
